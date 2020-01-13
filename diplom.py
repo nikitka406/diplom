@@ -30,5 +30,10 @@ l = [0 for j in range(N)]  # конец работы на i объекте
 for i in range(N):
     l[i] = e[i] + S[i]
 
-x, y, s, a, target_function = OneCarOneLocation(KA, S, t, wells, d) # заполняем стартовое решение, одна машина на одну локацию
+# заполняем стартовое решение, одна машина на одну локацию
+x, y, s, a = OneCarOneLocation(KA, S, t, wells, e)
+target_function = CalculationOfObjectiveFunction(d, x, KA)
+print(target_function)
+
+print(VerificationOfBoundaryConditions(x, y, s, a, wells, S, e, l, t, KA))
 
