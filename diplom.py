@@ -1,9 +1,6 @@
-from function import OneCarOneLocation
+from function import *
 from math import sqrt
-########################### Входные значения
-N = 10  # число объектов
-K = 5  # набор всех ТС
-car_cost = 1000 # цена за арнеду машины
+target_function = 0 # значение целевой функции
 
 X = [0,-27,21,50,31,-25,31,-43,-35,-14]#координаты по ОХ
 Y = [0,-44,38,42,30,39,15,-23,28,20]#координаты по ОУ
@@ -33,5 +30,5 @@ l = [0 for j in range(N)]  # конец работы на i объекте
 for i in range(N):
     l[i] = e[i] + S[i]
 
-x, y, s, a = OneCarOneLocation(N, KA, S, t, wells) # заполняем стартовое решение, одна машина на одну локацию
+x, y, s, a, target_function = OneCarOneLocation(KA, S, t, wells, d) # заполняем стартовое решение, одна машина на одну локацию
 
