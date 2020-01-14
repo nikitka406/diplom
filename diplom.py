@@ -33,7 +33,6 @@ for i in range(N):
 # заполняем стартовое решение, одна машина на одну локацию
 x, y, s, a = OneCarOneLocation(KA, S, t, wells, e)
 target_function = CalculationOfObjectiveFunction(d, x, KA)
-print(target_function)
-
-print(VerificationOfBoundaryConditions(x, y, s, a, wells, S, e, l, t, KA))
+# print(target_function)
+# print(VerificationOfBoundaryConditions(x, y, s, a, wells, S, e, l, t, KA))
 

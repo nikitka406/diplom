@@ -120,32 +120,32 @@ def ban_driling(s, S, y, KA):
     return 1
 
 
-def window_time_down(a, e, KA):
+def window_time_down(a, e, y, KA):
     # Add constraint: e[i]<=a[i][k]
-    for i in range(N):
+    for i in range(1, N):
         for k in range(KA):
-            if e[i] > a[i][k]:
-                print("5")
+            if e[i] > a[i][k] and y[i][k] == 1:
+                print("5")#не работает ээто ограничение
                 return 0
     return 1
 
 
-def window_time_up(a, s, l, KA):
+def window_time_up(a, s, l, y, KA):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, N):
         for k in range(KA):
-            if a[i][k] + s[i][k] > l[i]:
+            if a[i][k] + s[i][k] > l[i] and y[i][k] == 1:
                 print("6")
                 return 0
     return 1
 
 
-def ban_cycle(a, x, t, s, l, KA):
+def ban_cycle(a, x, t, s, l, y, KA):
     # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1-x[i][j][k])
     for i in range(1, N):
         for j in range(1, N):
             for k in range(KA):
-                if a[i][k] - a[j][k] + x[i][j][k] * t[i][j] + s[i][k] > l[i] * (1 - x[i][j][k]):
+                if a[i][k] - a[j][k] + x[i][j][k] * t[i][j] + s[i][k] > l[i] * (1 - x[i][j][k]) and y[i][k] == 1:
                     print("7")
                     return 0
     return 1
@@ -167,8 +167,7 @@ def positive_a_and_s(x, y, a, s, KA):
 
 # проверка выполнения граничных условий
 def VerificationOfBoundaryConditions(x, y, s, a, wells, S, e, l, t, KA):
-    result = X_join_Y(x, y, KA) * V_jobs(s, S, KA) * TC_equal_KA(wells, y, KA) * ban_driling(s, S, y, KA) * window_time_down(a, e, KA) * \
-             window_time_up(a, s, l, KA) * ban_cycle(a, x, t, s, l, KA) * positive_a_and_s(x, y, a, s, KA)
+    result = X_join_Y(x, y, KA) * V_jobs(s, S, KA) * TC_equal_KA(wells, y, KA) * ban_driling(s, S, y, KA) * window_time_down(a, e, y, KA) * window_time_up(a, s, l, y, KA) * ban_cycle(a, x, t, s, l, y, KA) * positive_a_and_s(x, y, a, s, KA)
     if result == 1:
         return 1
     else:
