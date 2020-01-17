@@ -1,8 +1,10 @@
+import random
 ########################### Входные значения
+from diplom import e, S, l, t, wells
+
 N = 10  # число объектов
 K = 5  # набор всех ТС
 car_cost = 1000 # цена за арнеду машины
-
 
 # подсчет значения целевой функции
 def CalculationOfObjectiveFunction(d, x, KA, target_function = 0):
@@ -14,7 +16,7 @@ def CalculationOfObjectiveFunction(d, x, KA, target_function = 0):
     return target_function
 
 # Распределяем на каждую локацию по машине
-def OneCarOneLocation(KA, S, t, wells, e):
+def OneCarOneLocation(KA):
     # копия переменной задачи Х, только кол-вo машин = число локаций
     x = [[[0 for k in range(KA)] for j in range(N)] for i in range(N)] # едет или нет ТС с номером К из города I в J
     y = [[0 for k in range(KA)] for i in range(N)]  # посещает или нет ТС с номером К объект i
@@ -45,8 +47,101 @@ def OneCarOneLocation(KA, S, t, wells, e):
             print("\n")
     return x, y, s, a
 
-# def RouteReduction():
+#ищем минимальный путь по которому можно попасть в client
+def SearchTheBestSoseda(d, client):
+    neighbor = 0
+    bufer = d[0][client]
+    for i in range(N):
+        if bufer <= d[i][client] and i != client:
+            bufer = d[i][client]
+            neighbor = i
+    return neighbor
 
+#номер машины которая обслуживает клиента
+def NumberCarClienta(y, client, KA):
+    for k in range(KA):
+        if y[client][k] == 1:
+            return k
+
+#удаляем машину с локации если позволяют огр
+def DeleteCarNonNarushOgr(x, y, s, a, target_function, KA):
+    #копии чтобы не испортить исходное решение
+    X = x
+    Y = y
+    Sresh = s
+    A = a
+    #Убираем одну машину
+    for i in range(1, N):
+        if wells[i] > 1:                              #Выбираем только те машины у которых больше одной скважины
+            for k in range(KA-1):
+                if Y[i][k] == 1 and Y[i][k+1] == 1:   #-//- ту машину за которой едет еще одна
+                    Y[i][k] = 0
+                    Sresh[i][k+1] += Sresh[i][k]
+                    Sresh[i][k] = 0
+                    A[i][k] = 0
+                    X[0][i][k] = 0
+                    X[i][0][k] = 0
+                    target_function -= car_cost
+                    if VerificationOfBoundaryConditions(X, Y, Sresh, A, KA) == 1:
+                        return X, Y, Sresh, A           #Если ограничения не сломались то сохраняем эти изменения
+                    else:
+                        return x, y, s, a               #Если ограничение нарушено, то оставляем старое решение
+
+#удаляем маршрут для выбранного клиента
+def DeletePathClienta(x, y, s, a, client, KA):
+    k = NumberCarClienta(y, client, KA)  # номер машины которая обслуживает клиента
+    for i in range(N):
+        if x[i][client][k] == 1 and y[i][k] == 1:
+            x[client][i][k] = 0
+            x[i][client][k] = 0
+            y[i][k] = 0
+            s[i][k] = 0
+            a[i][k] = 0
+
+def MaxTimeEndJob():
+
+#присоеденям к листу
+def JoinClientaList(x, y, s, a, client, sosed, k):
+    x[client][sosed][k] = 1
+    x[sosed][client][k] = 1
+    y[client][k] = 1
+    s
+    a[client][k] = a[sosed][k] + t[sosed][client]# здесь надо узнать мах время окончания работ у соседа
+
+#вклиниваем между
+def JoinClientaNonList():
+
+
+def CombiningRoutesLessFine(x, y, s, a, KA, d):
+####### Bыбираем коиента листа#############
+    summa = 1
+    client = 0
+    while summa != 0:
+        client = random.randint(1, N)
+        k = NumberCarClienta(y, client, KA)
+        summa = 0
+        for i in range(1, client):
+            summa += x[client][i][k]
+        for i in range(client+1, N):
+            summa += x[client][i][k]
+###########################################
+    X = x
+    Y = y
+    Sresh = s
+    A = a
+
+    sosed = SearchTheBestSoseda(d, client) #выбираем нового соседа
+
+    k = NumberCarClienta(y, sosed, KA) # узнаем машину которая обслуживает нового соседа
+    summa = 0 #узнаем про нового соседа, лист он или нет
+    for i in range(1, sosed):
+        summa += x[sosed][i][k]
+    for i in range(sosed+1, N):
+        summa += x[sosed][i][k]
+    if summa == 0 and wells:  #если лист
+        JoinClientaList()
+    else:
+        # JoinClientaNonList()
 
 # for k in range(KA):
 #     print(k)
@@ -62,6 +157,15 @@ def OneCarOneLocation(KA, S, t, wells, e):
 # for i  in range(N):
 #     print(t[0][i], end=' ')
 # print('\n')
+
+# for n in range(10):
+#     for k in range(KA):
+#         print(X[n][0])
+#         print(k)
+#         for i in range(N):
+#             for j in range(N):
+#                 print(X[n][1][i][j][k], end = ' ')
+#             print("\n")
 
 
 # Граничные условия
@@ -82,7 +186,7 @@ def X_join_Y(x, y, KA):
     return 1
 
 
-def V_jobs(s, S, KA):
+def V_jobs(s, KA):
     bufer1 = 0
     # Add constraint: sum (s[i][k])==S[i]
     for i in range(1, N):
@@ -110,7 +214,7 @@ def TC_equal_KA(ka, y, KA):
     return 1
 
 
-def ban_driling(s, S, y, KA):
+def ban_driling(s, y, KA):
     # Add constraint: s[i][k] <=S[i]*y[i][k]
     for i in range(1, N):
         for k in range(KA):
@@ -120,7 +224,7 @@ def ban_driling(s, S, y, KA):
     return 1
 
 
-def window_time_down(a, e, y, KA):
+def window_time_down(a, y, KA):
     # Add constraint: e[i]<=a[i][k]
     for i in range(1, N):
         for k in range(KA):
@@ -130,7 +234,7 @@ def window_time_down(a, e, y, KA):
     return 1
 
 
-def window_time_up(a, s, l, y, KA):
+def window_time_up(a, s, y, KA):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, N):
         for k in range(KA):
@@ -140,7 +244,7 @@ def window_time_up(a, s, l, y, KA):
     return 1
 
 
-def ban_cycle(a, x, t, s, l, y, KA):
+def ban_cycle(a, x, s, y, KA):
     # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1-x[i][j][k])
     for i in range(1, N):
         for j in range(1, N):
@@ -166,9 +270,9 @@ def positive_a_and_s(x, y, a, s, KA):
     return 1
 
 # проверка выполнения граничных условий
-def VerificationOfBoundaryConditions(x, y, s, a, wells, S, e, l, t, KA):
-    result = X_join_Y(x, y, KA) * V_jobs(s, S, KA) * TC_equal_KA(wells, y, KA) * ban_driling(s, S, y, KA) * window_time_down(a, e, y, KA) * window_time_up(a, s, l, y, KA) * ban_cycle(a, x, t, s, l, y, KA) * positive_a_and_s(x, y, a, s, KA)
+def VerificationOfBoundaryConditions(x, y, s, a, KA):
+    result = X_join_Y(x, y, KA) * V_jobs(s, KA) * TC_equal_KA(wells, y, KA) * ban_driling(s, y, KA) * window_time_down(a, y, KA) * window_time_up(a, s, y, KA) * ban_cycle(a, x, s, y, KA) * positive_a_and_s(x, y, a, s, KA)
     if result == 1:
-        return 1
+        return 1 # good
     else:
         return 0
