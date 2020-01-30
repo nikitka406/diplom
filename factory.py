@@ -22,7 +22,7 @@ S = [0 for j in range(N)] # число рабочих дней для одног
 for i in range(N):
     S[i] = wells[i] * 2
 
-KA = 0 # кол-во ТС = кол-ву скважин
+KA = 0# кол-во ТС = кол-ву скважин
 for i in range(N):
     KA += wells[i]
 
