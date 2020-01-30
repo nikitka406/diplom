@@ -1,22 +1,30 @@
 import random
+from factory import *
 ########################### Входные значения
-from diplom import e, S, l, t, wells
-
-N = 10  # число объектов
-K = 5  # набор всех ТС
-car_cost = 1000 # цена за арнеду машины
+#Считаем кол-во используемых ТС
+def AmountCarUsed(y):
+    summa = 0                   #счетчик
+    amount =0                   #число машин
+    for k in range(KA):
+        for j in range(N):
+            summa += y[j][k]    #смотрим посещает ли К-ая машина хотя бы один город
+        if summa != 0:          # если не 0 значит  посетила
+            amount += 1         # прибавляем еденичку
+        summa = 0               #Обнуляем счетчик
+    return amount
 
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(d, x, KA, target_function = 0):
+def CalculationOfObjectiveFunction(x, y, target_function = 0):
     for k in range(KA):
         for i in range(N):
             for j in range(N):
                 target_function += d[i][j]*x[i][j][k]
-    target_function += (KA-K) * car_cost
+    if AmountCarUsed(y) > K: #если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
+        target_function += (AmountCarUsed(y) - K) * car_cost
     return target_function
 
 # Распределяем на каждую локацию по машине
-def OneCarOneLocation(KA):
+def OneCarOneLocation():
     # копия переменной задачи Х, только кол-вo машин = число локаций
     x = [[[0 for k in range(KA)] for j in range(N)] for i in range(N)] # едет или нет ТС с номером К из города I в J
     y = [[0 for k in range(KA)] for i in range(N)]  # посещает или нет ТС с номером К объект i
@@ -42,9 +50,9 @@ def OneCarOneLocation(KA):
                     a[j][k] = e[j]
                 else:
                     a[j][k] = t[0][j] / 24
-                print(a[j][k], end=' ')
+                # print(a[j][k], end=' ')
                 k += 1
-            print("\n")
+            # print("\n")
     return x, y, s, a
 
 #ищем минимальный путь по которому можно попасть в client
@@ -64,28 +72,31 @@ def NumberCarClienta(y, client, KA):
             return k
 
 #удаляем машину с локации если позволяют огр
-def DeleteCarNonNarushOgr(x, y, s, a, target_function, KA):
-    #копии чтобы не испортить исходное решение
-    X = x
-    Y = y
-    Sresh = s
-    A = a
+def DeleteCarNonNarushOgr(x, y, s, a):
     #Убираем одну машину
     for i in range(1, N):
-        if wells[i] > 1:                              #Выбираем только те машины у которых больше одной скважины
+        # копии чтобы не испортить исходное решение
+        X = x
+        Y = y
+        Sresh = s
+        A = a
+        if wells[i] > 1:                              #Выбираем только те локации у которых больше одной скважины
             for k in range(KA-1):
                 if Y[i][k] == 1 and Y[i][k+1] == 1:   #-//- ту машину за которой едет еще одна
                     Y[i][k] = 0
+                    Y[0][k] = 0
                     Sresh[i][k+1] += Sresh[i][k]
                     Sresh[i][k] = 0
                     A[i][k] = 0
                     X[0][i][k] = 0
                     X[i][0][k] = 0
-                    target_function -= car_cost
-                    if VerificationOfBoundaryConditions(X, Y, Sresh, A, KA) == 1:
-                        return X, Y, Sresh, A           #Если ограничения не сломались то сохраняем эти изменения
-                    else:
-                        return x, y, s, a               #Если ограничение нарушено, то оставляем старое решение
+                    # target_function -= car_cost
+                    if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+                        x = X
+                        y = Y
+                        s = Sresh
+                        a = A                       #Если ограничения не сломались то сохраняем эти изменения
+    # return x, y, s, a#, target_function
 
 #удаляем маршрут для выбранного клиента
 def DeletePathClienta(x, y, s, a, client, KA):
@@ -98,7 +109,7 @@ def DeletePathClienta(x, y, s, a, client, KA):
             s[i][k] = 0
             a[i][k] = 0
 
-def MaxTimeEndJob():
+# def MaxTimeEndJob():
 
 #присоеденям к листу
 def JoinClientaList(x, y, s, a, client, sosed, k):
@@ -109,39 +120,37 @@ def JoinClientaList(x, y, s, a, client, sosed, k):
     a[client][k] = a[sosed][k] + t[sosed][client]# здесь надо узнать мах время окончания работ у соседа
 
 #вклиниваем между
-def JoinClientaNonList():
+# def JoinClientaNonList():
 
-
-def CombiningRoutesLessFine(x, y, s, a, KA, d):
-####### Bыбираем коиента листа#############
-    summa = 1
-    client = 0
-    while summa != 0:
-        client = random.randint(1, N)
-        k = NumberCarClienta(y, client, KA)
-        summa = 0
-        for i in range(1, client):
-            summa += x[client][i][k]
-        for i in range(client+1, N):
-            summa += x[client][i][k]
-###########################################
-    X = x
-    Y = y
-    Sresh = s
-    A = a
-
-    sosed = SearchTheBestSoseda(d, client) #выбираем нового соседа
-
-    k = NumberCarClienta(y, sosed, KA) # узнаем машину которая обслуживает нового соседа
-    summa = 0 #узнаем про нового соседа, лист он или нет
-    for i in range(1, sosed):
-        summa += x[sosed][i][k]
-    for i in range(sosed+1, N):
-        summa += x[sosed][i][k]
-    if summa == 0 and wells:  #если лист
-        JoinClientaList()
-    else:
-        # JoinClientaNonList()
+#
+# def CombiningRoutesLessFine(x, y, s, a, KA, d):
+# ####### Bыбираем коиента листа#############
+#     summa = 1
+#     client = 0
+#     while summa != 0: # Будем искать такого рандомного клиента который лист
+#         client = random.randint(1, N) #Берем рандомного клиента
+#         k = NumberCarClienta(y, client, KA) # получаем номер машины, которая обслуживает этого клиента
+#         for i in range(1, N):
+#             if a[client][k] < a[i][k]:
+#                 summa = 0
+# ###########################################
+#     X = x
+#     Y = y
+#     Sresh = s
+#     A = a
+#
+#     sosed = SearchTheBestSoseda(d, client) #выбираем нового соседа
+#
+#     k = NumberCarClienta(y, sosed, KA) # узнаем машину которая обслуживает нового соседа
+#     summa = 0 #узнаем про нового соседа, лист он или нет
+#     for i in range(1, sosed):
+#         summa += x[sosed][i][k]
+#     for i in range(sosed+1, N):
+#         summa += x[sosed][i][k]
+#     if summa == 0 and wells:  #если лист
+#         JoinClientaList()
+#     # else:
+#         # JoinClientaNonList()
 
 # for k in range(KA):
 #     print(k)
@@ -270,7 +279,7 @@ def positive_a_and_s(x, y, a, s, KA):
     return 1
 
 # проверка выполнения граничных условий
-def VerificationOfBoundaryConditions(x, y, s, a, KA):
+def VerificationOfBoundaryConditions(x, y, s, a):
     result = X_join_Y(x, y, KA) * V_jobs(s, KA) * TC_equal_KA(wells, y, KA) * ban_driling(s, y, KA) * window_time_down(a, y, KA) * window_time_up(a, s, y, KA) * ban_cycle(a, x, s, y, KA) * positive_a_and_s(x, y, a, s, KA)
     if result == 1:
         return 1 # good
