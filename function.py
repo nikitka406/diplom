@@ -1,6 +1,6 @@
 import random
 import factory
-########################### Входные значения
+
 #Считаем кол-во используемых ТС
 def AmountCarUsed(y):
     summa = 0                   #счетчик
@@ -126,35 +126,35 @@ def DeleteNotUsedCar(x, y, s, a):
             Sresh[i][k] = s[i][k]
             A[i][k] = a[i][k]
     return X, Y, Sresh, A
-#
-# #ищем минимальный путь по которому можно попасть в client
-# def SearchTheBestSoseda(client):
-#     neighbor = 0
-#     bufer = d[0][client]
-#     for i in range(N):
-#         if bufer <= d[i][client] and i != client:
-#             bufer = d[i][client]
-#             neighbor = i
-#     return neighbor
-#
-# #номер машины которая обслуживает клиента
-# def NumberCarClienta(y, client, KA):
-#     for k in range(KA):
-#         if y[client][k] == 1:
-#             return k
-#
-# #удаляем маршрут для выбранного клиента
-# def DeletePathClienta(x, y, s, a, client, KA):
-#     k = NumberCarClienta(y, client, KA)  # номер машины которая обслуживает клиента
-#     for i in range(N):
-#         if x[i][client][k] == 1 and y[i][k] == 1:
-#             x[client][i][k] = 0
-#             x[i][client][k] = 0
-#             y[i][k] = 0
-#             s[i][k] = 0
-#             a[i][k] = 0
-#
-# # def MaxTimeEndJob():
+
+#ищем минимальный путь по которому можно попасть в client
+def SearchTheBestSoseda(client):
+    neighbor = 0                                                #старый сосед
+    bufer = factory.d[0][client]                                #расстояние от старого сосед адо клиента
+    for i in range(factory.N):
+        if bufer >= factory.d[i][client] and i != client:       #ищим мин расстояние до клиента с учетом что новый сосед не клиент
+            bufer = factory.d[i][client]
+            neighbor = i
+    return neighbor
+
+#номер машины которая обслуживает клиента
+def NumberCarClienta(y, client):
+    for k in range(factory.KA):
+        if y[client][k] == 1:
+            return k
+
+#удаляем маршрут для выбранного клиента
+def DeletePathClienta(x, y, s, a, client):
+    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+    for i in range(factory.N):
+        if x[i][client][k] == 1 and y[i][k] == 1:
+            x[client][i][k] = 0
+            x[i][client][k] = 0
+            y[i][k] = 0
+            s[i][k] = 0
+            a[i][k] = 0
+
+# def MaxTimeEndJob():
 #
 # #присоеденям к листу
 # def JoinClientaList(x, y, s, a, client, sosed, k):
@@ -163,40 +163,55 @@ def DeleteNotUsedCar(x, y, s, a):
 #     y[client][k] = 1
 #     s
 #     a[client][k] = a[sosed][k] + t[sosed][client]# здесь надо узнать мах время окончания работ у соседа
-
-#вклиниваем между
+#
+# вклиниваем между
 # def JoinClientaNonList():
 
-#
-# def CombiningRoutesLessFine(x, y, s, a, KA, d):
-# ####### Bыбираем коиента листа#############
-#     summa = 1
-#     client = 0
-#     while summa != 0: # Будем искать такого рандомного клиента который лист
-#         client = random.randint(1, N) #Берем рандомного клиента
-#         k = NumberCarClienta(y, client, KA) # получаем номер машины, которая обслуживает этого клиента
-#         for i in range(1, N):
-#             if a[client][k] < a[i][k]:
-#                 summa = 0
-# ###########################################
-#     X = x
-#     Y = y
-#     Sresh = s
-#     A = a
-#
-#     sosed = SearchTheBestSoseda(d, client) #выбираем нового соседа
-#
-#     k = NumberCarClienta(y, sosed, KA) # узнаем машину которая обслуживает нового соседа
-#     summa = 0 #узнаем про нового соседа, лист он или нет
-#     for i in range(1, sosed):
-#         summa += x[sosed][i][k]
-#     for i in range(sosed+1, N):
-#         summa += x[sosed][i][k]
-#     if summa == 0 and wells:  #если лист
-#         JoinClientaList()
-#     # else:
-#         # JoinClientaNonList()
 
+def CombiningRoutesLessFine(x, y, s, a):
+####### Bыбираем коиента листа#############
+    flag = 1
+    while flag != 0: # Будем искать такого рандомного клиента который лист
+        client = random.randint(1, (factory.N - 1)) #Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
+        k = NumberCarClienta(y, client) # получаем номер машины, которая обслуживает этого клиента
+        for i in range(1, factory.N):
+            if a[client][k] < a[i][k]:
+                flag = 1
+            else:
+                flag = 0
+
+    # for i  in range(factory.N):
+    #     for k in range (factory.KA):
+    #         print(y[i][k], end=' ')
+    #     print('\n')
+    #
+    #
+    # print('\n')
+    # for i  in range(factory.N):
+    #     for k in range (factory.KA):
+    #         print(a[i][k], end=' ')
+    #     print('\n')
+
+###########################################
+
+    sosed = SearchTheBestSoseda(client) #выбираем нового соседа
+
+    # X = x
+    # Y = y
+    # Sresh = s
+    # A = a
+    #
+    # k = NumberCarClienta(y, sosed, KA) # узнаем машину которая обслуживает нового соседа
+    # summa = 0 #узнаем про нового соседа, лист он или нет
+    # for i in range(1, sosed):
+    #     summa += x[sosed][i][k]
+    # for i in range(sosed+1, N):
+    #     summa += x[sosed][i][k]
+    # if summa == 0 and wells:  #если лист
+    #     JoinClientaList()
+    # else:
+    #     JoinClientaNonList()
+    #
 
 
 # for k in range(factory.KA):
