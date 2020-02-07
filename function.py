@@ -205,31 +205,31 @@ def TimeOfArrival(a, s, client, sosed, sosedK):
 
 #удаляем клиента из выбранного  маршрут
 def DeleteClientaFromPath(x, y, s, a, client):
-    k = NumberCarClienta(y, client)                             # номер машины которая обслуживает клиента
-    sosedLeft = SearchSosedLeftOrRight(x, y, client, "left")    #ищем город перед клиентом
-    sosedRight = SearchSosedLeftOrRight(x, y, client, "right")  #ищем город после клиента
+    k = NumberCarClienta(y, client)                              # номер машины которая обслуживает клиента
+    clientLeft = SearchSosedLeftOrRight(x, y, client, "left")    #ищем город перед клиентом
+    clientRight = SearchSosedLeftOrRight(x, y, client, "right")  #ищем город после клиента
     #если у клиента есть сосед справо и слево
-    if sosedLeft != -1 and sosedRight != -1:
-        x[sosedRight][sosedLeft][k] = 1                         #соеденяем левого и правого соседа
-        x[sosedRight][client][k] = 0                            #удаляем ребро клиента с правым соседом
-        x[sosedLeft][client][k] = 0                             #удаляем ребро клиента с левым соседом
+    if clientLeft != -1 and clientRight != -1:
+        x[clientLeft][clientRight][k] = 1                         #соединяем левого и правого соседа
+        x[client][clientRight][k] = 0                            #удаляем ребро клиента с правым соседом
+        x[clientLeft][client][k] = 0                             #удаляем ребро клиента с левым соседом
 
         # У и S для левого и правого не меняются, но время прибытия меняется
         y[client][k] = 0                                        #машина К больше не обслуживает клиента
         s[client][k] = 0                                        #время работы машины К у клиента = 0
         a[client][k] = 0                                        #машина не прибывает к клиенту
 
-        TimeOfArrival(a, s, sosedRight, sosedLeft, k)
+        TimeOfArrival(a, s, clientRight, clientLeft, k)
     # если клиент лист
-    if sosedLeft != -1 and sosedRight == -1:
-        x[sosedLeft][client][k] = 0                             #теперь после левого соседа машина К никуда не едет кроме депо
-        if sosedLeft != 0:
-            x[sosedLeft][0][k] = 1                                  #значит левый сосед становится листом и должен вернуться в депо
+    if clientLeft != -1 and clientRight == -1:
+        x[clientLeft][client][k] = 0                            #теперь после левого соседа машина К никуда не едет кроме депо
+        if clientLeft != 0:
+            x[clientLeft][0][k] = 1                             #значит левый сосед становится листом и должен вернуться в депо
         x[client][0][k] = 0                                     #а клиент не возвращается в депо
         y[client][k] = 0                                        #клиент больше не обслуживается машиной К
         s[client][k] = 0                                        #машиной К больше не тратит время у клиента
         a[client][k] = 0                                        #и не приезжает
-    if sosedLeft == -1:                                         #logir
+    if clientLeft == -1:                                         #logir
         print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")
 
 #присоеденям к листу
@@ -246,7 +246,30 @@ def JoinClientaList(x, y, s, a, client, sosed):
     DeleteClientaFromPath(x, y, s, a, client)
 
 #вклиниваем между
-# def JoinClientaNonList():
+def JoinClientaNonList(x, y, s, a, client, sosed):
+    sosedK = NumberCarClienta(y, sosed)
+    clientK = NumberCarClienta(y, client)
+
+    sosedLeft = SearchSosedLeftOrRight(x, y, sosed, "left")                                             #левый сосед соседа
+    sosedRight = SearchSosedLeftOrRight(x, y, sosed, "right")                                           #правый сосед соседа
+
+    zatratLeft = factory.t[sosedLeft][client] + factory.t[client][sosed] + factory.t[sosed][sosedRight] #затраты присунуть слева
+    zatratRight = factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
+
+    if zatratLeft >= zatratRight and factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
+        x[sosed][client][sosedK] = 1
+        x[client][sosedRight][sosedK] = 1
+        y[client][sosedK] = 1                                                                           #тепреь машина соседа обслуживает клиента
+        s[client][sosedK] = s[client][clientK]                                                          #машина соседа будет работать у клиента столько же
+        TimeOfArrival(a, s, client, sosed, sosedK)
+        DeleteClientaFromPath(x, y, s, a, client)
+    elif zatratLeft < zatratRight and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]:
+        x[sosedLeft][client][sosedK] = 1
+        x[client][sosed][sosedK] = 1
+        y[client][sosedK] = 1                                                                          # тепреь машина соседа обслуживает клиента
+        s[client][sosedK] = s[client][clientK]                                                         # машина соседа будет работать у клиента столько же
+        TimeOfArrival(a, s, client, sosed, sosedK)
+        DeleteClientaFromPath(x, y, s, a, client)
 
 
 def CombiningRoutesLessFine(x, y, s, a):
@@ -285,12 +308,13 @@ def CombiningRoutesLessFine(x, y, s, a):
 
     if flag == 0: #лист
         JoinClientaList(X, Y, Sresh, A, client, sosed)
-        # if VerificationOfBoundaryConditions(X, Y, Sresh, A) != 1:
-        #     print("error")
-        #проверить временные рамки, если нарушились штрафовать
-    # else: #не лист
-    #     JoinClientaNonList()
-    #     # проверить временные рамки, если нарушились штрафовать
+        if VerificationOfBoundaryConditions(X, Y, Sresh, A) != 1:
+            print("error")
+            # if window_time_up(A, Sresh, Y) != 1:
+                # то штраф
+    else: #не лист
+        JoinClientaNonList(x, y, s, a, client, sosed)
+        # проверить временные рамки, если нарушились штрафовать
     BeautifulPrint(X, Y, Sresh, A)
     return X, Y, Sresh, A
 
@@ -406,7 +430,7 @@ def ban_cycle(a, x, s, y):
         for j in range(1, factory.N):
             for k in range(factory.KA):
                 if a[i][k] - a[j][k] + x[i][j][k] * factory.t[i][j] + s[i][k] > factory.l[i] * (1 - x[i][j][k]) and y[i][k] == 1:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, машшина", k,"не посещает депо")
+                    print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,"не посещает депо")
                     return 0
     return 1
 
