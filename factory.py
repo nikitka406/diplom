@@ -14,7 +14,7 @@ for i in range(N):
 t = d  # время перемещения между городами
 for i in range(N):
     for j in range(N):
-        t[i][j] = round(t[i][j])
+        t[i][j] = round(t[i][j] / 24)
 
 wells = [0, 1, 2, 1, 3, 1, 1, 1, 5, 1]  # число скважин на i объекте
 

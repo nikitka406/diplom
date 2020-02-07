@@ -11,8 +11,11 @@ assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 
 #Убераем маршруты если позволяют гран усл
 DeleteCarNonNarushOgr(x, y, s, a)
+
 #Удаляем не используемые ТС
 x, y, s, a = DeleteNotUsedCar(x, y, s, a)
+
+#Проверяем что ничего не сломалось
 target_function = CalculationOfObjectiveFunction(x, y)
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 print(target_function)
