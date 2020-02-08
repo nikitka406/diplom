@@ -50,14 +50,24 @@ def AmountCarUsed(y):
         summa = 0               #Обнуляем счетчик
     return amount
 
+#копирование решения
+def CopyingSolution(x, y, s, a):
+    X = x
+    Y = y
+    Sresh = s
+    A = a
+    return X, Y, Sresh, A
+
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, y, target_function = 0):
+def CalculationOfObjectiveFunction(x, y, pinalty_function = 0):
+    target_function = 0
     for k in range(factory.KA):
         for i in range(factory.N):
             for j in range(factory.N):
                 target_function += factory.d[i][j]*x[i][j][k]
     if AmountCarUsed(y) > factory.K: #если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
         target_function += (AmountCarUsed(y) - factory.K) * factory.car_cost
+    target_function += pinalty_function
     return target_function
 
 # Распределяем на каждую локацию по машине
@@ -97,13 +107,11 @@ def DeleteCarNonNarushOgr(x, y, s, a):
     #Убираем одну машину
     for i in range(1, factory.N):
         # копии чтобы не испортить исходное решение
-        X = x
-        Y = y
-        Sresh = s
-        A = a
-        if factory.wells[i] > 1:                              #Выбираем только те локации у которых больше одной скважины
+        X, Y, Sresh, A = CopyingSolution(x, y, s, a)
+
+        if factory.wells[i] > 1:                                #Выбираем только те локации у которых больше одной скважины
             for k in range(factory.KA-1):
-                if Y[i][k] == 1 and Y[i][k+1] == 1:   #-//- ту машину за которой едет еще одна
+                if Y[i][k] == 1 and Y[i][k+1] == 1:             #-//- ту машину за которой едет еще одна
                     Y[i][k] = 0
                     Y[0][k] = 0
                     Sresh[i][k+1] += Sresh[i][k]
@@ -113,11 +121,8 @@ def DeleteCarNonNarushOgr(x, y, s, a):
                     X[i][0][k] = 0
                     # target_function -= car_cost
                     if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
-                        x = X
-                        y = Y
-                        s = Sresh
-                        a = A                       #Если ограничения не сломались то сохраняем эти изменения
-    # return x, y, s, a#, target_function
+                        x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+                                                                #Если ограничения не сломались то сохраняем эти изменения
 
 #перезапись одного маршрута на другой
 def Rewriting(Y, k, m, flag):
@@ -133,11 +138,9 @@ def Rewriting(Y, k, m, flag):
 
 #удаляем/уменьшаем размерность с помощью не используемых машин
 def DeleteNotUsedCar(x, y, s, a):
-    summa1 = 0
-    summa2 = 0
-    for k in range(factory.KA):
+    for k in range(factory.KA-1):
         summa1 = 0  # Обнуляем счетчик
-        for j in range(factory.N):
+        for j in range(1, factory.N):
             summa1 += y[j][k]    #смотрим посещает ли К-ая машина хотя бы один город
         if summa1 == 0:          # если 0 значит не посещает
             for m in range(k+1, factory.KA): # ищем ближайшую рабочую машину
@@ -151,6 +154,7 @@ def DeleteNotUsedCar(x, y, s, a):
                     Rewriting(x, k, m, "2")
                     break
     factory.KA = AmountCarUsed(y)
+    #создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто прировнять
     X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]  # едет или нет ТС с номером К из города I в J
     Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
     Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
@@ -271,13 +275,19 @@ def JoinClientaNonList(x, y, s, a, client, sosed):
         TimeOfArrival(a, s, client, sosed, sosedK)
         DeleteClientaFromPath(x, y, s, a, client)
 
+#штрафнвя функция
+def PenaltyFunction(s, a):
+    penalty_sum = 0
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            if a[i][k] + s[i][k] > factory.l[i]:
+                penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
+    return  penalty_sum
 
-def CombiningRoutesLessFine(x, y, s, a):
+#переставляем клиентов к новым соседям
+def JoiningClientToNewSosed(x, y, s, a, target_function=0):
 # копируем чтобы не испортить решение
-    X = x
-    Y = y
-    Sresh = s
-    A = a
+    X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
 #скорее всего нужен вайл пока ограничения выполняются
 ####### Bыбираем коиента листа#############
@@ -306,17 +316,27 @@ def CombiningRoutesLessFine(x, y, s, a):
         else:#Он лист
             flag += 0
 
-    if flag == 0: #лист
+    if flag == 0: #присоеденяем к соседу листу
         JoinClientaList(X, Y, Sresh, A, client, sosed)
-        if VerificationOfBoundaryConditions(X, Y, Sresh, A) != 1:
-            print("error")
-            # if window_time_up(A, Sresh, Y) != 1:
-                # то штраф
-    else: #не лист
-        JoinClientaNonList(x, y, s, a, client, sosed)
-        # проверить временные рамки, если нарушились штрафовать
+    else: #вклиниваем к соседу не листу
+        JoinClientaNonList(X, Y, Sresh, A, client, sosed)
+
+    X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+    #проверка на успеваемость выполнения работ
+    #если не успел уложиться в срок, штраф
+    if window_time_up(A, Sresh, Y) == 0:
+        target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
+        print(1)
+        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
+            x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+        else:
+            print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+    if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+        x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+    else:
+        print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+
     BeautifulPrint(X, Y, Sresh, A)
-    return X, Y, Sresh, A
 
 
 
@@ -365,7 +385,6 @@ def X_join_Y(x, y):
             bufer2 = 0
     return 1
 
-
 def V_jobs(s):
     bufer1 = 0
     # Add constraint: sum (s[i][k])==S[i]
@@ -378,7 +397,6 @@ def V_jobs(s):
                 return 0
             bufer1 = 0
     return 1
-
 
 def TC_equal_KA(y):
     bufer1 =0
@@ -393,7 +411,6 @@ def TC_equal_KA(y):
             bufer1 = 0
     return 1
 
-
 def ban_driling(s, y):
     # Add constraint: s[i][k] <=S[i]*y[i][k]
     for i in range(1, factory.N):
@@ -402,7 +419,6 @@ def ban_driling(s, y):
                 print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект", i,", но начало бурение")
                 return 0
     return 1
-
 
 def window_time_down(a, y):
     # Add constraint: e[i]<=a[i][k]
@@ -413,7 +429,6 @@ def window_time_down(a, y):
                 return 0
     return 1
 
-
 def window_time_up(a, s, y):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, factory.N):
@@ -422,7 +437,6 @@ def window_time_up(a, s, y):
                 print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект", i,"больше чем конец работ")
                 return 0
     return 1
-
 
 def ban_cycle(a, x, s, y):
     # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1-x[i][j][k])
@@ -433,7 +447,6 @@ def ban_cycle(a, x, s, y):
                     print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,"не посещает депо")
                     return 0
     return 1
-
 
 def positive_a_and_s(x, y, a, s):
     # Add constraint: s[i][k] >= 0 and a[i][k] >= 0
@@ -452,8 +465,19 @@ def positive_a_and_s(x, y, a, s):
     return 1
 
 # проверка выполнения граничных условий
-def VerificationOfBoundaryConditions(x, y, s, a):
-    result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * window_time_down(a, y) * window_time_up(a, s, y) * ban_cycle(a, x, s, y) * positive_a_and_s(x, y, a, s)
+def VerificationOfBoundaryConditions(x, y, s, a, pinalty = "false"):
+    #по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
+    if pinalty == "false":
+        result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * \
+                 window_time_down(a, y) * window_time_up(a, s, y) * \
+                 ban_cycle(a, x, s, y) * positive_a_and_s(x, y, a, s)
+    elif pinalty == "true":
+        result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * \
+                 window_time_down(a, y)  * ban_cycle(a, x, s, y) *\
+                 positive_a_and_s(x, y, a, s)
+    else:
+        print("ERROR from VerificationOfBoundaryConditions: неверное значение, переменной pinalty")
+        return -1
     if result == 1:
         return 1 # good
     else:

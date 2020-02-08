@@ -41,4 +41,5 @@ for n in range(1000):
     A[n][0] = n
     A[n][1] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-CombiningRoutesLessFine(x, y, s, a)
+JoiningClientToNewSosed(x, y, s, a, target_function)
+print(target_function)
