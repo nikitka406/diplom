@@ -22,12 +22,19 @@ def BeautifulPrint(X, Y, Sresh, A):
         print("a = ", end=' ')
         for  i in range(factory.N):
             print(A[i][k], end=' ')
+            # for k in range(factory.KA):
+            #     print(A[i][k], end=' ')
+            # print("\n")
         print("\n")
 
         print("s = ", end=' ')
         for  i in range(factory.N):
             print(Sresh[i][k], end=' ')
+            # for k in range(factory.KA):
+            #     print(Sresh[i][k], end=' ')
+            # print("\n")
         print("\n")
+
     for i in range(factory.N):
         for k in range (factory.N):
            print(factory.t[i][k], end=' ')
@@ -188,15 +195,17 @@ def NumberCarClienta(y, client):
 def SearchSosedLeftOrRight(x, y, client, leftOrRight):
     k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     if leftOrRight == "left":
-        for i in range(client):#ищем по столбцу
+        for i in range(factory.N):#ищем по столбцу
             if x[i][client][k] == 1:
                 return i
         return -1
     if leftOrRight == "right":
-        for i in range(client, factory.N):#ищем по строке
+        for i in range(factory.N):#ищем по строке
             if x[client][i][k] == 1:
                 return i
         return -1
+    if leftOrRight != "left" and leftOrRight != "right":
+        print("ERROR from SearchSosedLeftOrRight: неверное значение переменной leftOrRight")
 
 # определяем время приезда на конкретную локацию
 def TimeOfArrival(a, s, client, sosed, sosedK):
@@ -240,14 +249,17 @@ def DeleteClientaFromPath(x, y, s, a, client):
 def JoinClientaList(x, y, s, a, client, sosed):
     clientK = NumberCarClienta(y, client)                   #ищем номер машины клиента
     sosedK = NumberCarClienta(y, sosed)                     #ищем номер машины соседа
+
+    s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
+    TimeOfArrival(a, s, client, sosed, sosedK)
+
+    DeleteClientaFromPath(x, y, s, a, client)
+
     x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
     x[sosed][client][sosedK] = 1                            #вставляем клиента после соседа
     x[client][0][sosedK] = 1                                #теперь клиент литс, значит он возвращается в депо
     y[client][sosedK] = 1                                   #тепреь машина соседа обслуживает клиента
-    s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
 
-    TimeOfArrival(a, s, client, sosed, sosedK)
-    DeleteClientaFromPath(x, y, s, a, client)
 
 #вклиниваем между
 def JoinClientaNonList(x, y, s, a, client, sosed):
@@ -261,19 +273,20 @@ def JoinClientaNonList(x, y, s, a, client, sosed):
     zatratRight = factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
 
     if zatratLeft >= zatratRight and factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
-        x[sosed][client][sosedK] = 1
-        x[client][sosedRight][sosedK] = 1
-        y[client][sosedK] = 1                                                                           #тепреь машина соседа обслуживает клиента
         s[client][sosedK] = s[client][clientK]                                                          #машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)
         DeleteClientaFromPath(x, y, s, a, client)
+        x[sosed][client][sosedK] = 1
+        x[client][sosedRight][sosedK] = 1
+        y[client][sosedK] = 1                                                                           # тепреь машина соседа обслуживает клиента
     elif zatratLeft < zatratRight and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]:
+        s[client][sosedK] = s[client][clientK]                                                          # машина соседа будет работать у клиента столько же
+        TimeOfArrival(a, s, client, sosed, sosedK)
+        DeleteClientaFromPath(x, y, s, a, client)
         x[sosedLeft][client][sosedK] = 1
         x[client][sosed][sosedK] = 1
         y[client][sosedK] = 1                                                                          # тепреь машина соседа обслуживает клиента
-        s[client][sosedK] = s[client][clientK]                                                         # машина соседа будет работать у клиента столько же
-        TimeOfArrival(a, s, client, sosed, sosedK)
-        DeleteClientaFromPath(x, y, s, a, client)
+
 
 #штрафнвя функция
 def PenaltyFunction(s, a):
@@ -303,11 +316,9 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
                 flag = 0
                 change_cl[client] = 1               #флажок что мы этого клиента уже переставляли
 ###########################################
-    print(client)
     sosed = SearchTheBestSoseda(client)             #выбираем нового, лучшего соседа
-    print(sosed)
     k = NumberCarClienta(y, sosed)                  # узнаем машину которая обслуживает нового соседа
-    print(k)
+
     #узнаем про нового соседа, лист он или нет
     flag = 0
     for i in range(1, factory.N):
@@ -320,13 +331,15 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
         JoinClientaList(X, Y, Sresh, A, client, sosed)
     else: #вклиниваем к соседу не листу
         JoinClientaNonList(X, Y, Sresh, A, client, sosed)
-
     X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+
+    BeautifulPrint(X, Y, Sresh, A)
     #проверка на успеваемость выполнения работ
     #если не успел уложиться в срок, штраф
     if window_time_up(A, Sresh, Y) == 0:
         target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
         print(1)
+        #не понятно как работает 7 огр, здесь не рабоатет!!!!!
         if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
         else:
@@ -336,11 +349,9 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
     else:
         print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
 
-    BeautifulPrint(X, Y, Sresh, A)
-
-
-
-
+    print("Присоеденияем клиеннта", client)
+    print("к соседу ", sosed)
+    print("на машине ", k)
 
 
 # for k in range(factory.KA):
