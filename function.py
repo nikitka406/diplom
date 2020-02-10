@@ -14,6 +14,11 @@ def BeautifulPrint(X, Y, Sresh, A):
             print(factory.e[i], end=' ')
         print("\n")
 
+        print("l = ", end=' ')
+        for i in range(factory.N):
+            print(factory.l[i], end=' ')
+        print("\n")
+
         print("y = ", end=' ')
         for  i in range(factory.N):
             print(Y[i][k], end=' ')
@@ -251,8 +256,10 @@ def JoinClientaList(x, y, s, a, client, sosed):
     sosedK = NumberCarClienta(y, sosed)                     #ищем номер машины соседа
 
     s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
-    TimeOfArrival(a, s, client, sosed, sosedK)
-
+    TimeOfArrival(a, s, client, sosed, sosedK)              #Подсчет времени приезда к клиенту от соседа
+    #Чтобы все корректно работало, сначала надонаписать
+    # новое время приезда и новое время работы, потом
+    # удалить старое решение, и только потом заполнять Х и У
     DeleteClientaFromPath(x, y, s, a, client)
 
     x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
@@ -272,16 +279,24 @@ def JoinClientaNonList(x, y, s, a, client, sosed):
     zatratLeft = factory.t[sosedLeft][client] + factory.t[client][sosed] + factory.t[sosed][sosedRight] #затраты присунуть слева
     zatratRight = factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
 
+    #Если время затрат слева больше чем справа и время окончания слева меньше чем у клиента и меньше чем справа
     if zatratLeft >= zatratRight and factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
         s[client][sosedK] = s[client][clientK]                                                          #машина соседа будет работать у клиента столько же
-        TimeOfArrival(a, s, client, sosed, sosedK)
+        TimeOfArrival(a, s, client, sosed, sosedK)                                                      #Подсчет времени приезда к клиенту от соседа
+        # Чтобы все корректно работало, сначала надонаписать
+        # новое время приезда и новое время работы, потом
+        # удалить старое решение, и только потом заполнять Х и У
         DeleteClientaFromPath(x, y, s, a, client)
+
         x[sosed][client][sosedK] = 1
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1                                                                           # тепреь машина соседа обслуживает клиента
     elif zatratLeft < zatratRight and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]:
         s[client][sosedK] = s[client][clientK]                                                          # машина соседа будет работать у клиента столько же
-        TimeOfArrival(a, s, client, sosed, sosedK)
+        TimeOfArrival(a, s, client, sosed, sosedK)                                                      #Подсчет времени приезда к клиенту от соседа
+        # Чтобы все корректно работало, сначала надонаписать
+        # новое время приезда и новое время работы, потом
+        # удалить старое решение, и только потом заполнять Х и У
         DeleteClientaFromPath(x, y, s, a, client)
         x[sosedLeft][client][sosedK] = 1
         x[client][sosed][sosedK] = 1
@@ -293,19 +308,17 @@ def PenaltyFunction(s, a):
     penalty_sum = 0
     for i in range(factory.N):
         for k in range(factory.KA):
-            if a[i][k] + s[i][k] > factory.l[i]:
+            if a[i][k] + s[i][k] > factory.l[i]:#Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
     return  penalty_sum
 
-#переставляем клиентов к новым соседям
-def JoiningClientToNewSosed(x, y, s, a, target_function=0):
+#переставляем клиента к новому соседу
+def JoiningClientToNewSosed(x, y, s, a, target_function):
 # копируем чтобы не испортить решение
     X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
-#скорее всего нужен вайл пока ограничения выполняются
 ####### Bыбираем коиента листа#############
     flag = 1
-    change_cl = [0 for i in range(factory.N)]
     while flag != 0:                                # Будем искать такого рандомного клиента который лист
         client = random.randint(1, (factory.N - 1)) #Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
         k = NumberCarClienta(y, client)             # получаем номер машины, которая обслуживает этого клиента
@@ -314,7 +327,6 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
                 flag = 1                            # который она посещает позже, значит он НЕ ЛЕСИТ
             else:                                   #Он лист
                 flag = 0
-                change_cl[client] = 1               #флажок что мы этого клиента уже переставляли
 ###########################################
     sosed = SearchTheBestSoseda(client)             #выбираем нового, лучшего соседа
     k = NumberCarClienta(y, sosed)                  # узнаем машину которая обслуживает нового соседа
@@ -324,7 +336,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
     for i in range(1, factory.N):
         if a[sosed][k] < a[i][k]:                   #Если у машины, котораяя посещает соседа есть город,
             flag += 1                               # который она посещает позже, значит он НЕ ЛЕСИТ
-        else:#Он лист
+        else:                   #Он лист
             flag += 0
 
     if flag == 0: #присоеденяем к соседу листу
@@ -333,25 +345,17 @@ def JoiningClientToNewSosed(x, y, s, a, target_function=0):
         JoinClientaNonList(X, Y, Sresh, A, client, sosed)
     X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
-    BeautifulPrint(X, Y, Sresh, A)
     #проверка на успеваемость выполнения работ
     #если не успел уложиться в срок, штраф
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
     if window_time_up(A, Sresh, Y) == 0:
         target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-        print(1)
-        #не понятно как работает 7 огр, здесь не рабоатет!!!!!
         if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
         else:
             print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
     if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
         x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-    else:
-        print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
-
-    print("Присоеденияем клиеннта", client)
-    print("к соседу ", sosed)
-    print("на машине ", k)
 
 
 # for k in range(factory.KA):
@@ -484,7 +488,7 @@ def VerificationOfBoundaryConditions(x, y, s, a, pinalty = "false"):
                  ban_cycle(a, x, s, y) * positive_a_and_s(x, y, a, s)
     elif pinalty == "true":
         result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * \
-                 window_time_down(a, y)  * ban_cycle(a, x, s, y) *\
+                 window_time_down(a, y)  *\
                  positive_a_and_s(x, y, a, s)
     else:
         print("ERROR from VerificationOfBoundaryConditions: неверное значение, переменной pinalty")
