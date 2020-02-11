@@ -196,6 +196,14 @@ def NumberCarClienta(y, client):
         if y[client][k] == 1:
             return k
 
+#узнаем про клиента, лист он или не лист
+def ListOrNotList(y, a, client):
+    k = NumberCarClienta(y, client)  # получаем номер машины, которая обслуживает этого клиента
+    for i in range(1, factory.N):
+        if a[client][k] < a[i][k]:  # Если у машины, котораяя посещает clienta есть город,
+            return 1 # который она посещает позже, значит он НЕ ЛЕСИТ
+    return 0 #значит клиент лист
+
 #ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight):
     k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
@@ -312,50 +320,40 @@ def PenaltyFunction(s, a):
                 penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
     return  penalty_sum
 
-#переставляем клиента к новому соседу
+#переставляем клиента к новому соседу, локальный поиск
 def JoiningClientToNewSosed(x, y, s, a, target_function):
-# копируем чтобы не испортить решение
-    X, Y, Sresh, A = CopyingSolution(x, y, s, a)
+    for local_s in range(factory.param_local_search):
+        # копируем чтобы не испортить решение
+        X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
-####### Bыбираем коиента листа#############
-    flag = 1
-    while flag != 0:                                # Будем искать такого рандомного клиента который лист
-        client = random.randint(1, (factory.N - 1)) #Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
-        k = NumberCarClienta(y, client)             # получаем номер машины, которая обслуживает этого клиента
-        for i in range(1, factory.N):
-            if a[client][k] < a[i][k]:              #Если у машины, котораяя посещает clienta есть город,
-                flag = 1                            # который она посещает позже, значит он НЕ ЛЕСИТ
-            else:                                   #Он лист
-                flag = 0
-###########################################
-    sosed = SearchTheBestSoseda(client)             #выбираем нового, лучшего соседа
-    k = NumberCarClienta(y, sosed)                  # узнаем машину которая обслуживает нового соседа
+        ####### Bыбираем клиента #############
+        client = random.randint(1, (
+                    factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
 
-    #узнаем про нового соседа, лист он или нет
-    flag = 0
-    for i in range(1, factory.N):
-        if a[sosed][k] < a[i][k]:                   #Если у машины, котораяя посещает соседа есть город,
-            flag += 1                               # который она посещает позже, значит он НЕ ЛЕСИТ
-        else:                   #Он лист
-            flag += 0
+        sosed = client # берем рандомного соседа, главное чтобы не совпал с клиентом
+        while sosed == client:
+            sosed = random.randint(1, (
+                    factory.N - 1))  # выбираем нового соседа
 
-    if flag == 0: #присоеденяем к соседу листу
-        JoinClientaList(X, Y, Sresh, A, client, sosed)
-    else: #вклиниваем к соседу не листу
-        JoinClientaNonList(X, Y, Sresh, A, client, sosed)
-    X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+        if ListOrNotList(y, a, sosed) == 0:  # присоеденяем к соседу листу
+            JoinClientaList(X, Y, Sresh, A, client, sosed)
+        else:  # вклиниваем к соседу не листу
+            JoinClientaNonList(X, Y, Sresh, A, client, sosed)
+        X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
-    #проверка на успеваемость выполнения работ
-    #если не успел уложиться в срок, штраф
-    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
-    if window_time_up(A, Sresh, Y) == 0:
-        target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
+        # проверка на успеваемость выполнения работ
+        # если не успел уложиться в срок, штраф
+        print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
+        if window_time_up(A, Sresh, Y) == 0:
+            target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
+            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
+                x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+            else:
+                print(
+                    "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+        if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-        else:
-            print("ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
-    if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
-        x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+
 
 
 # for k in range(factory.KA):
