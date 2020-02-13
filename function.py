@@ -39,16 +39,74 @@ def BeautifulPrint(X, Y, Sresh, A):
             #     print(Sresh[i][k], end=' ')
             # print("\n")
         print("\n")
-
-    for i in range(factory.N):
-        for k in range (factory.N):
-           print(factory.t[i][k], end=' ')
-        print('\n')
+    #
+    # for i in range(factory.N):
+    #     for k in range (factory.N):
+    #        print(factory.t[i][k], end=' ')
+    #     print('\n')
 
     # for i in range(factory.N):
     #     #     for k in range (factory.N):
     #     #         print(factory.d[i][k], end=' ')
     #     #     print('\n')
+
+#красивая печать в файл
+def BeautifulPrintInFile(X, Y, Sresh, A, target_function, number_solution):
+    file = open('population.txt', 'a')
+    file.write('Номер решения ' + str(number_solution))
+    file.write("\n")
+    for k in range(factory.KA):
+        file.write('Номер машины ' + str(k))
+        file.write("\n")
+        for i in range(factory.N):
+            for j in range(factory.N):
+                file.write(str(X[i][j][k]) + ' ')
+            file.write("\n")
+        file.write("\n")
+
+        file.write("e = ")
+        for i in range(factory.N):
+            file.write(str(factory.e[i]) + ' ')
+        file.write("\n")
+
+        file.write("l = ")
+        for i in range(factory.N):
+            file.write(str(factory.l[i]) + ' ')
+        file.write("\n")
+
+        file.write("y = ")
+        for  i in range(factory.N):
+            file.write(str(Y[i][k])+' ')
+        file.write("\n")
+
+        file.write("a = ")
+        for  i in range(factory.N):
+            file.write(str(A[i][k])+' ')
+            # for k in range(factory.KA):
+            #     print(A[i][k], end=' ')
+            # print("\n")
+        file.write("\n")
+
+        file.write("s = ")
+        for  i in range(factory.N):
+            file.write(str(Sresh[i][k])+' ')
+            # for k in range(factory.KA):
+            #     print(Sresh[i][k], end=' ')
+            # print("\n")
+        file.write("\n")
+    file.write(str(target_function))
+    file.write("\n")
+    file.write("\n")
+    # for i in range(factory.N):
+    #     for k in range (factory.N):
+    #        file.write(factory.t[i][k]+' ')
+    #     file.write('\n')
+
+    # for i in range(factory.N):
+    #     #     for k in range (factory.N):
+    #     #         print(factory.d[i][k], end=' ')
+    #     #     print('\n')
+    file.close()
 
 #Считаем кол-во используемых ТС
 def AmountCarUsed(y):
@@ -275,7 +333,6 @@ def JoinClientaList(x, y, s, a, client, sosed):
     x[client][0][sosedK] = 1                                #теперь клиент литс, значит он возвращается в депо
     y[client][sosedK] = 1                                   #тепреь машина соседа обслуживает клиента
 
-
 #вклиниваем между
 def JoinClientaNonList(x, y, s, a, client, sosed):
     sosedK = NumberCarClienta(y, sosed)
@@ -291,11 +348,12 @@ def JoinClientaNonList(x, y, s, a, client, sosed):
     if zatratLeft >= zatratRight and factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
         s[client][sosedK] = s[client][clientK]                                                          #машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)                                                      #Подсчет времени приезда к клиенту от соседа
-        # Чтобы все корректно работало, сначала надонаписать
+        # Чтобы все корректно работало, сначала надо написать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
         DeleteClientaFromPath(x, y, s, a, client)
 
+        x[sosed][sosedRight][sosedK] = 0
         x[sosed][client][sosedK] = 1
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1                                                                           # тепреь машина соседа обслуживает клиента
@@ -306,10 +364,10 @@ def JoinClientaNonList(x, y, s, a, client, sosed):
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
         DeleteClientaFromPath(x, y, s, a, client)
+        x[sosedLeft][sosed][sosedK] = 0
         x[sosedLeft][client][sosedK] = 1
         x[client][sosed][sosedK] = 1
         y[client][sosedK] = 1                                                                          # тепреь машина соседа обслуживает клиента
-
 
 #штрафнвя функция
 def PenaltyFunction(s, a):
@@ -322,37 +380,44 @@ def PenaltyFunction(s, a):
 
 #переставляем клиента к новому соседу, локальный поиск
 def JoiningClientToNewSosed(x, y, s, a, target_function):
-    for local_s in range(factory.param_local_search):
-        # копируем чтобы не испортить решение
-        X, Y, Sresh, A = CopyingSolution(x, y, s, a)
+    # копируем чтобы не испортить решение
+    X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
-        ####### Bыбираем клиента #############
-        client = random.randint(1, (
-                    factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
+    ####### Bыбираем клиента #############
+    client = random.randint(1, (
+            factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
 
-        sosed = client # берем рандомного соседа, главное чтобы не совпал с клиентом
-        while sosed == client:
-            sosed = random.randint(1, (
-                    factory.N - 1))  # выбираем нового соседа
+    print("Переставляем клиент ", client)
 
-        if ListOrNotList(y, a, sosed) == 0:  # присоеденяем к соседу листу
-            JoinClientaList(X, Y, Sresh, A, client, sosed)
-        else:  # вклиниваем к соседу не листу
-            JoinClientaNonList(X, Y, Sresh, A, client, sosed)
-        X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+    sosed = client  # берем рандомного соседа, главное чтобы не совпал с клиентом
+    while sosed == client:
+        sosed = random.randint(1, (
+                factory.N - 1))  # выбираем нового соседа
 
-        # проверка на успеваемость выполнения работ
-        # если не успел уложиться в срок, штраф
-        print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
-        if window_time_up(A, Sresh, Y) == 0:
+    print("К соседу ", sosed)
+    print("На машине ", NumberCarClienta(y, sosed))
+
+    if ListOrNotList(y, a, sosed) == 0:  # присоеденяем к соседу листу
+        JoinClientaList(X, Y, Sresh, A, client, sosed)
+    else:  # вклиниваем к соседу не листу
+        JoinClientaNonList(X, Y, Sresh, A, client, sosed)
+    X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+
+    # проверка на успеваемость выполнения работ
+    # если не успел уложиться в срок, штраф
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
+    if window_time_up(A, Sresh, Y) == 0:
+        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
             target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
-                x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-            else:
-                print(
-                    "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
-        if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+            print(target_function)
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+        else:
+            print(
+                "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+    if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+        target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
+        x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+    return target_function
 
 
 
@@ -457,7 +522,7 @@ def ban_cycle(a, x, s, y):
         for j in range(1, factory.N):
             for k in range(factory.KA):
                 if a[i][k] - a[j][k] + x[i][j][k] * factory.t[i][j] + s[i][k] > factory.l[i] * (1 - x[i][j][k]) and y[i][k] == 1:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,"не посещает депо")
+                    print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,"не посещает депо согласно временным рамкам")
                     return 0
     return 1
 

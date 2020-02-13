@@ -41,4 +41,11 @@ for n in range(factory.population):
     A[n][0] = n
     A[n][1] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-JoiningClientToNewSosed(x, y, s, a, target_function)
+Target_Function = [0 for n in range(factory.population)]# здесь сохраняем результат целевой функции для каждого решения
+
+for n in range(factory.population):#создаем популяцию решений в кол-ве population
+    bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s, a)  # в очередное решение сначала  сохраняем стартовое
+    for local_s in range(factory.param_local_search):#производим param_local_search кол-во перестановок
+        Target_Function[n] = JoiningClientToNewSosed(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n])
+    # BeautifulPrintInFile(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n], n)
+    X[n][1], Y[n][1], Sresh[n][1], A[n][1] = CopyingSolution(bufer_X, bufer_Y, bufer_Sresh, bufer_A)
