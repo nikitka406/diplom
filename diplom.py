@@ -1,8 +1,7 @@
-import factory
 from function import *
 import factory
 target_function = 0 # значение целевой функции
-
+#TODO надо разобраться почему время в А выставляется не правильно
 # заполняем стартовое решение, одна машина на одну локацию
 x, y, s, a = OneCarOneLocation()
 target_function = CalculationOfObjectiveFunction(x, y)
@@ -15,6 +14,7 @@ DeleteCarNonNarushOgr(x, y, s, a)
 #Удаляем не используемые ТС
 x, y, s, a = DeleteNotUsedCar(x, y, s, a)
 
+# BeautifulPrint(x, y, s, a)
 #Проверяем что ничего не сломалось
 target_function = CalculationOfObjectiveFunction(x, y)
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
@@ -47,5 +47,5 @@ for n in range(factory.population):#создаем популяцию решен
     bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s, a)  # в очередное решение сначала  сохраняем стартовое
     for local_s in range(factory.param_local_search):#производим param_local_search кол-во перестановок
         Target_Function[n] = JoiningClientToNewSosed(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n])
-    # BeautifulPrintInFile(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n], n)
+    BeautifulPrintInFile(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n], n)
     X[n][1], Y[n][1], Sresh[n][1], A[n][1] = CopyingSolution(bufer_X, bufer_Y, bufer_Sresh, bufer_A)
