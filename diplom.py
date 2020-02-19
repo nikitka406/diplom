@@ -2,6 +2,7 @@ from function import *
 import factory
 target_function = 0 # значение целевой функции
 #TODO надо разобраться почему время в А выставляется не правильно
+
 # заполняем стартовое решение, одна машина на одну локацию
 x, y, s, a = OneCarOneLocation()
 target_function = CalculationOfObjectiveFunction(x, y)

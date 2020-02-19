@@ -208,7 +208,7 @@ def Rewriting(Y, k, m, flag):
 
 #удаляем/уменьшаем размерность с помощью не используемых машин
 def DeleteNotUsedCar(x, y, s, a):
-#todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные)
+#todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные) под вопросом?????
     for k in range(factory.KA):
         summa1 = 0  # Обнуляем счетчик
         for j in range(1, factory.N):
@@ -226,19 +226,24 @@ def DeleteNotUsedCar(x, y, s, a):
                         Rewriting(x, k, m, "2")
                         break
     factory.KA = AmountCarUsed(y)
-    #создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто прировнять
-    X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]  # едет или нет ТС с номером К из города I в J
-    Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
-    Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
-    A = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
-    for k in range(factory.KA):
-        for i in range(factory.N):
-            for j in range(factory.N):
-                X[i][j][k] = x[i][j][k]
-            Y[i][k] = y[i][k]
-            Sresh[i][k] = s[i][k]
-            A[i][k] = a[i][k]
-    return X, Y, Sresh, A
+    if factory.KA >= factory.K - 1:
+        # создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто прировнять
+        X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
+             range(factory.N)]  # едет или нет ТС с номером К из города I в J
+        Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+        Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+        A = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+        for k in range(factory.KA):
+            for i in range(factory.N):
+                for j in range(factory.N):
+                    X[i][j][k] = x[i][j][k]
+                Y[i][k] = y[i][k]
+                Sresh[i][k] = s[i][k]
+                A[i][k] = a[i][k]
+        return X, Y, Sresh, A
+    else:
+        print("NOTIFICATION from DeleteNotUsedCar: Уже удалены все арендованные машины")
+        return x, y, s, a
 
 #ищем минимальный путь по которому можно попасть в client
 def SearchTheBestSoseda(client):
@@ -318,25 +323,27 @@ def DeleteClientaFromPath(x, y, s, a, client):
     if clientLeft == -1 or clientRight == -1:
         print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")#logir
 
-#присоеденям к листу
-def JoinClientaList(x, y, s, a, client, sosed):
-    clientK = NumberCarClienta(y, client)                   #ищем номер машины клиента
-    sosedK = NumberCarClienta(y, sosed)                     #ищем номер машины соседа
-
-    s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
-    TimeOfArrival(a, s, client, sosed, sosedK)              #Подсчет времени приезда к клиенту от соседа
-    #Чтобы все корректно работало, сначала надонаписать
-    # новое время приезда и новое время работы, потом
-    # удалить старое решение, и только потом заполнять Х и У
-    DeleteClientaFromPath(x, y, s, a, client)
-
-    x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
-    x[sosed][client][sosedK] = 1                            #вставляем клиента после соседа
-    x[client][0][sosedK] = 1                                #теперь клиент литс, значит он возвращается в депо
-    y[client][sosedK] = 1                                   #тепреь машина соседа обслуживает клиента
+#
+# #присоеденям к листу
+# def JoinClientaList(x, y, s, a, client, sosed):
+#     clientK = NumberCarClienta(y, client)                   #ищем номер машины клиента
+#     sosedK = NumberCarClienta(y, sosed)                     #ищем номер машины соседа
+#
+#     s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
+#     TimeOfArrival(a, s, client, sosed, sosedK)              #Подсчет времени приезда к клиенту от соседа
+#     #Чтобы все корректно работало, сначала надонаписать
+#     # новое время приезда и новое время работы, потом
+#     # удалить старое решение, и только потом заполнять Х и У
+#     DeleteClientaFromPath(x, y, s, a, client)
+#
+#     x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
+#     x[sosed][client][sosedK] = 1                            #вставляем клиента после соседа
+#     x[client][0][sosedK] = 1                                #теперь клиент литс, значит он возвращается в депо
+#     y[client][sosedK] = 1                                   #тепреь машина соседа обслуживает клиента
+#
 
 #вклиниваем между
-def JoinClientaNonList(x, y, s, a, client, sosed):
+def OperatorJoin(x, y, s, a, client, sosed):
     sosedK = NumberCarClienta(y, sosed)
     clientK = NumberCarClienta(y, client)
 
@@ -400,10 +407,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 
     print("К соседу ", sosed)
     print("На машине ", NumberCarClienta(y, sosed))
-    # if ListOrNotList(y, a, sosed) == 0:  # присоеденяем к соседу листу
-    #     JoinClientaList(X, Y, Sresh, A, client, sosed)
-    # else:  # вклиниваем к соседу не листу
-    JoinClientaNonList(X, Y, Sresh, A, client, sosed)
+    OperatorJoin(X, Y, Sresh, A, client, sosed)
     X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
     # проверка на успеваемость выполнения работ
