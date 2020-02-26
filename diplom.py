@@ -22,7 +22,7 @@ target_function = CalculationOfObjectiveFunction(x, y)
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 print(target_function)
 
-#Создаем хранилище решений, для большего числа рещений
+#Создаем хранилище решений, для большего числа решений
 X, Y, Sresh, A, Target_Function, bufer = SolutionStore()
 
 #Cоздаем популяцию решений
