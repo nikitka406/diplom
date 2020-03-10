@@ -51,6 +51,7 @@ def RecursiveSearchSosed(children, k, i, bufer_in, bufer_out, k_out, i_out, flag
 
     # Убираем последний добавленный чтобы больше на него не попадаться
     bufer_out[k_out][i_out] = 0
+    bufer_in[k_in][i_in] = 0
 
     #смотрим что этот город еще можно вставлять
     # bufer_in[k_in][i_in + 1] - новый, которого хотим добавить
@@ -60,46 +61,47 @@ def RecursiveSearchSosed(children, k, i, bufer_in, bufer_out, k_out, i_out, flag
         #добавляем в ребенка bufer_in[k_in][i_in + 1]
         children[k][i] = bufer_in[k_in][i_in + 1]
         #ищем дальше
-        RecursiveSearchSosed(children, k, i+1, bufer_out, bufer_in, k_in, i_in, flag)
+        RecursiveSearchSosed(children, k, i+1, bufer_out, bufer_in, k_in, i_in+1, flag)
 
     #это значит что встретили ноль, цикл должен завершится
     elif flag[ bufer_in[k_in][i_in + 1] ] == -1:
-        # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
-        flag[bufer_in[k_in][i_in + 1]] += 1
         # добавляем в ребенка bufer_in[k_in][i_in + 1]
         children[k][i] = bufer_in[k_in][i_in + 1]
 
     #Если мы его в на этом ТС уже посещали, то нужно взять рандомного
-    #или его уже посетили в каком-то другом
+    #или его уже посетили в каком-то другом маршруте
     elif flag[bufer_in[k_in][i_in + 1]] == 1 or k_in == -1 and i_in == -1:
-        #ищем нового клиента, пока не найдем не посещенного
+        #ищем нового клиента, пока не найдем не посещенного или который есть в другом решении
         next_client = random.randint(0, factory.N-1)
-        while flag[next_client] == 1:
-            next_client = random.randint(0, factory.N - 1)
         # номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
         k_in = NumberCarClientaInSequence(bufer_in, next_client)
         # номер позиции клиента в bufer_in из bufer_out
         i_in = NumberClientaInSequence(bufer_in, next_client, k_in)
 
-        if k_in != -1 and i_in != -1:
-            # это значит что встретили ноль, цикл должен завершится
-            if flag[next_client] == -1:
-                # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
-                flag[next_client] += 1
-                # добавляем в ребенка bufer_in[k_in][i_in + 1]
-                children[k][i] = next_client
+        while flag[next_client] == 1 or k_in == -1 and i_in == -1:
+            next_client = random.randint(0, factory.N - 1)
+            # номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
+            k_in = NumberCarClientaInSequence(bufer_in, next_client)
+            # номер позиции клиента в bufer_in из bufer_out
+            i_in = NumberClientaInSequence(bufer_in, next_client, k_in)
 
-            # смотрим что этот город еще можно вставлять
-            elif flag[next_client] == 0:
-                # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
-                flag[next_client] += 1
-                # добавляем в ребенка bufer_in[k_in][i_in + 1]
-                children[k][i] = next_client
-                # ищем дальше
-                RecursiveSearchSosed(children, k, i + 1, bufer_out, bufer_in, k_in, i_in, flag)
-            else:
-                print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
-            #TODO нужно описать ситуацию, когда цикл закончился, а посетили еще не все
+        # это значит что встретили ноль, цикл должен завершится
+        if flag[next_client] == -1:
+            # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
+            flag[next_client] += 1
+            # добавляем в ребенка bufer_in[k_in][i_in + 1]
+            children[k][i] = next_client
+
+        # смотрим что этот город еще можно вставлять
+        elif flag[next_client] == 0:
+            # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
+            flag[next_client] += 1
+            # добавляем в ребенка bufer_in[k_in][i_in + 1]
+            children[k][i] = next_client
+            # ищем дальше
+            RecursiveSearchSosed(children, k, i + 1, bufer_out, bufer_in, k_in, i_in, flag)
+        else:
+            print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
     else:
         print("ERROR from RecursiveSearchSosed outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
 
@@ -144,6 +146,6 @@ def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
             flag[bufer2[k][1]] += 1
 
             RecursiveSearchSosed(children, k, 2, bufer1, bufer2, k, 1, flag)
-
+    # TODO нужно описать ситуацию, когда цикл закончился, а посетили еще не все
     else:
         print("ERROR from AEX: исключение, произошло не возможное!!!!")
