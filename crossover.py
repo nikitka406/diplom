@@ -22,21 +22,21 @@ def GettingTheSequence(X):
         XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
     return sequenceX2
 
-def CountCarInSequence(sequenceX1):
+#количество посещений в последовательности
+def CountVisitInSequence(sequenceX1):
     for i in range(1, (factory.N+1) * factory.KA):
         if sequenceX1[i - 1] != 0 and sequenceX1[i] == 0 and (sequenceX1[i + 1] == 0 or i == ((factory.N+1) * factory.KA - 1)):
             return i + 1
 
 #уменьшить размерность последовательности
 def LowerTheDimensionOfTheSequence(sequenceX1):
-    size = CountCarInSequence(sequenceX1)
+    size = CountVisitInSequence(sequenceX1)
 
     bufer = [0 for i in range(size)]
 
     for i in range(size):
         bufer[i] = sequenceX1[i]
     return bufer
-
 
 #Переделываем двумерную в одномерную, вида 014856047852098704850
 def TransferX2toX1(sequenceX2):
@@ -69,12 +69,12 @@ def NumberCarClientaInSequence(bufer, client):
     return -1
 
 #номер посещения клиента
-def NumberClientaInSequence(bufer, client, k):
+def NumberClientaInSequence(bufer, client):
     for i in range(factory.N + 1):
-        if bufer[k][i] == client:
+        if bufer[i] == client:
             return i
-    return -1
-
+        else
+            print("ERROR for NumberClientaInSequence: Не нашел номер посещения клиента в последовательности")
 #Возвращает матрицу, где индекс это номер клиента а содержимое, это сколько раз его можно посетить
 def CountOfVisitsPribityClient(bufer):
     #TODO надо что-то сделать с депо, его можно сколько угодно посещать
@@ -87,98 +87,141 @@ def CountOfVisitsPribityClient(bufer):
     return contVisit
 
 #рекурсивный поиск для скрещивания
-#bufer_in- где ищем, bufer_out- откуда ищем
-#bufer_out[k_out][i_out] - последний добавленный клиент в новый маршрут
-def RecursiveSearchSosed(children, k, i, bufer_in, bufer_out, k_out, i_out, flag):
-    #номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
-    k_in = NumberCarClientaInSequence(bufer_in, bufer_out[k_out][i_out])
-    #номер позиции клиента в bufer_in из bufer_out
-    i_in = NumberClientaInSequence(bufer_in, bufer_out[k_out][i_out], k_in)
+#bufer_in- где ищем(Куда едем), bufer_out- откуда ищем
+#bufer_out[i_out] - последний добавленный клиент в новый маршрут
+#i_out - номер последнего добавленног клиента
+#i - номер куда будем добавлять в ребенке
 
-    # Убираем последний добавленный чтобы больше на него не попадаться
-    bufer_out[k_out][i_out] = 0
-    bufer_in[k_in][i_in] = 0
+def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces):
 
-    #смотрим что этот город еще можно вставлять
-    # bufer_in[k_in][i_in + 1] - новый, которого хотим добавить
-    if flag[ bufer_in[k_in][i_in + 1] ] == 0:
-        # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
-        flag [bufer_in[k_in][i_in + 1] ] += 1
-        #добавляем в ребенка bufer_in[k_in][i_in + 1]
-        children[k][i] = bufer_in[k_in][i_in + 1]
+    # #номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
+    # k_in = NumberCarClientaInSequence(bufer_in, bufer_out[i_out])
+    #номер позиции клиента bufer_out[i_out] в bufer_in
+    i_in = NumberClientaInSequence(bufer_in, bufer_out[i_out])
+
+    # # Убираем последний добавленный чтобы больше на него не попадаться
+    # bufer_out[i_out] = 0
+    # bufer_in[i_in] = 0
+
+    #смотрим что этот город еще можно вставлять, в этот маршрут
+    # bufer_in[i_in + 1] - новый, которого хотим добавить
+    if flag[ bufer_in[i_in + 1] ] == 0 and countOfRaces[bufer_in[i_in + 1]] > 0:
+        # ставим флаг
+        flag [bufer_in[i_in + 1] ] += 1
+        flagAll[bufer_in[i_in + 1]] = 1
+        #добавляем в ребенка bufer_in[i_in + 1]
+        children[i] = bufer_in[i_in + 1]
         #ищем дальше
-        RecursiveSearchSosed(children, k, i+1, bufer_out, bufer_in, k_in, i_in+1, flag)
+        RecursiveSearchSosed(children, i+1, bufer_out, bufer_in, i_in+1, flag, flagAll)
 
     #это значит что встретили ноль, цикл должен завершится
-    elif flag[ bufer_in[k_in][i_in + 1] ] == -1:
+    elif flag[ bufer_in[i_in + 1] ] == -1:
+        # ставим влаг
+        flag[bufer_in[i_in + 1]] += 1
+        flagAll[bufer_in[i_in + 1]] = 1
         # добавляем в ребенка bufer_in[k_in][i_in + 1]
-        children[k][i] = bufer_in[k_in][i_in + 1]
+        children[i] = bufer_in[i_in + 1]
 
-    #Если мы его в на этом ТС уже посещали, то нужно взять рандомного
-    #или его уже посетили в каком-то другом маршруте
-    elif flag[bufer_in[k_in][i_in + 1]] == 1 or k_in == -1 and i_in == -1:
-        #ищем нового клиента, пока не найдем не посещенного или который есть в другом решении
+    #Если мы его на этом ТС уже посещали, то нужно взять рандомного
+    #или у него больше не хватает скважин
+    elif flag[bufer_in[i_in + 1]] == 1 or countOfRaces[bufer_in[i_in + 1]] <= 0:
+        #Берем рандомного клиента
         next_client = random.randint(0, factory.N-1)
-        # номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
-        k_in = NumberCarClientaInSequence(bufer_in, next_client)
-        # номер позиции клиента в bufer_in из bufer_out
-        i_in = NumberClientaInSequence(bufer_in, next_client, k_in)
+        # номер позиции клиента bufer_out[i_out] в bufer_in
+        i_in = NumberClientaInSequence(bufer_in, next_client)
 
-        while flag[next_client] == 1 or k_in == -1 and i_in == -1:
+        # ищем нового клиента, пока не найдем не посещенного и у которого остались свободные скважины
+        while flag[next_client] == 1 or countOfRaces[bufer_in[i_in + 1]] <= 0:
             next_client = random.randint(0, factory.N - 1)
-            # номер машины в bufer_in, которая обслуживает последнего добавленного клиента в ребенка из bufer_out
-            k_in = NumberCarClientaInSequence(bufer_in, next_client)
-            # номер позиции клиента в bufer_in из bufer_out
-            i_in = NumberClientaInSequence(bufer_in, next_client, k_in)
+            # номер позиции клиента bufer_out[i_out] в bufer_in
+            i_in = NumberClientaInSequence(bufer_in, next_client)
 
         # это значит что встретили ноль, цикл должен завершится
         if flag[next_client] == -1:
-            # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
+            #ставим влаг
             flag[next_client] += 1
-            # добавляем в ребенка bufer_in[k_in][i_in + 1]
-            children[k][i] = next_client
+            flagAll[bufer_in[i_in + 1]] = 1
+            # добавляем в ребенка bufer_in[i_in + 1]
+            children[i] = next_client
 
         # смотрим что этот город еще можно вставлять
         elif flag[next_client] == 0:
-            # добавляем в ребенка bufer_in[k_in][i_in + 1], ставим влаг
+            # ставим влаг
             flag[next_client] += 1
-            # добавляем в ребенка bufer_in[k_in][i_in + 1]
-            children[k][i] = next_client
+            flagAll[bufer_in[i_in + 1]] = 1
+            # добавляем в ребенка bufer_in[i_in + 1]
+            children[i] = next_client
             # ищем дальше
-            RecursiveSearchSosed(children, k, i + 1, bufer_out, bufer_in, k_in, i_in, flag)
+            RecursiveSearchSosed(children, i + 1, bufer_out, bufer_in, i_in, flag, flagAll)
         else:
             print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
     else:
         print("ERROR from RecursiveSearchSosed outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
 
-
-
 #кроссовер AEX
 def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
+    # первый индекс это номер машины, второй это последовательность
+    children = [0 for i in range((factory.N+1) * factory.KA)]  # результат скрещивания (РЕБЕНОК)
+
     #сохроняем последовательности чтобы не испортить
     bufer1 = sequence1
     bufer2 = sequence2
 
     #кол-во используемых машин в каждом решение
-    size1 = AmountCarUsed(Y1)
-    size2 = AmountCarUsed(Y2)
-    # первы индекс это номер машины, второй это последовательность
-    children = [[0 for j in range(factory.N + 1)] for i in range(factory.KA)]  # результат скрещивания (РЕБЕНОК)
+    size1 = CountVisitInSequence(sequence1)
+    size2 = CountVisitInSequence(sequence2)
+
+    # флаг, для посещенных городов в заключительном решении
+    flagAll = [0 for j in range(factory.N)]
+    #сколько раз можно заехать к каждому
+    countOfRaces = factory.wells
 
     #определяем по кому будем делать цикл
     if size1 >= size2:
-        for k in range(size1):
-            #флаг, для посещенных городов в одном маршруте(одной машиной)
-            flag = [0 for j in range(factory.N)]
+        # флаг, для посещенных городов в одном маршруте(одной машиной)
+        flag = [0 for j in range(factory.N)]
+        flag[0] = -2
+
+        #Добавляем первые два города в ребенка
+        children[0] = bufer1[0]
+        children[1] = bufer1[1]
+
+        #Расставляем флажки локально для первой машины и для общего решения
+        flag[bufer1[0]] += 1
+        flag[bufer1[1]] += 1
+        flagAll[bufer1[0]] = 1
+        flagAll[bufer1[1]] = 1
+        #на одну мащину к нему теперь может приехать меньше
+        countOfRaces[bufer1[1]] -= 1
+
+        #Число задействованных машин в ребенке
+        k = 0
+        #Индекс который идет по ребенку
+        j = 2
+
+        #Для первого добавления запустим без цикла
+        RecursiveSearchSosed(children, j, bufer2, bufer1, 1, flag, flagAll)
+        #Обнуляем флаг для следующей машины
+        for i in range(factory.N):
+            flag[i] = 0
+        flag[0] = -2
+
+        #Добавляем еще одну машину + сдвигаем индекс последовательности
+        k += 1
+        j += 1
+
+        #Пока есть свободные не арендованные машины или остались не посещенные города
+        while k <= factory.K or sum(flagAll) <= factory.N:
+
+            RecursiveSearchSosed(children, 2, bufer2, bufer1, 1, flag, flagAll)
+
+            for i in range(factory.N):
+                flag[i] = 0
             flag[0] = -2
+            k += 1
+            j += 1
 
-            children[k][0] = bufer1[k][0]
-            children[k][1] = bufer1[k][1]
 
-            flag[bufer1[k][0]] += 1
-            flag[bufer1[k][1]] += 1
-
-            RecursiveSearchSosed(children, k, 2, bufer2, bufer1, k, 1, flag)
     elif size2 < size1:
         for k in range(size2):
             # флаг, для посещенных городов в одном маршруте(одной машиной)
