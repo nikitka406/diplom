@@ -2,17 +2,63 @@ import factory
 from function import *
 import random
 
-#преобразование матрицы Х в последовательность посещения городов
+#преобразование матрицы Х в последовательность посещения городов,
 #bul - порядок посещения
 #i-откуда мы сейчас будем уезжать
 #k-номер машины
-def XDisplayInTheSequence(x, bufer, i, k, bul):
+def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
     for j in range(factory.N):
         if x[i][j][k] == 1:
             bul += 1
             bufer[k][bul] = j
             if j != 0:
-                XDisplayInTheSequence(x, bufer, j, k, bul)
+                XDisplayInTheSequenceX2(x, bufer, j, k, bul)
+
+#Получаем двумерную последовательность
+def GettingTheSequence(X):
+    #factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
+    sequenceX2 = [[0 for i in range(factory.N+1)] for j in range(factory.KA)]
+    for k in range(factory.KA):
+        XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
+    return sequenceX2
+
+def CountCarInSequence(sequenceX1):
+    for i in range(1, (factory.N+1) * factory.KA):
+        if sequenceX1[i - 1] != 0 and sequenceX1[i] == 0 and (sequenceX1[i + 1] == 0 or i == ((factory.N+1) * factory.KA - 1)):
+            return i + 1
+
+#уменьшить размерность последовательности
+def LowerTheDimensionOfTheSequence(sequenceX1):
+    size = CountCarInSequence(sequenceX1)
+
+    bufer = [0 for i in range(size)]
+
+    for i in range(size):
+        bufer[i] = sequenceX1[i]
+    return bufer
+
+
+#Переделываем двумерную в одномерную, вида 014856047852098704850
+def TransferX2toX1(sequenceX2):
+    sequenceX1 = [0 for i in range((factory.N+1) * factory.KA)]
+    j = 1
+    for k in range(factory.KA):
+        for i in range(1, factory.N-1):
+            print(i)
+            #случай когда находишься на цифре и следующая цифра
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
+                sequenceX1[j] = sequenceX2[k][i]
+                j += 1
+            # случай когда находишься на цифре и следующий ноль
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] == 0:
+                sequenceX1[j] = sequenceX2[k][i]
+                j += 1
+            # случай когда находишься на нуле и предыдущая цифра
+            if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
+                sequenceX1[j] = sequenceX2[k][i]
+                j += 1
+    sequenceX1 = LowerTheDimensionOfTheSequence(sequenceX1)
+    return sequenceX1
 
 #номер машины которая обслуживает клиента
 def NumberCarClientaInSequence(bufer, client):
