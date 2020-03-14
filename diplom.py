@@ -39,3 +39,4 @@ for k in range(factory.KA):
     print("\n")
 print("\n")
 print(sequenceX1)
+AddOneCell(sequenceX1)
