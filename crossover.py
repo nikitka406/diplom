@@ -15,7 +15,6 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
             if j != 0:
                 XDisplayInTheSequenceX2(x, bufer, j, k, bul)
 
-
 # Получаем двумерную последовательность
 def GettingTheSequence(X):
     # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
@@ -24,14 +23,12 @@ def GettingTheSequence(X):
         XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
     return sequenceX2
 
-
 # количество посещений в последовательности
 def CountVisitInSequence(sequenceX1):
     for i in range(1, (factory.N + 1) * factory.KA):
         if sequenceX1[i - 1][0] != 0 and sequenceX1[i][0] == 0 and (
                 sequenceX1[i + 1][0] == 0 or i == ((factory.N + 1) * factory.KA - 1)):
             return i + 1
-
 
 # уменьшить размерность последовательности
 def LowerTheDimensionOfTheSequence(sequenceX1):
@@ -43,7 +40,6 @@ def LowerTheDimensionOfTheSequence(sequenceX1):
         bufer[i] = sequenceX1[i]
     return bufer
 
-
 # Добавление еще одной ячейки к последовательности
 def AddOneCell(sequenceX1):
     bufer = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]
@@ -51,7 +47,6 @@ def AddOneCell(sequenceX1):
     for i in range(factory.N):
         bufer[i][0] = sequenceX1[i]
     return bufer
-
 
 # Переделываем двумерную в одномерную, вида 014856047852098704850
 def TransferX2toX1(sequenceX2):
@@ -76,7 +71,6 @@ def TransferX2toX1(sequenceX2):
     sequenceX1 = AddOneCell(sequenceX1)
     return sequenceX1
 
-
 # номер машины которая обслуживает клиента
 def NumberCarClientaInSequence(bufer, client):
     for k in range(factory.KA):
@@ -85,7 +79,6 @@ def NumberCarClientaInSequence(bufer, client):
                 return k
     return -1
 
-
 # номер посещения клиента
 def NumberClientaInSequence(bufer, client):
     for i in range(factory.N + 1):
@@ -93,7 +86,6 @@ def NumberClientaInSequence(bufer, client):
             return i
         else:
             print("ERROR for NumberClientaInSequence: Не нашел номер посещения клиента в последовательности")
-
 
 # Возвращает матрицу, где индекс это номер клиента а содержимое, это сколько раз его можно посетить
 def CountOfVisitsPribityClient(bufer):
@@ -106,26 +98,18 @@ def CountOfVisitsPribityClient(bufer):
                     contVisit[client] += 1
     return contVisit
 
-
 # выбираю другое ребро но из начала c таким же номером
 def AnotherEdgeWithTheSameBeginning(bufer_in, new_start, flag, countOfRaces):
     p = -1
     for i in range((factory.N + 1) * factory.KA):
         # bufer_in[i][0] == new_start нашли кокой-то выезд из такого же города
         # bufer_in[i][1] == 0 мы из него еще не выезжали
-        # bufer_in[i+1][0] != 0 едем из него не в ноль  НЕПРАВИЛЬНО
         # flag[ bufer_in[i][0] ] == 0 в этом маршруте еще не посещали
         # countOfRaces[bufer_in[i][0]] > 0 есть свободные скважины
-        if bufer_in[i][0] == new_start and bufer_in[i][1] == 0 and bufer_in[i + 1][0] != 0 and flag[
+        if bufer_in[i][0] == new_start and bufer_in[i][1] == 0 and flag[
             bufer_in[i + 1][0]] == 0 and countOfRaces[bufer_in[i + 1][0]] > 0:
             return i
-        # все тоже самое только потом едем в ноль
-        # просто запоминаем индекс в псоледовательности
-        elif bufer_in[i][0] == new_start and bufer_in[i][1] == 0 and bufer_in[i + 1][0] == 0 and flag[
-            bufer_in[i][0]] == 0 and countOfRaces[bufer_in[i][0]] > 0:
-            p = i
     return p
-
 
 # рекурсивный поиск для скрещивания
 # bufer_in- где ищем(Куда едем), bufer_out- откуда идем
@@ -143,15 +127,25 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
     # и что у него есть свободные скважины
     # и что конкретно это ребро мы еще не использовали
     # bufer_in[i_in + 1] - новый, которого хотим добавить
-    if flag[bufer_in[i_in + 1][0]] == 0 and countOfRaces[bufer_in[i_in + 1][0]] > 0 and bufer_in[i_in][1] == 0:
-        # ставим флаг
-        flag[bufer_in[i_in + 1][0]] = 1
-        flagAll[bufer_in[i_in + 1][0]] = 1
-        countOfRaces[bufer_in[i_in + 1][0]] -= 1
+    #Здесь все заебись!!!!!!!!!!
+    if flag[bufer_in[i_in + 1][0]] == 0 and countOfRaces[bufer_in[i_in + 1][0]] \
+            > 0 and bufer_in[i_in][1] == 0:
         # добавляем в ребенка bufer_in[i_in + 1]
         children[i][0] = bufer_in[i_in + 1][0]
+
+        #Ставим флаг в последовательности в которой искали ребро в доп ячееки
+        bufer_in[i_in][1] = 1
+
+        # ставим флажки
+        flag[bufer_in[i_in + 1][0]] = 1
+        flagAll[bufer_in[i_in + 1][0]] = 1
+
+        #Уменьшаем кол-во машин которые к этому клиенту могут приехать
+        countOfRaces[bufer_in[i_in + 1][0]] -= 1
+
         # ищем дальше
-        RecursiveSearchSosed(children, i + 1, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces)
+        i += 1
+        RecursiveSearchSosed(children, i, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces)
 
     # если конкретно это ребро уже использовали, то
     elif bufer_in[i_in][1] != 0:
@@ -159,56 +153,103 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
         i_in_buf = AnotherEdgeWithTheSameBeginning(bufer_in, bufer_in[i_in][0], flag, countOfRaces)
         # Если нашли такой индекс
         if i_in_buf != -1:
-            # ставим флаг
-            flag[bufer_in[i_in_buf + 1][0]] = 1
-            flagAll[bufer_in[i_in_buf + 1][0]] = 1
-            countOfRaces[bufer_in[i_in_buf + 1][0]] -= 1
             # добавляем в ребенка bufer_in[i_in + 1]
             children[i][0] = bufer_in[i_in_buf + 1][0]
+
+            # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+            bufer_in[i_in_buf][1] = 1
+
+            # ставим флажки
+            flag[bufer_in[i_in_buf + 1][0]] = 1
+            flagAll[bufer_in[i_in_buf + 1][0]] = 1
+
+            # Уменьшаем кол-во машин которые к этому клиенту могут приехать
+            countOfRaces[bufer_in[i_in_buf + 1][0]] -= 1
+
             # ищем дальше
             RecursiveSearchSosed(children, i + 1, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces)
 
-    # это значит что встретили ноль, цикл должен завершится
-    elif flag[bufer_in[i_in + 1][0]] == -1:
-        # ставим влаг
-        flag[bufer_in[i_in + 1][0]] += 1
-        flagAll[bufer_in[i_in + 1][0]] = 1
-        # добавляем в ребенка bufer_in[k_in][i_in + 1]
-        children[i][0] = bufer_in[i_in + 1][0]
-
     # Если мы его на этом ТС уже посещали, то нужно взять рандомного
     # или у него больше не хватает скважин
-    elif flag[bufer_in[i_in + 1][0]] == 1 or countOfRaces[bufer_in[i_in + 1][0]] <= 0:
+    elif flag[bufer_in[i_in + 1][0]] == 1 or countOfRaces[bufer_in[i_in + 1][0]] <= 0 or bufer_in[i_in][1] != 0:
+        # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+        bufer_in[i_in][1] = 1
+
         # Берем рандомного клиента
         next_client = random.randint(0, factory.N - 1)
-        # номер позиции клиента bufer_out[i_out] в bufer_in
+        # номер позиции клиента next_client в bufer_in
         i_in = NumberClientaInSequence(bufer_in, next_client)
 
         # ищем нового клиента, пока не найдем не посещенного и у которого остались свободные скважины
-        while flag[next_client] == 1 or countOfRaces[bufer_in[i_in + 1][0]] <= 0:
+        # Здесь все заебись!!!!!!!!!!
+        count = 0
+        while (flag[next_client] == 1 or countOfRaces[next_client] <= 0 or bufer_in[i_in][1] != 0) and count <= factory.N:
+            #счетчик, чтобы вайл не был бесконечным
+            count += 1
             next_client = random.randint(0, factory.N - 1)
             # номер позиции клиента bufer_out[i_out] в bufer_in
             i_in = NumberClientaInSequence(bufer_in, next_client)
 
-        # это значит что встретили ноль, цикл должен завершится
-        if flag[next_client] == -1:
-            # ставим влаг
-            flag[next_client] += 1
-            flagAll[bufer_in[i_in + 1][0]] = 1
-            # добавляем в ребенка bufer_in[i_in + 1]
-            children[i][0] = next_client
+        #Означает что нашли рандомного
+        if count <= factory.N:
+            # это значит что встретили ноль, цикл должен завершится
+            if flag[next_client] == -1:
+                # добавляем в ребенка bufer_in[i_in + 1]
+                children[i][0] = next_client
 
-        # смотрим что этот город еще можно вставлять
-        elif flag[next_client] == 0:
-            # ставим влаг
-            flag[next_client] += 1
-            flagAll[bufer_in[i_in + 1][0]] = 1
-            # добавляем в ребенка bufer_in[i_in + 1]
-            children[i][0] = next_client
-            # ищем дальше
-            RecursiveSearchSosed(children, i + 1, bufer_out, bufer_in, i_in, flag, flagAll)
+                # ставим влаг
+                flag[next_client] = 1
+                flagAll[next_client] = 1
+
+            # смотрим что этот город еще можно вставлять
+            # Здесь все заебись!!!!!!!!!!
+            elif flag[next_client] == 0:
+                # добавляем в ребенка bufer_in[i_in + 1]
+                children[i][0] = next_client
+
+                # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+                bufer_in[i_in][1] = 1
+
+                # ставим флажки
+                flag[next_client] = 1
+                flagAll[next_client] = 1
+
+                # Уменьшаем кол-во машин которые к этому клиенту могут приехать
+                countOfRaces[next_client] -= 1
+
+                # ищем дальше
+                i += 1
+                RecursiveSearchSosed(children, i, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces)
+            else:
+                print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
+
+        #Означает что вывалились из вайла, потому что долго ждали, поэтому возвращаем машину в депо
         else:
-            print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
+            # добавляем в ребенка bufer_in[i_in + 1]
+            children[i][0] = 0
+
+            # # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+            # bufer_in[i_in][1] = 1
+
+            # ставим влаг
+            flag[0] = 1
+            flagAll[0] = 1
+
+
+    # это значит что встретили ноль, цикл должен завершится
+    # Здесь все заебись!!!!!!!!!!
+    elif flag[bufer_in[i_in + 1][0]] == -1:
+        # добавляем в ребенка bufer_in[k_in][i_in + 1]
+        children[i][0] = bufer_in[i_in + 1][0]
+
+        # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+        bufer_in[i_in][1] = 1
+
+        # ставим влаг
+        flag[bufer_in[i_in + 1][0]] = 1
+        flagAll[bufer_in[i_in + 1][0]] = 1
+
+
     else:
         print("ERROR from RecursiveSearchSosed outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
 
@@ -216,6 +257,7 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
 # кроссовер AEX
 def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
     # первый индекс это номер машины, второй это последовательность
+    # Здесь все заебись!!!!!!!!!!
     children = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]  # результат скрещивания (РЕБЕНОК)
 
     # сохроняем последовательности чтобы не испортить
@@ -236,8 +278,6 @@ def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
         # флаг, для посещенных городов в одном маршруте(одной машиной)
         flag = [0 for j in range(factory.N)]
         flag[0] = -2
-        # посетили или нет в этом маршруте клиента?
-        visitThisRoute = [0 for j in range(factory.N)]
 
         # Добавляем первые два города в ребенка
         children[0][0] = bufer1[0][0]
@@ -273,7 +313,7 @@ def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
         # Пока есть свободные не арендованные машины или остались не посещенные города
         while k <= factory.K or sum(flagAll) <= factory.N:
 
-            RecursiveSearchSosed(children, j, bufer2, bufer1, 1, flag, flagAll)
+            RecursiveSearchSosed(children, j, bufer2, bufer1, 1, flag, flagAll, countOfRaces)
 
             for i in range(factory.N):
                 flag[i] = 0
