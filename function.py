@@ -406,6 +406,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
         sosedK = NumberCarClienta(y, sosed)
 
     print("К соседу ", sosed)
+    #TODO поставить sosedK
     print("На машине ", NumberCarClienta(y, sosed))
     OperatorJoin(X, Y, Sresh, A, client, sosed)
     X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
