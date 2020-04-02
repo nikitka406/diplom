@@ -2,6 +2,25 @@ import factory
 from function import *
 import random
 
+#Создание последовательности для каждого решения
+def CreateSequence(X):
+    #Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
+    sequenceX1 = [0 for n in range(factory.population)]
+    sequenceX2 = [0 for n in range(factory.population)]
+
+    for n in range(factory.population):
+        # Интерпритируем матрицу Х на двумерный массив
+        sequenceX2[n] = GettingTheSequence(X[n])
+        print(n)
+        for k in range(factory.KA):
+            for i in range(factory.N + 1):
+                print(sequenceX2[n][k][i], end=" ")
+            print("\n")
+        sequenceX1[n] = TransferX2toX1(sequenceX2[n])
+        print(sequenceX1[n], "\n")
+
+
+    return sequenceX1
 
 # преобразование матрицы Х в последовательность посещения городов,
 # bul - порядок посещения
@@ -16,7 +35,17 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
                 XDisplayInTheSequenceX2(x, bufer, j, k, bul)
 
 
-# Получаем двумерную последовательность
+# Получаем двумерную последовательность вида
+# 0 3 0 0 0 0 0 0 0 0
+#
+# 0 5 0 0 0 0 0 0 0 0
+#
+# 0 7 1 0 0 0 0 0 0 0
+#
+# 0 2 6 4 8 0 0 0 0 0
+#
+# 0 9 0 0 0 0 0 0 0 0
+#Заебись, работает!!!
 def GettingTheSequence(X):
     # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
     sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(factory.KA)]
@@ -25,15 +54,19 @@ def GettingTheSequence(X):
     return sequenceX2
 
 
-# количество посещений в последовательности
+# количество посещений в последовательности (не нулевых элементов)
+#Заебись, работает!!!
 def CountVisitInSequence(sequenceX1):
-    for i in range(1, (factory.N + 1) * factory.KA):
-        if sequenceX1[i - 1][0] != 0 and sequenceX1[i][0] == 0 and (
-                sequenceX1[i + 1][0] == 0 or i == ((factory.N + 1) * factory.KA - 1)):
-            return i + 1
+    for i in range(1, (factory.N + 1) * factory.KA - 1):
+        # если дошли до нулевого, но предэдущий не нулевой
+        # а следующий нулевой или мы сейчас на предпоследнем
+        if sequenceX1[i - 1] != 0 and sequenceX1[i] == 0 and (
+                sequenceX1[i + 1] == 0 or i == ((factory.N + 1) * factory.KA - 1)):
+            return i+1
 
 
 # уменьшить размерность последовательности
+#Заебись, работает!!!
 def LowerTheDimensionOfTheSequence(sequenceX1):
     size = CountVisitInSequence(sequenceX1)
 
@@ -45,6 +78,7 @@ def LowerTheDimensionOfTheSequence(sequenceX1):
 
 
 # Добавление еще одной ячейки к последовательности
+#Заебись, работает!!!
 def AddOneCell(sequenceX1):
     bufer = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]
     # ячейка означает, что из этого конкретного города на этой машине нельзя ехать в следующий
@@ -54,12 +88,13 @@ def AddOneCell(sequenceX1):
 
 
 # Переделываем двумерную в одномерную, вида 014856047852098704850
+#Заебись, работает!!!
 def TransferX2toX1(sequenceX2):
     sequenceX1 = [0 for i in range((factory.N + 1) * factory.KA)]
     j = 1
     for k in range(factory.KA):
         for i in range(1, factory.N - 1):
-            print(i)
+            # print(i)
             # случай когда находишься на цифре и следующая цифра
             if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
                 sequenceX1[j] = sequenceX2[k][i]
@@ -72,8 +107,11 @@ def TransferX2toX1(sequenceX2):
             if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
                 sequenceX1[j] = sequenceX2[k][i]
                 j += 1
+    #уменьщаем размерность последовательности (убераем нули вконце)
     sequenceX1 = LowerTheDimensionOfTheSequence(sequenceX1)
+    #ДОбавляем еще одну ячейку к каждому элементу последовательности
     sequenceX1 = AddOneCell(sequenceX1)
+
     return sequenceX1
 
 
