@@ -1,10 +1,78 @@
 import random
 import factory
+import copy
+
+
+# Сохраняем стартовое решение в файл
+def SaveStartSolution(local_x, local_y, local_s, local_a):
+    file = open('StartSolution.txt', 'w')
+
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            for k in range(factory.KA):
+                file.write(str(local_x[i][j][k])+' ')
+            file.write("\n")
+        # file.write("\n")
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(local_y[i][k])+' ')
+        file.write("\n")
+    # Печатаем в файл S
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(local_s[i][k])+' ')
+        file.write("\n")
+    # Печатаем в файл A
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(local_a[i][k])+' ')
+        file.write("\n")
+
+    file.close()
+
+
+# Сохраняем стартовое решение в файл
+def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
+    file = open('StartSolution.txt', 'r')
+    # прочитали весь файл, получился список из строк файла
+    line = file.readlines()
+
+    index = 0
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            # for k in range(factory.KA):
+            local_x[i][j] = line[index].split()
+            for k in range(len(local_x[i][j])):
+                local_x[i][j][k] = int(local_x[i][j][k])
+            index += 1
+
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        local_y[i] = line[index].split()
+        for k in range(len(local_y[i])):
+            local_y[i][k] = int(local_y[i][k])
+        index += 1
+    # Печатаем в файл S
+    for i in range(factory.N):
+        local_s[i] = line[index].split()
+        for k in range(len(local_s[i])):
+            local_s[i][k] = float(local_s[i][k])
+        index += 1
+    # Печатаем в файл A
+    for i in range(factory.N):
+        local_a[i] = line[index].split()
+        for k in range(len(local_a[i])):
+            local_a[i][k] = float(local_a[i][k])
+        index += 1
+    file.close()
 
 
 # красивая печать
 def BeautifulPrint(X, Y, Sresh, A):
-    for k in range(factory.KA):
+    for k in range(len(X[0][0])):
         print('Номер машины ', k)
         for i in range(factory.N):
             for j in range(factory.N):
@@ -58,7 +126,7 @@ def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function
     file = open('population.txt', 'a')
     file.write('Номер решения ' + str(number_solution))
     file.write("\n")
-    for k in range(factory.KA):
+    for k in range(len(lokal_X[0][0])):
         file.write('Номер машины ' + str(k))
         file.write("\n")
         for i in range(factory.N):
@@ -112,6 +180,25 @@ def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function
     file.close()
 
 
+# # Переводит лист в кортеж и наоборот
+# def InterpretatorListTuple(x, y, s, a, case):
+#     if case == 'tuple':
+#         # x = tuple(x)
+#         for i in range(factory.N):
+#             for j in range(factory.N):
+#                 x[i][j] = tuple(x[i][j])
+#         y = tuple(y)
+#         s = tuple(s)
+#         a = tuple(a)
+#     elif case == 'list':
+#         x = list(x)
+#         y = list(y)
+#         s = list(s)
+#         a = list(a)
+#     else:
+#         print("ERROR from InterpritatorListTuple: неверное значение переменной case")
+#     return x, y, s, a
+
 # Считаем кол-во используемых ТС
 def AmountCarUsed(lokal_y):
     summa = 0  # счетчик
@@ -126,12 +213,22 @@ def AmountCarUsed(lokal_y):
 
 
 # копирование решения
-def CopyingSolution(lokal_x, lokal_y, lokal_s, lokal_a):
-    lokal_X = lokal_x.copy()
-    lokal_Y = lokal_y.copy()
-    lokal_Sresh = lokal_s.copy()
-    lokal_A = lokal_a.copy()
-    return lokal_X, lokal_Y, lokal_Sresh, lokal_A
+def CopyingSolution(local_x, local_y, local_s, local_a):
+    local_X = local_x.copy()
+    # local_X = [[[0 for k in range(len(local_x[0][0]))] for j in range(factory.N)] for i in
+    #      range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    # # for k in range(factory.KA):
+    # for i in range(factory.N):
+    #     local_X[i] = list(local_x[i])
+    #     for j in range(factory.N):
+    #             local_X[i][j][k] = local_x[i][j][k]
+    local_Y = local_y.copy()
+    local_S = local_s.copy()
+    local_A = local_a.copy()
+    return local_X, local_Y, local_S, local_A
+
+
+
 
 
 # подсчет значения целевой функции
@@ -216,9 +313,11 @@ def Rewriting(lokal_Y, k, m, flag):
                 lokal_Y[i][j][m] = 0
 
 
+# TODO делит почему портит стартовое решение
 # удаляем/уменьшаем размерность с помощью не используемых машин
 def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
-    # todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные) под вопросом?????
+    # todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные) под
+    #  вопросом?????
     for k in range(factory.KA):
         summa1 = 0  # Обнуляем счетчик
         for j in range(1, factory.N):
@@ -229,7 +328,7 @@ def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
                     summa2 = 0
                     for i in range(factory.N):
                         summa2 += lokal_y[i][m]
-                    if summa2 != 0:  # сохзанем ее в первый пустой маршрут
+                    if summa2 != 0:  # сохранем ее в первый пустой маршрут
                         Rewriting(lokal_y, k, m, "1")
                         Rewriting(lokal_s, k, m, "1")
                         Rewriting(lokal_a, k, m, "1")
@@ -237,12 +336,15 @@ def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
                         break
     factory.KA = AmountCarUsed(lokal_y)
     if factory.KA >= factory.K - 1:
-        # создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто прировнять
+        # создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто
+        # прировнять
         lokal_X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
-             range(factory.N)]  # едет или нет ТС с номером К из города I в J
+                   range(factory.N)]  # едет или нет ТС с номером К из города I в J
         lokal_Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
-        lokal_Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
-        lokal_A = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+        lokal_Sresh = [[0 for k in range(factory.KA)] for i in
+                       range(factory.N)]  # время работы ТС c номером К на объекте i
+        lokal_A = [[0 for k in range(factory.KA)] for i in
+                   range(factory.N)]  # время прибытия ТС с номером К на объект i
         for k in range(factory.KA):
             for i in range(factory.N):
                 for j in range(factory.N):
@@ -261,8 +363,8 @@ def SearchTheBestSoseda(client):
     neighbor = 0  # старый сосед
     bufer = factory.d[0][client]  # расстояние от старого сосед адо клиента
     for i in range(factory.N):
-        if bufer >= factory.d[i][
-            client] and i != client:  # ищим мин расстояние до клиента с учетом что новый сосед не клиент
+        if bufer >= factory.d[i][client] and i != client:
+            # ищим мин расстояние до клиента с учетом что новый сосед не клиент
             bufer = factory.d[i][client]
             neighbor = i
     return neighbor
@@ -369,11 +471,12 @@ def OperatorJoin(x, y, s, a, client, sosed):
     sosedLeft = SearchSosedLeftOrRight(x, y, sosed, "left")  # левый сосед соседа
     sosedRight = SearchSosedLeftOrRight(x, y, sosed, "right")  # правый сосед соседа
 
-    # смотрим временные затраты так как время напрямую связано с км
-    #     zatratLeft = factory.t[sosedLeft][client] + factory.t[client][sosed] + factory.t[sosed][sosedRight] #временные затраты присунуть слева
-    #     zatratRight = factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
+    # смотрим временные затраты так как время напрямую связано с км zatratLeft = factory.t[sosedLeft][client] +
+    # factory.t[client][sosed] + factory.t[sosed][sosedRight] #временные затраты присунуть слева zatratRight =
+    # factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
 
-    # Если время затрат слева больше чем справа и время окончания слева меньше чем у клиента и меньше чем справа
+    # TODO написать рандом на вставление слева или справа
+    # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
     if factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
         s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
@@ -386,6 +489,7 @@ def OperatorJoin(x, y, s, a, client, sosed):
         x[sosed][client][sosedK] = 1
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
+
     elif factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]:
         s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
@@ -396,7 +500,10 @@ def OperatorJoin(x, y, s, a, client, sosed):
         x[sosedLeft][sosed][sosedK] = 0
         x[sosedLeft][client][sosedK] = 1
         x[client][sosed][sosedK] = 1
-        y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
+        y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+
+    else:
+        print("EXCEPTION from OperatorJoin: не получилось вставить ни слева ни справа из-за временных окон сверху")
 
 
 # штрафнвя функция
@@ -404,18 +511,21 @@ def PenaltyFunction(s, a):
     penalty_sum = 0
     for i in range(factory.N):
         for k in range(factory.KA):
-            if a[i][k] + s[i][k] > factory.l[
-                i]:  # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
+            if a[i][k] + s[i][k] > factory.l[i]:
+                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
     return penalty_sum
 
 
 # переставляем клиента к новому соседу, локальный поиск
 def JoiningClientToNewSosed(x, y, s, a, target_function):
+    # Берем стартовое решение, потому что какой-то пиздюк его испортил
+    ReadStartSolutionOfFile(x, y, s, a)
+
     # копируем чтобы не испортить решение
     X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
-    ####### Bыбираем клиента #############
+    # Bыбираем клиента
     client = random.randint(1, (
             factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
 
@@ -428,8 +538,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
         sosedK = NumberCarClienta(y, sosed)
 
     print("К соседу ", sosed)
-    # TODO поставить sosedK
-    print("На машине ", NumberCarClienta(y, sosed))
+    print("На машине ", sosedK)
     OperatorJoin(X, Y, Sresh, A, client, sosed)
     X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
@@ -438,15 +547,18 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
     print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
     if window_time_up(A, Sresh, Y) == 0:
         if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
+            print("NOTIFICATION from JoiningClientToNewSosed: вставили с нарушением временного окна")
             target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-            print(target_function)
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
         else:
             print(
                 "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
-    if VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+    elif VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+        print("NOTIFICATION from JoiningClientToNewSosed: вставили без нарушений ограничений")
         target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
         x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+    else:
+        print("ERROR from JoiningClientToNewSosed: не получилось переставить, что-то пошло нет")
     return target_function
 
 
