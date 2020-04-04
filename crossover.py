@@ -2,9 +2,10 @@ import factory
 from function import *
 import random
 
-#Создание последовательности для каждого решения
+
+# Создание последовательности для каждого решения
 def CreateSequence(X):
-    #Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
+    # Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
     sequenceX1 = [0 for n in range(factory.population)]
     sequenceX2 = [0 for n in range(factory.population)]
 
@@ -19,8 +20,8 @@ def CreateSequence(X):
         sequenceX1[n] = TransferX2toX1(sequenceX2[n])
         print(sequenceX1[n], "\n")
 
-
     return sequenceX1
+
 
 # преобразование матрицы Х в последовательность посещения городов,
 # bul - порядок посещения
@@ -45,7 +46,7 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
 # 0 2 6 4 8 0 0 0 0 0
 #
 # 0 9 0 0 0 0 0 0 0 0
-#Заебись, работает!!!
+# Заебись, работает!!!
 def GettingTheSequence(X):
     # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
     sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(factory.KA)]
@@ -55,18 +56,18 @@ def GettingTheSequence(X):
 
 
 # количество посещений в последовательности (не нулевых элементов)
-#Заебись, работает!!!
+# Заебись, работает!!!
 def CountVisitInSequence(sequenceX1):
     for i in range(1, (factory.N + 1) * factory.KA - 1):
         # если дошли до нулевого, но предэдущий не нулевой
         # а следующий нулевой или мы сейчас на предпоследнем
         if sequenceX1[i - 1] != 0 and sequenceX1[i] == 0 and (
                 sequenceX1[i + 1] == 0 or i == ((factory.N + 1) * factory.KA - 1)):
-            return i+1
+            return i + 1
 
 
 # уменьшить размерность последовательности
-#Заебись, работает!!!
+# Заебись, работает!!!
 def LowerTheDimensionOfTheSequence(sequenceX1):
     size = CountVisitInSequence(sequenceX1)
 
@@ -78,7 +79,7 @@ def LowerTheDimensionOfTheSequence(sequenceX1):
 
 
 # Добавление еще одной ячейки к последовательности
-#Заебись, работает!!!
+# Заебись, работает!!!
 def AddOneCell(sequenceX1):
     bufer = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]
     # ячейка означает, что из этого конкретного города на этой машине нельзя ехать в следующий
@@ -88,7 +89,7 @@ def AddOneCell(sequenceX1):
 
 
 # Переделываем двумерную в одномерную, вида 014856047852098704850
-#Заебись, работает!!!
+# Заебись, работает!!!
 def TransferX2toX1(sequenceX2):
     sequenceX1 = [0 for i in range((factory.N + 1) * factory.KA)]
     j = 1
@@ -107,9 +108,9 @@ def TransferX2toX1(sequenceX2):
             if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
                 sequenceX1[j] = sequenceX2[k][i]
                 j += 1
-    #уменьщаем размерность последовательности (убераем нули вконце)
+    # уменьщаем размерность последовательности (убераем нули вконце)
     sequenceX1 = LowerTheDimensionOfTheSequence(sequenceX1)
-    #ДОбавляем еще одну ячейку к каждому элементу последовательности
+    # ДОбавляем еще одну ячейку к каждому элементу последовательности
     sequenceX1 = AddOneCell(sequenceX1)
 
     return sequenceX1
@@ -146,10 +147,10 @@ def CountOfVisitsPribityClient(bufer):
 
 
 # выбираю другое ребро но из начала c таким же номером
-#вроде тоже все заебись!!!!
+# вроде тоже все заебись!!!!
 def AnotherEdgeWithTheSameBeginning(bufer_in, new_start, flag, countOfRaces):
     p = -1
-    #TODO for i in bufer_in:
+    # TODO for i in bufer_in:
     for i in range((factory.N + 1) * factory.KA):
         # bufer_in[i][0] == new_start нашли кокой-то выезд из такого же города
         # bufer_in[i][1] == 0 мы из него еще не выезжали
@@ -160,23 +161,25 @@ def AnotherEdgeWithTheSameBeginning(bufer_in, new_start, flag, countOfRaces):
             return i
     return p
 
+
 def RandNotVisitClient(countOfRaces):
-    #считаем сколько свободных скважин осталось
+    # считаем сколько свободных скважин осталось
     size = sum(countOfRaces)
-    #массив для не посещенных городов
+    # массив для не посещенных городов
     count_not_visit = [0 for i in range(size)]
 
     j = 0
     for i in range(size):
-        #если у кого-то клиента есть свободные скважины,
+        # если у кого-то клиента есть свободные скважины,
         if countOfRaces[i] != 0:
-            #то сохраняем номер этого клиента
+            # то сохраняем номер этого клиента
             count_not_visit[j] = i
             j += 1
-    #берем рандомного из списка не посещенных
+    # берем рандомного из списка не посещенных
     i = random.randint(0, size - 1)
-    #и возвращаем его
+    # и возвращаем его
     return count_not_visit[i]
+
 
 # рекурсивный поиск для скрещивания
 # bufer_in- где ищем(Куда едем), bufer_out- откуда идем
@@ -188,7 +191,7 @@ def RandNotVisitClient(countOfRaces):
 # countOfRaces - сколько машин мжно отправить на локацию
 def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar):
     # номер позиции клиента bufer_out[i_out][0] в bufer_in
-    #TODO i_in = bufer_in.__index__(bufer_out[i_out][0])
+    # TODO i_in = bufer_in.__index__(bufer_out[i_out][0])
     i_in = NumberClientaInSequence(bufer_in, bufer_out[i_out][0])
 
     # смотрим что этот город еще можно вставлять, в этот маршрут
@@ -213,8 +216,8 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
 
         # ищем дальше
         i += 1
-        #плюс один клиент в машине
-        numberInCar +=1
+        # плюс один клиент в машине
+        numberInCar += 1
 
         RecursiveSearchSosed(children, i, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces, numberInCar)
 
@@ -244,9 +247,10 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
             # плюс один клиент в машине
             numberInCar += 1
 
-            RecursiveSearchSosed(children, i, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosed(children, i, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces,
+                                 numberInCar)
 
-        #если не нашли такой индекс
+        # если не нашли такой индекс
         else:
             # выбираю другое ребро но из такого же начала в другом решении,
             # но которое не посещали в этом маршруте,
@@ -272,7 +276,7 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
                 # плюс один клиент в машине
                 numberInCar += 1
 
-                RecursiveSearchSosed(children, i,  bufer_in, bufer_out, i_in_buf + 1, flag, flagAll, countOfRaces,
+                RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_in_buf + 1, flag, flagAll, countOfRaces,
                                      numberInCar)
 
     # Если мы его на этом ТС уже посещали, то нужно взять рандомного
@@ -351,17 +355,17 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
             flag[0] += 1
             flagAll[0] = 1
 
-            #зануляем сяетчик, так как следом будет уже другая машина
+            # зануляем сяетчик, так как следом будет уже другая машина
             numberInCar = 0
             return
 
-    #Если уже встретили ноль, но в последовательности слишком мало клиентов
+    # Если уже встретили ноль, но в последовательности слишком мало клиентов
     elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar < factory.min_num_cl_in_car:
 
         # Ставим флаг в последовательности в которой искали ребро в доп ячееки
         bufer_in[i_in][1] = 1
 
-        #берем рандомного клиента у кторого есть не посещенные скважины
+        # берем рандомного клиента у кторого есть не посещенные скважины
         rand_client = RandNotVisitClient(countOfRaces)
 
         # номер позиции клиента bufer_out[i_out][0] в bufer_in
@@ -403,13 +407,13 @@ def RecursiveSearchSosed(children, i, bufer_in, bufer_out, i_out, flag, flagAll,
         print("ERROR from RecursiveSearchSosed outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
 
 
-#Добавляем клиента в последовательность, со всеми флагами
-#ЗАебись!!!
+# Добавляем клиента в последовательность, со всеми флагами
+# ЗАебись!!!
 def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, j):
     # # Добавляем первые два города в ребенка
     # children[j][0] = bufer1[i_in][0]
     # j += 1
-    #TODO children.append([bufer[i_in][0], 0])
+    # TODO children.append([bufer[i_in][0], 0])
     children[j][0] = bufer[i_in][0]
     j += 1
     # из первого нуля больше никуда не едем
@@ -423,9 +427,9 @@ def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, j):
     countOfRaces[bufer[i_in]] -= 1
 
 
-#Выбор рандомного города из тех у который остались свободные скважины
+# Выбор рандомного города из тех у который остались свободные скважины
 def RandomClientWithWells(countOfRaces):
-    #список в котором будут хранится клиенты в которорых остались скважины
+    # список в котором будут хранится клиенты в которорых остались скважины
     ostatok = []
     for i in factory.N:
         if countOfRaces[i] > 0:
@@ -434,8 +438,8 @@ def RandomClientWithWells(countOfRaces):
 
 
 # Поиск депо из которого не выезжали
-#jndex - индекс у ребенка
-#ЗАебись!!!
+# jndex - индекс у ребенка
+# ЗАебись!!!
 def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces, children, flag, jndex):
     # #Сначала проверим есть ли те которых мне не посетили ни разу
     # if sum(flagAll) <= factory.N:
@@ -491,7 +495,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         else:
             print("ERROR from SearchForAnUnvisitedZero: нарушенно заполнение флага")
 
-    #TODO надо ли рассматривать клиентов у которых остались скважины
+    # TODO надо ли рассматривать клиентов у которых остались скважины
     # Если не нашли ни в большем ни в меньшем, и уже всех посетили хотя бы по разу
     # else:
     #     #рандомный клиент у которого есть свободные скважины
@@ -509,7 +513,7 @@ def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
     # Здесь все заебись!!!!!!!!!!
     children = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]  # результат скрещивания (РЕБЕНОК)
 
-    #число клиентов в текущей машине
+    # число клиентов в текущей машине
     numberInCar = 0
 
     # сохроняем последовательности чтобы не испортить
@@ -549,7 +553,7 @@ def AEX(sequence1, sequence2, X1, Y1, S1, A1, X2, Y2, S2, A2):
         k = 0
         # Индекс который идет по ребенку
         j = 2
-        #один клиент в машине
+        # один клиент в машине
         numberInCar += 1
 
         # Для первого добавления запустим без цикла

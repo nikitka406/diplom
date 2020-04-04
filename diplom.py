@@ -15,7 +15,7 @@ assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 DeleteCarNonNarushOgr(x, y, s, a)
 
 # Удаляем не используемые ТС
-x, y, s, a = DeleteNotUsedCar(x, y, s, a)
+# x, y, s, a = DeleteNotUsedCar(x, y, s, a)
 
 # Проверяем что ничего не сломалось
 target_function = CalculationOfObjectiveFunction(x, y)
@@ -24,7 +24,11 @@ print(target_function)
 
 # Сохраняем стартовое решение в файл
 SaveStartSolution(x, y, s, a)
-
+# X, Y, Ss, A = CopyingSolution(x, y, s, a)
+# ReadStartSolutionOfFile(X, Y, Ss, A)
+# # if y == Y:
+# #     print("true")
+# BeautifulPrint(X, Y, Ss, A)
 # Создаем хранилище решений, для популяции решений
 X, Y, Sresh, A, Target_Function = SolutionStore()
 

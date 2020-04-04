@@ -11,23 +11,23 @@ def SaveStartSolution(local_x, local_y, local_s, local_a):
     for i in range(factory.N):
         for j in range(factory.N):
             for k in range(factory.KA):
-                file.write(str(local_x[i][j][k])+' ')
+                file.write(str(local_x[i][j][k]) + ' ')
             file.write("\n")
         # file.write("\n")
     # Печатаем в файл Y
     for i in range(factory.N):
         for k in range(factory.KA):
-            file.write(str(local_y[i][k])+' ')
+            file.write(str(local_y[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл S
     for i in range(factory.N):
         for k in range(factory.KA):
-            file.write(str(local_s[i][k])+' ')
+            file.write(str(local_s[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл A
     for i in range(factory.N):
         for k in range(factory.KA):
-            file.write(str(local_a[i][k])+' ')
+            file.write(str(local_a[i][k]) + ' ')
         file.write("\n")
 
     file.close()
@@ -228,9 +228,6 @@ def CopyingSolution(local_x, local_y, local_s, local_a):
     return local_X, local_Y, local_S, local_A
 
 
-
-
-
 # подсчет значения целевой функции
 def CalculationOfObjectiveFunction(x, y, pinalty_function=0):
     target_function = 0
@@ -301,30 +298,32 @@ def DeleteCarNonNarushOgr(lokal_x, lokal_y, lokal_s, lokal_a):
 
 
 # перезапись одного маршрута на другой
-def Rewriting(lokal_Y, k, m, flag):
+def Rewriting(lokal, k, m, flag):
     if flag == "1":
         for j in range(factory.N):
-            lokal_Y[j][k] = lokal_Y[j][m]
-            lokal_Y[j][m] = 0
+            lokal[j][k] = lokal[j][m]
+            lokal[j][m] = 0
     if flag == "2":
         for i in range(factory.N):
             for j in range(factory.N):
-                lokal_Y[i][j][k] = lokal_Y[i][j][m]
-                lokal_Y[i][j][m] = 0
+                lokal[i][j][k] = lokal[i][j][m]
+                lokal[i][j][m] = 0
 
 
 # TODO делит почему портит стартовое решение
+# TODO надо полностью переписать делит с помощью флага и последующео удаления через remove
 # удаляем/уменьшаем размерность с помощью не используемых машин
 def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
     # todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные) под
     #  вопросом?????
-    for k in range(factory.KA):
+    for k in range(len(lokal_x[0][0])):
         summa1 = 0  # Обнуляем счетчик
         for j in range(1, factory.N):
-            summa1 += lokal_y[j][k]  # смотрим посещает ли К-ая машина хотя бы один город
+            # смотрим посещает ли К-ая машина хотя бы один город
+            summa1 += lokal_y[j][k]
         if summa1 == 0:  # если 0 значит не посещает
-            if k != factory.KA - 1:  # если пустой машиной оказалась не последняя в списке, то
-                for m in range(k + 1, factory.KA):  # ищем ближайшую рабочую машину
+            if k != len(lokal_x[0][0]) - 1:  # если пустой машиной оказалась не последняя в списке, то
+                for m in range(k + 1, len(lokal_x[0][0])):  # ищем ближайшую рабочую машину
                     summa2 = 0
                     for i in range(factory.N):
                         summa2 += lokal_y[i][m]
@@ -334,28 +333,30 @@ def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
                         Rewriting(lokal_a, k, m, "1")
                         Rewriting(lokal_x, k, m, "2")
                         break
-    factory.KA = AmountCarUsed(lokal_y)
-    if factory.KA >= factory.K - 1:
-        # создаем новые переменные так как они должны быть меньше по размерности относительно старых, нельзя просто
-        # прировнять
-        lokal_X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
-                   range(factory.N)]  # едет или нет ТС с номером К из города I в J
-        lokal_Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
-        lokal_Sresh = [[0 for k in range(factory.KA)] for i in
-                       range(factory.N)]  # время работы ТС c номером К на объекте i
-        lokal_A = [[0 for k in range(factory.KA)] for i in
-                   range(factory.N)]  # время прибытия ТС с номером К на объект i
-        for k in range(factory.KA):
-            for i in range(factory.N):
-                for j in range(factory.N):
-                    lokal_X[i][j][k] = lokal_x[i][j][k]
-                lokal_Y[i][k] = lokal_y[i][k]
-                lokal_Sresh[i][k] = lokal_s[i][k]
-                lokal_A[i][k] = lokal_a[i][k]
-        return lokal_X, lokal_Y, lokal_Sresh, lokal_A
-    else:
-        print("NOTIFICATION from DeleteNotUsedCar: Уже удалены все арендованные машины")
-        return lokal_x, lokal_y, lokal_s, lokal_a
+
+            factory.KA = AmountCarUsed(lokal_y)
+            if factory.KA > factory.K - 1:
+                # создаем новые переменные так как они должны быть меньше по размерности относительно старых,
+                # нельзя просто прировнять
+                lokal_X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
+                           range(factory.N)]  # едет или нет ТС с номером К из города I в J
+                lokal_Y = [[0 for k in range(factory.KA)] for i in
+                           range(factory.N)]  # посещает или нет ТС с номером К объект i
+                lokal_Sresh = [[0 for k in range(factory.KA)] for i in
+                               range(factory.N)]  # время работы ТС c номером К на объекте i
+                lokal_A = [[0 for k in range(factory.KA)] for i in
+                           range(factory.N)]  # время прибытия ТС с номером К на объект i
+                for k in range(factory.KA):
+                    for i in range(factory.N):
+                        for j in range(factory.N):
+                            lokal_X[i][j][k] = lokal_x[i][j][k]
+                        lokal_Y[i][k] = lokal_y[i][k]
+                        lokal_Sresh[i][k] = lokal_s[i][k]
+                        lokal_A[i][k] = lokal_a[i][k]
+                return lokal_X, lokal_Y, lokal_Sresh, lokal_A
+            else:
+                print("NOTIFICATION from DeleteNotUsedCar: Уже удалены все арендованные машины")
+                return lokal_x, lokal_y, lokal_s, lokal_a
 
 
 # ищем минимальный путь по которому можно попасть в client
@@ -471,13 +472,24 @@ def OperatorJoin(x, y, s, a, client, sosed):
     sosedLeft = SearchSosedLeftOrRight(x, y, sosed, "left")  # левый сосед соседа
     sosedRight = SearchSosedLeftOrRight(x, y, sosed, "right")  # правый сосед соседа
 
+    print("sosed_left = ", sosedLeft)
+    print("sosed_right = ", sosedRight)
+
+    print("Время окончание client = ", factory.l[client])
+    print("Время окончание sosed = ", factory.l[sosed])
+    print("Время окончание sosedLeft = ", factory.l[sosedLeft])
+    print("Время окончание sosedRight = ", factory.l[sosedRight])
+
     # смотрим временные затраты так как время напрямую связано с км zatratLeft = factory.t[sosedLeft][client] +
     # factory.t[client][sosed] + factory.t[sosed][sosedRight] #временные затраты присунуть слева zatratRight =
     # factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
 
     # TODO написать рандом на вставление слева или справа
     # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
-    if factory.l[sosed] < factory.l[client] < factory.l[sosedRight]:
+    # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
+    if (factory.l[sosed] <= factory.l[client] <= factory.l[sosedRight] and sosedRight != 0) or (
+            sosedRight == 0 and factory.l[sosed] <= factory.l[client]):
+        print("Вставляем клиента к соседу справа")
         s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
         # Чтобы все корректно работало, сначала надо написать
@@ -490,7 +502,9 @@ def OperatorJoin(x, y, s, a, client, sosed):
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-    elif factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]:
+    elif (sosedLeft != 0 and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]) or (
+            sosedLeft == 0 and factory.l[client] < factory.l[sosed]):
+        print("Вставляем клиента к соседу слева")
         s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
         TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
         # Чтобы все корректно работало, сначала надонаписать
@@ -519,9 +533,6 @@ def PenaltyFunction(s, a):
 
 # переставляем клиента к новому соседу, локальный поиск
 def JoiningClientToNewSosed(x, y, s, a, target_function):
-    # Берем стартовое решение, потому что какой-то пиздюк его испортил
-    ReadStartSolutionOfFile(x, y, s, a)
-
     # копируем чтобы не испортить решение
     X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
@@ -530,6 +541,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
             factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
 
     print("Переставляем клиент ", client)
+    print("С машины", NumberCarClienta(y, client))
 
     sosedK = NumberCarClienta(y, client)  # берем рандомного соседа, главное чтобы не совпал с клиентом
     while sosedK == NumberCarClienta(y, client):
@@ -540,7 +552,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
     print("К соседу ", sosed)
     print("На машине ", sosedK)
     OperatorJoin(X, Y, Sresh, A, client, sosed)
-    X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+    # X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
     # проверка на успеваемость выполнения работ
     # если не успел уложиться в срок, штраф
@@ -595,15 +607,23 @@ def SolutionStore():
 # Cоздаем популяцию решений
 def PopulationOfSolutions(X, Y, Sresh, A, Target_Function, x, y, s, a):
     for n in range(factory.population):  # создаем популяцию решений в кол-ве population
-        bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s,
-                                                                 a)  # в очередное решение сначала  сохраняем стартовое
+        # Берем стартовое решение, потому что какой-то пиздюк его испортил
+        ReadStartSolutionOfFile(x, y, s, a)
+        # BeautifulPrint(x, y, s, a)
+        # # в очередное решение сначала  сохраняем стартовое
+        # bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s, a)
+
         for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
+            print("Переставление № ", local_s)
             # BeautifulPrintInFile(x, y, s, a, Target_Function[n], local_s)
-            Target_Function[n] = JoiningClientToNewSosed(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n])
+            Target_Function[n] = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
             # BeautifulPrint(x, y, s, a)
 
+        print("Первое решение построено")
+
         # BeautifulPrintInFile(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n], n)
-        X[n], Y[n], Sresh[n], A[n] = CopyingSolution(bufer_X, bufer_Y, bufer_Sresh, bufer_A)
+        X[n], Y[n], Sresh[n], A[n] = CopyingSolution(x, y, s, a)
+        # BeautifulPrint(X[0], Y[0], Sresh[0], A[0])
 
 
 # Граничные условия
