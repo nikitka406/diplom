@@ -9,16 +9,16 @@ def CreateSequence(X):
     sequenceX1 = [0 for n in range(factory.population)]
     sequenceX2 = [0 for n in range(factory.population)]
 
-    for n in range(factory.population):
+    for m in range(factory.population):
         # Интерпритируем матрицу Х на двумерный массив
-        sequenceX2[n] = GettingTheSequence(X[n])
-        print(n)
+        sequenceX2[m] = GettingTheSequence(X[m])
+        print("Номер решения", m)
         for k in range(factory.KA):
             for i in range(factory.N + 1):
-                print(sequenceX2[n][k][i], end=" ")
+                print(sequenceX2[m][k][i], end=" ")
             print("\n")
-        sequenceX1[n] = TransferX2toX1(sequenceX2[n])
-        print(sequenceX1[n], "\n")
+        sequenceX1[m] = TransferX2toX1(sequenceX2[m], X[m])
+        # print(sequenceX1[m], "\n")
 
     return sequenceX1
 
@@ -81,38 +81,30 @@ def LowerTheDimensionOfTheSequence(sequenceX1):
 # Добавление еще одной ячейки к последовательности
 # Заебись, работает!!!
 def AddOneCell(sequenceX1):
-    bufer = [[0 for j in range(2)] for i in range((factory.N + 1) * factory.KA)]
+    bufer = [[0 for j in range(2)] for i in range(len(sequenceX1))]
     # ячейка означает, что из этого конкретного города на этой машине нельзя ехать в следующий
-    for i in range(factory.N):
+    for i in range(len(sequenceX1)):
         bufer[i][0] = sequenceX1[i]
     return bufer
 
 
 # Переделываем двумерную в одномерную, вида 014856047852098704850
 # Заебись, работает!!!
-def TransferX2toX1(sequenceX2):
-    sequenceX1 = [0 for i in range((factory.N + 1) * factory.KA)]
-    j = 1
-    for k in range(factory.KA):
+def TransferX2toX1(sequenceX2, X):
+    sequenceX1 = [0]
+    for k in range(len(X[0][0])):
         for i in range(1, factory.N - 1):
-            # print(i)
             # случай когда находишься на цифре и следующая цифра
             if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
-                sequenceX1[j] = sequenceX2[k][i]
-                j += 1
+                sequenceX1.append(sequenceX2[k][i])
             # случай когда находишься на цифре и следующий ноль
             if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] == 0:
-                sequenceX1[j] = sequenceX2[k][i]
-                j += 1
+                sequenceX1.append(sequenceX2[k][i])
             # случай когда находишься на нуле и предыдущая цифра
             if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
-                sequenceX1[j] = sequenceX2[k][i]
-                j += 1
-    # уменьщаем размерность последовательности (убераем нули вконце)
-    sequenceX1 = LowerTheDimensionOfTheSequence(sequenceX1)
+                sequenceX1.append(sequenceX2[k][i])
     # ДОбавляем еще одну ячейку к каждому элементу последовательности
     sequenceX1 = AddOneCell(sequenceX1)
-
     return sequenceX1
 
 

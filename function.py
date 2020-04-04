@@ -4,8 +4,9 @@ import copy
 
 
 # Сохраняем стартовое решение в файл
+# Заебись работает!!!
 def SaveStartSolution(local_x, local_y, local_s, local_a):
-    file = open('StartSolution.txt', 'w')
+    file = open('output/StartSolution.txt', 'w')
 
     # Печатаем в файл Х
     for i in range(factory.N):
@@ -33,9 +34,10 @@ def SaveStartSolution(local_x, local_y, local_s, local_a):
     file.close()
 
 
-# Сохраняем стартовое решение в файл
+# Cчитываем стартовое решение в файл
+# Заебись работает!!!
 def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
-    file = open('StartSolution.txt', 'r')
+    file = open('output/StartSolution.txt', 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
@@ -67,6 +69,80 @@ def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
         for k in range(len(local_a[i])):
             local_a[i][k] = float(local_a[i][k])
         index += 1
+    file.close()
+
+
+# Сохраняем популяцию, добавляя новое решение в конец
+def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A):
+    file = open('output/SolutionPopulation.txt', 'a')
+
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            for k in range(factory.KA):
+                file.write(str(lokal_X[i][j][k]) + ' ')
+            file.write("\n")
+        # file.write("\n")
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(lokal_Y[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл S
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(lokal_Sresh[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл A
+    for i in range(factory.N):
+        for k in range(factory.KA):
+            file.write(str(lokal_A[i][k]) + ' ')
+        file.write("\n")
+
+    file.close()
+
+
+# Считываем популяцию
+def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
+    file = open('output/SolutionPopulation.txt', 'r')
+    # прочитали весь файл, получился список из строк файла
+    line = file.readlines()
+
+    index = 0
+    for n in range(factory.population):
+        # Печатаем в файл Х
+        for i in range(factory.N):
+            for j in range(factory.N):
+                # for k in range(factory.KA):
+                local_x[n][i][j] = line[index].split()
+                for k in range(len(local_x[n][i][j])):
+                    local_x[n][i][j][k] = int(local_x[n][i][j][k])
+                index += 1
+
+        # Печатаем в файл Y
+        for i in range(factory.N):
+            local_y[n][i] = line[index].split()
+            for k in range(len(local_y[n][i])):
+                local_y[n][i][k] = int(local_y[n][i][k])
+            index += 1
+
+        # Печатаем в файл S
+        for i in range(factory.N):
+            local_s[n][i] = line[index].split()
+            for k in range(len(local_s[n][i])):
+                local_s[n][i][k] = float(local_s[n][i][k])
+            index += 1
+        # Печатаем в файл A
+        for i in range(factory.N):
+            local_a[n][i] = line[index].split()
+            for k in range(len(local_a[n][i])):
+                local_a[n][i][k] = float(local_a[n][i][k])
+            index += 1
+    file.close()
+
+# Отчищаем файл
+def ClearFileSolutionPopulation():
+    file = open('output/SolutionPopulation.txt', 'w')
     file.close()
 
 
@@ -123,7 +199,7 @@ def BeautifulPrint(X, Y, Sresh, A):
 
 # красивая печать в файл
 def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function, number_solution):
-    file = open('population.txt', 'a')
+    file = open('output/population.txt', 'a')
     file.write('Номер решения ' + str(number_solution))
     file.write("\n")
     for k in range(len(lokal_X[0][0])):
@@ -179,25 +255,6 @@ def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function
     #     #     print('\n')
     file.close()
 
-
-# # Переводит лист в кортеж и наоборот
-# def InterpretatorListTuple(x, y, s, a, case):
-#     if case == 'tuple':
-#         # x = tuple(x)
-#         for i in range(factory.N):
-#             for j in range(factory.N):
-#                 x[i][j] = tuple(x[i][j])
-#         y = tuple(y)
-#         s = tuple(s)
-#         a = tuple(a)
-#     elif case == 'list':
-#         x = list(x)
-#         y = list(y)
-#         s = list(s)
-#         a = list(a)
-#     else:
-#         print("ERROR from InterpritatorListTuple: неверное значение переменной case")
-#     return x, y, s, a
 
 # Считаем кол-во используемых ТС
 def AmountCarUsed(lokal_y):
@@ -578,20 +635,20 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 def SolutionStore():
     # Хранилище решений, первый индекс это номер решения, со второго начинается само решение
     X = [0 for n in range(factory.population)]  # едет или нет ТС с номером К из города I в J
-    # for n in range(factory.population):
-    #     X[n] = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
+    for n in range(factory.population):
+        X[n] = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
 
     Y = [0 for n in range(factory.population)]  # посещает или нет ТС с номером К объект i
-    # for n in range(factory.population):
-    #     Y[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    for n in range(factory.population):
+        Y[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
     Sresh = [0 for n in range(factory.population)]  # время работы ТС c номером К на объекте i
-    # for n in range(factory.population):
-    #     Sresh[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    for n in range(factory.population):
+        Sresh[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
     A = [0 for n in range(factory.population)]  # время прибытия ТС с номером К на объект i
-    # for n in range(factory.population):
-    #     A[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    for n in range(factory.population):
+        A[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
     Target_Function = [0 for n in
                        range(factory.population)]  # здесь сохраняем результат целевой функции для каждого решения
@@ -614,18 +671,22 @@ def PopulationOfSolutions(X, Y, Sresh, A, Target_Function, x, y, s, a):
         # bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s, a)
 
         for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
-            print("Переставление № ", local_s)
+            print("\nПереставление № ", local_s)
             # BeautifulPrintInFile(x, y, s, a, Target_Function[n], local_s)
             Target_Function[n] = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
             # BeautifulPrint(x, y, s, a)
 
-        print("Первое решение построено")
+        print("\nРешение номер", n, "построено")
+        print("_____________________________")
 
-        # BeautifulPrintInFile(bufer_X, bufer_Y, bufer_Sresh, bufer_A, Target_Function[n], n)
-        X[n], Y[n], Sresh[n], A[n] = CopyingSolution(x, y, s, a)
-        # BeautifulPrint(X[0], Y[0], Sresh[0], A[0])
+        SavePopulation(x, y, s, a)
+        # X[n], Y[n], Sresh[n], A[n] = CopyingSolution(x, y, s, a)
+        # BeautifulPrint(X[n], Y[n], Sresh[n], A[n])
+    print("Популяция создана!!")
+    print("___________________________________________________________________________________________________________")
 
 
+# TODO когда верну делит не используемых, надо пометь цикл  на лен от х
 # Граничные условия
 def X_join_Y(x, y):
     bufer1 = 0

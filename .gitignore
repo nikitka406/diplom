@@ -1,5 +1,6 @@
 coordinate.txt
-population.txt
-StartSolution.txt
+output/population.txt
+output/StartSolution.txt
 1.txt
 2.txt
+output/SolutionPopulation.txt
