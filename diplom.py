@@ -30,7 +30,7 @@ SaveStartSolution(x, y, s, a)
 X, Y, Sresh, A, Target_Function = SolutionStore()
 
 # Cоздаем популяцию решений
-PopulationOfSolutions(X, Y, Sresh, A, Target_Function, x, y, s, a)
+PopulationOfSolutions(Target_Function, x, y, s, a)
 
 # Считываем популяцию из файла
 ReadSolutionPopulationOnFile(X, Y, Sresh, A)

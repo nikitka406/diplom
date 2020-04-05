@@ -6,10 +6,10 @@ import random
 # Создание последовательности для каждого решения
 def CreateSequence(X):
     # Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
-    sequenceX1 = [0 for n in range(factory.population)]
-    sequenceX2 = [0 for n in range(factory.population)]
+    sequenceX1 = [0 for n in range(factory.param_population)]
+    sequenceX2 = [0 for n in range(factory.param_population)]
 
-    for m in range(factory.population):
+    for m in range(factory.param_population):
         # Интерпритируем матрицу Х на двумерный массив
         sequenceX2[m] = GettingTheSequence(X[m])
         # print("Номер решения", m)
@@ -65,29 +65,6 @@ def GettingTheSequence(X):
     return sequenceX2
 
 
-# количество посещений в последовательности (не нулевых элементов)
-# Заебись, работает!!!
-def CountVisitInSequence(sequenceX1):
-    for i in range(1, (factory.N + 1) * factory.KA - 1):
-        # если дошли до нулевого, но предэдущий не нулевой
-        # а следующий нулевой или мы сейчас на предпоследнем
-        if sequenceX1[i - 1] != 0 and sequenceX1[i] == 0 and (
-                sequenceX1[i + 1] == 0 or i == ((factory.N + 1) * factory.KA - 1)):
-            return i + 1
-
-
-# уменьшить размерность последовательности
-# Заебись, работает!!!
-def LowerTheDimensionOfTheSequence(sequenceX1):
-    size = CountVisitInSequence(sequenceX1)
-
-    bufer = [0 for i in range(size)]
-
-    for i in range(size):
-        bufer[i] = sequenceX1[i]
-    return bufer
-
-
 # Добавление еще одной ячейки к последовательности
 # Заебись, работает!!!
 def AddOneCell(sequenceX1):
@@ -118,32 +95,12 @@ def TransferX2toX1(sequenceX2, X):
     return sequenceX1
 
 
-# номер машины которая обслуживает клиента
-def NumberCarClientaInSequence(bufer, client):
-    for k in range(factory.KA):
-        for i in range(factory.N + 1):
-            if bufer[k][i] == client:
-                return k
-    return -1
-
-
 # номер посещения клиента
 def NumberClientaInSequence(bufer, client):
     for i in range(len(bufer)):
         if bufer[i][0] == client:
             return i
     print("ERROR for NumberClientaInSequence: Не нашел номер посещения клиента в последовательности")
-
-
-# Возвращает матрицу, где индекс это номер клиента а содержимое, это сколько раз его можно посетить
-def CountOfVisitsPribityClient(bufer):
-    contVisit = [0 for j in range(factory.N)]
-    for client in range(factory.N):
-        for k in range(factory.KA):
-            for i in range(factory.N + 1):
-                if bufer[k][i] == client:
-                    contVisit[client] += 1
-    return contVisit
 
 
 # выбираю другое ребро но из начала c таким же номером
@@ -351,7 +308,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                     print("равна", i_in)
 
                     # это значит что встретили ноль, цикл должен завершится
-                    if flag[next_client] == -1 and numberInCar >= factory.min_num_cl_in_car:
+                    if flag[next_client] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
                         print("Рандомный оказался 0, поэтому цикл должен завершится")
 
                         # добавляем в ребенка bufer_in[i_in + 1.txt]
@@ -448,7 +405,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
             print("равна", i_in)
 
             # это значит что встретили ноль, цикл должен завершится
-            if flag[next_client] == -1 and numberInCar >= factory.min_num_cl_in_car:
+            if flag[next_client] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
                 print("Рандомный оказался 0, поэтому цикл должен завершится")
 
                 # добавляем в ребенка bufer_in[i_in + 1.txt]
@@ -526,7 +483,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
             return True
 
     # Если уже встретили ноль, но в последовательности слишком мало клиентов
-    elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar < factory.min_num_cl_in_car:
+    elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar < factory.param_min_num_cl_in_car:
         print("-------------------Этот блок проверен программой!!-------------------")
         print("Слишком рано встретили ноль, в последовательности только", numberInCar, " клиент")
 
@@ -563,7 +520,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
 
     # это значит что встретили ноль, цикл должен завершится
     # Здесь все заебись, проверенно программой!!!!!!!!!!
-    elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar >= factory.min_num_cl_in_car:
+    elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
         print("-------------------Этот блок проверен программой!!-------------------")
         print("Встретили 0 пора возвращаться в депо")
         # добавляем в ребенка bufer_in[k_in][i_in + 1.txt]
@@ -937,8 +894,23 @@ def UsedOperators(sequence1, sequence2, operator):
 
 
 # Локальный поиск (локально меняем решение)
-def LocalSearch(children):
+def LocalSearch(x, y, s, a, target_function):
     print("Применяем локальный поиск (локально меняем решение)")
+
+    # TODO выбираем оператор локального поиска
+    local_search_oper = ['relocate', '2Opt', 'Exchange']
+    oper = random.choice(local_search_oper)
+    oper = 'relocate'
+
+    print("Используем оператор ", oper)
+    if oper == 'relocate':
+        for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
+            target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
+    elif oper == '2Opt':
+        print("")
+
+    elif oper == 'Exchange':
+        print("")
 
 
 # Функция которая позволяет родить ребенка (скрестить два решения)
@@ -948,7 +920,7 @@ def LocalSearch(children):
 def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
     for crossing in range(factory.param_crossing):
         # Выбираем по каком сценарию будем брать родителей
-        scenario_cross = ['randomAndRandom', 'randomAndBad']
+        scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
 
         # Выбираю как буду сохранять полученное решение
@@ -964,14 +936,14 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         if scenario == 'randomAndRandom':
             print("Пошли по сценарию, два рандомных решения")
             # Индекс первого родителя
-            index = random.randint(0, factory.population)
+            index = random.randint(0, factory.param_population)
 
             # Индекс второго родителя
-            jndex = random.randint(0, factory.population)
+            jndex = random.randint(0, factory.param_population)
 
             # Если вдруг индекс второго родителя равен первому
             while jndex == index:
-                jndex = random.randint(0, factory.population)
+                jndex = random.randint(0, factory.param_population)
 
             print("Первое рандомное решение")
             print(Sequence[index])
@@ -983,7 +955,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         elif scenario == 'randomAndBad':
             print("Пошли по сценарию, один рандомный второй самый худший")
             # Индекс первого родителя
-            index = random.randint(0, factory.population)
+            index = random.randint(0, factory.param_population)
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
@@ -997,15 +969,55 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
 
             children = UsedOperators(Sequence[index], Sequence[jndex], operator)
 
-        # Применяем локальный поиск
-        LocalSearch(children)
+        elif scenario == 'BestAndRand':
+            print("Пошли по сценарию, один рандомный второй самый лудший")
+            # Индекс первого родителя
+            index = random.randint(0, factory.param_population)
+
+            # Ищем самое маленькое решение по целевой функции
+            minimum = min(Target_Function)
+            # Оно будет вторым родителем
+            jndex = Target_Function.count(minimum)
+
+            print("Первое рандомное решение")
+            print(Sequence[index])
+            print("Второе решение, лудшие из всех")
+            print(Sequence[jndex])
+
+            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+
+        elif scenario == 'BestAndBad':
+            print("Пошли по сценарию, один самый лудший второй самый худший")
+            # Ищем самое маленькое решение по целевой функции
+            minimum = min(Target_Function)
+            # Оно будет первым родителем
+            index = Target_Function.count(minimum)
+
+            # Ищем самое большое решение по целевой функции
+            maximum = max(Target_Function)
+            # Оно будет вторым родителем
+            jndex = Target_Function.count(maximum)
+
+            print("Первое решение, лудшие из всех")
+            print(Sequence[index])
+            print("Второе решение, худшие из всех")
+            print(Sequence[jndex])
+
+            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
 
         # Переводим последовательность в матрицы решений
         x, y, s, a = SequenceDisplayInTheXYSA(children)
 
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, y)
-        print("Целевая функция нового решения равна ", target_function)
+        print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
+
+        # Применяем локальный поиск
+        LocalSearch(x, y, s, a, target_function)
+
+        # Считаем целевую функцию
+        target_function = CalculationOfObjectiveFunction(x, y)
+        print("Целевая функция нового решения после локального поиска равна ", target_function)
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции
@@ -1013,6 +1025,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         i_max = Target_Function.index(maximum)
         print("Самое плохое решение в популяции ", maximum)
 
+        # Удаляем какое-нибудь решение
         if maximum >= target_function:
             if scenario_add == 'deleteTheBad':
                 print("Удаляем самое плохое решение в популяции")

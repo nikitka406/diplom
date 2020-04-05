@@ -110,7 +110,7 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
     line = file.readlines()
 
     index = 0
-    for n in range(factory.population):
+    for n in range(factory.param_population):
         # Печатаем в файл Х
         for i in range(factory.N):
             for j in range(factory.N):
@@ -201,7 +201,7 @@ def BeautifulPrint(X, Y, Sresh, A):
 
 # красивая печать в файл
 def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function, number_solution):
-    file = open('output/population.txt', 'a')
+    file = open('output/Population.txt', 'a')
     file.write('Номер решения ' + str(number_solution))
     file.write("\n")
     for k in range(len(lokal_X[0][0])):
@@ -597,7 +597,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 
     # Bыбираем клиента
     client = random.randint(1, (
-            factory.N - 1))  # Берем рандомного клиента/ -1.txt потому что иногда может появится 10, а это выход за граници
+            factory.N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
 
     print("Переставляем клиент ", client)
     print("С машины", NumberCarClienta(y, client))
@@ -636,54 +636,47 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 # Создаем хранилище решений, для большего числа рещений
 def SolutionStore():
     # Хранилище решений, первый индекс это номер решения, со второго начинается само решение
-    X = [0 for n in range(factory.population)]  # едет или нет ТС с номером К из города I в J
-    for n in range(factory.population):
+    X = [0 for n in range(factory.param_population)]  # едет или нет ТС с номером К из города I в J
+    for n in range(factory.param_population):
         X[n] = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
 
-    Y = [0 for n in range(factory.population)]  # посещает или нет ТС с номером К объект i
-    for n in range(factory.population):
+    Y = [0 for n in range(factory.param_population)]  # посещает или нет ТС с номером К объект i
+    for n in range(factory.param_population):
         Y[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-    Sresh = [0 for n in range(factory.population)]  # время работы ТС c номером К на объекте i
-    for n in range(factory.population):
+    Sresh = [0 for n in range(factory.param_population)]  # время работы ТС c номером К на объекте i
+    for n in range(factory.param_population):
         Sresh[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-    A = [0 for n in range(factory.population)]  # время прибытия ТС с номером К на объект i
-    for n in range(factory.population):
+    A = [0 for n in range(factory.param_population)]  # время прибытия ТС с номером К на объект i
+    for n in range(factory.param_population):
         A[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
     Target_Function = [0 for n in
-                       range(factory.population)]  # здесь сохраняем результат целевой функции для каждого решения
+                       range(factory.param_population)]  # здесь сохраняем результат целевой функции для каждого решения
 
     # # сохраняет последовательное посещение городов для каждой машины
-    # bufer = [0 for n in range(factory.population)]
-    # for n in range(factory.population):
+    # bufer = [0 for n in range(factory.param_population)]
+    # for n in range(factory.param_population):
     #     bufer[n] = [[0 for j in range(factory.N + 1.txt)] for i in range(factory.KA)]  # первы индекс это номер машины,
     #     # второй это последовательность посещения
     return X, Y, Sresh, A, Target_Function
 
 
 # Cоздаем популяцию решений
-def PopulationOfSolutions(X, Y, Sresh, A, Target_Function, x, y, s, a):
-    for n in range(factory.population):  # создаем популяцию решений в кол-ве population
+def PopulationOfSolutions(Target_Function, x, y, s, a):
+    for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
         # Берем стартовое решение, потому что какой-то пиздюк его испортил
         ReadStartSolutionOfFile(x, y, s, a)
-        # BeautifulPrint(x, y, s, a)
-        # # в очередное решение сначала  сохраняем стартовое
-        # bufer_X, bufer_Y, bufer_Sresh, bufer_A = CopyingSolution(x, y, s, a)
 
-        for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
+        for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
             print("\nПереставление № ", local_s)
-            # BeautifulPrintInFile(x, y, s, a, Target_Function[n], local_s)
             Target_Function[n] = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
-            # BeautifulPrint(x, y, s, a)
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
 
         SavePopulation(x, y, s, a)
-        # X[n], Y[n], Sresh[n], A[n] = CopyingSolution(x, y, s, a)
-        # BeautifulPrint(X[n], Y[n], Sresh[n], A[n])
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
 
