@@ -140,6 +140,7 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
             index += 1
     file.close()
 
+
 # Отчищаем файл
 def ClearFileSolutionPopulation():
     file = open('output/SolutionPopulation.txt', 'w')
@@ -356,7 +357,7 @@ def DeleteCarNonNarushOgr(lokal_x, lokal_y, lokal_s, lokal_a):
 
 # перезапись одного маршрута на другой
 def Rewriting(lokal, k, m, flag):
-    if flag == "1":
+    if flag == "1.txt":
         for j in range(factory.N):
             lokal[j][k] = lokal[j][m]
             lokal[j][m] = 0
@@ -385,9 +386,9 @@ def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
                     for i in range(factory.N):
                         summa2 += lokal_y[i][m]
                     if summa2 != 0:  # сохранем ее в первый пустой маршрут
-                        Rewriting(lokal_y, k, m, "1")
-                        Rewriting(lokal_s, k, m, "1")
-                        Rewriting(lokal_a, k, m, "1")
+                        Rewriting(lokal_y, k, m, "1.txt")
+                        Rewriting(lokal_s, k, m, "1.txt")
+                        Rewriting(lokal_a, k, m, "1.txt")
                         Rewriting(lokal_x, k, m, "2")
                         break
 
@@ -516,9 +517,9 @@ def DeleteClientaFromPath(x, y, s, a, client):
 #     DeleteClientaFromPath(x, y, s, a, client)
 #
 #     x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
-#     x[sosed][client][sosedK] = 1                            #вставляем клиента после соседа
-#     x[client][0][sosedK] = 1                                #теперь клиент литс, значит он возвращается в депо
-#     y[client][sosedK] = 1                                   #тепреь машина соседа обслуживает клиента
+#     x[sosed][client][sosedK] = 1.txt                            #вставляем клиента после соседа
+#     x[client][0][sosedK] = 1.txt                                #теперь клиент литс, значит он возвращается в депо
+#     y[client][sosedK] = 1.txt                                   #тепреь машина соседа обслуживает клиента
 #
 
 # вклиниваем между
@@ -595,7 +596,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 
     # Bыбираем клиента
     client = random.randint(1, (
-            factory.N - 1))  # Берем рандомного клиента/ -1 потому что иногда может появится 10, а это выход за граници
+            factory.N - 1))  # Берем рандомного клиента/ -1.txt потому что иногда может появится 10, а это выход за граници
 
     print("Переставляем клиент ", client)
     print("С машины", NumberCarClienta(y, client))
@@ -656,7 +657,7 @@ def SolutionStore():
     # # сохраняет последовательное посещение городов для каждой машины
     # bufer = [0 for n in range(factory.population)]
     # for n in range(factory.population):
-    #     bufer[n] = [[0 for j in range(factory.N + 1)] for i in range(factory.KA)]  # первы индекс это номер машины,
+    #     bufer[n] = [[0 for j in range(factory.N + 1.txt)] for i in range(factory.KA)]  # первы индекс это номер машины,
     #     # второй это последовательность посещения
     return X, Y, Sresh, A, Target_Function
 
@@ -769,7 +770,7 @@ def window_time_up(a, s, y):
 
 
 def ban_cycle(a, x, s, y):
-    # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1-x[i][j][k])
+    # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1.txt-x[i][j][k])
     for i in range(1, factory.N):
         for j in range(1, factory.N):
             for k in range(factory.KA):
