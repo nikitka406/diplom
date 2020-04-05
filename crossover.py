@@ -944,6 +944,7 @@ def LocalSearch(children):
 # Функция которая позволяет родить ребенка (скрестить два решения)
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
+# и все это сделает factory.param_crossing раз
 def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
     for crossing in range(factory.param_crossing):
         # Выбираем по каком сценарию будем брать родителей
