@@ -105,6 +105,7 @@ def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A):
 # Считываем популяцию
 def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
     file = open('output/SolutionPopulation.txt', 'r')
+    print("Считываем популяцию из файла output/SolutionPopulation.txt")
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
@@ -683,7 +684,7 @@ def PopulationOfSolutions(X, Y, Sresh, A, Target_Function, x, y, s, a):
         SavePopulation(x, y, s, a)
         # X[n], Y[n], Sresh[n], A[n] = CopyingSolution(x, y, s, a)
         # BeautifulPrint(X[n], Y[n], Sresh[n], A[n])
-    print("Популяция создана!!")
+    print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
 
 

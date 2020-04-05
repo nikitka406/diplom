@@ -38,6 +38,7 @@ ReadSolutionPopulationOnFile(X, Y, Sresh, A)
 # Создаем последовательность решения
 Sequence = CreateSequence(X)
 
+
 print(Sequence[0])
 print(Sequence[1])
 AEX(Sequence[0], Sequence[1])

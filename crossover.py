@@ -19,7 +19,7 @@ def CreateSequence(X):
         #     print("\n")
         sequenceX1[m] = TransferX2toX1(sequenceX2[m], X[m])
         # print(sequenceX1[m], "\n")
-
+    print("Матрица Х из популяция решений преобразованна в последовательность посещений для каждого решения")
     return sequenceX1
 
 
@@ -34,6 +34,16 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
             bufer[k][bul] = j
             if j != 0:
                 XDisplayInTheSequenceX2(x, bufer, j, k, bul)
+
+
+# Преобразуем последовательность в матрицы решений
+def SequenceDisplayInTheXYSA(sequence):
+    print("Переделываем последовательность в матрицы решений")
+    x = []
+    y = []
+    s = []
+    a = []
+    return x, y, s, a
 
 
 # Получаем двумерную последовательность вида
@@ -127,7 +137,6 @@ def NumberClientaInSequence(bufer, client):
 
 # Возвращает матрицу, где индекс это номер клиента а содержимое, это сколько раз его можно посетить
 def CountOfVisitsPribityClient(bufer):
-    # TODO надо что-то сделать с депо, его можно сколько угодно посещать
     contVisit = [0 for j in range(factory.N)]
     for client in range(factory.N):
         for k in range(factory.KA):
@@ -166,7 +175,7 @@ def RandNotVisitClient(countOfRaces, flag):
     print(count_not_visit)
 
     # берем рандомного из списка не посещенных
-    i = random.randint(0, len(count_not_visit)-1)
+    i = random.randint(0, len(count_not_visit) - 1)
 
     print("Взяли рандомного из этого списка равного ", count_not_visit[i])
     return count_not_visit[i]
@@ -182,7 +191,6 @@ def RandNotVisitClient(countOfRaces, flag):
 # countOfRaces - сколько машин мжно отправить на локацию
 def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar):
     # номер позиции клиента bufer_out[i_out][0] в bufer_in
-    # TODO i_in = bufer_in.__index__(bufer_out[i_out][0])
     i_in = NumberClientaInSequence(bufer_in, bufer_out[i_out][0])
 
     print("Ищем ", bufer_out[i_out][0])
@@ -327,7 +335,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                 while (flag[next_client] == 1 or countOfRaces[next_client]
                        <= 0) and count <= factory.N and bufer_in[next_client][1] == 1:
                     print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
-                                                        "этой машине либо нет свободных скважин")
+                                                    "этой машине либо нет свободных скважин")
 
                     # счетчик, чтобы вайл не был бесконечным
                     count += 1
@@ -424,7 +432,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         while (flag[next_client] == 1 or countOfRaces[next_client]
                <= 0) and count <= factory.N:
             print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
-                                                "этой машине либо нет свободных скважин")
+                                            "этой машине либо нет свободных скважин")
 
             # счетчик, чтобы вайл не был бесконечным
             count += 1
@@ -692,6 +700,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 
 # кроссовер AEX
 def AEX(sequence1, sequence2):
+    print("Скрещивание решений усуществляется с помощью оператора АЕХ")
     # первый индекс это номер машины, второй это последовательность
     # Здесь все заебись!!!!!!!!!!
 
@@ -779,7 +788,8 @@ def AEX(sequence1, sequence2):
             # или просто не посещенного
             # и его добавление в ребенка с расставлением всех флагов
             # и запуском рекурсии
-            SearchForAnUnvisitedZero(sequence1, size1, sequence2, size2, flagAll, countOfRaces, children, flag, numberInCar)
+            SearchForAnUnvisitedZero(sequence1, size1, sequence2, size2, flagAll, countOfRaces, children, flag,
+                                     numberInCar)
 
             print("Построили для следующей машины")
             print(
@@ -857,7 +867,8 @@ def AEX(sequence1, sequence2):
             # и его добавление в ребенка с расставлением всех флагов
             # и запуском рекурсии
 
-            SearchForAnUnvisitedZero(sequence2, size2, sequence1, size1, flagAll, countOfRaces, children, flag, numberInCar)
+            SearchForAnUnvisitedZero(sequence2, size2, sequence1, size1, flagAll, countOfRaces, children, flag,
+                                     numberInCar)
 
             print("Построили для следующей машиины машины")
             print(
@@ -876,15 +887,168 @@ def AEX(sequence1, sequence2):
     else:
         print("ERROR from AEX: исключение, произошло невозможное!!!!")
 
-
     for i in range(len(children)):
         children[i][1] = 0
     for i in range(len(sequence1)):
         sequence1[i][1] = 0
     for i in range(len(sequence2)):
         sequence2[i][1] = 0
-    print("children = ", children)
+    print("Оператор AEX закончил своб работу с решениями")
     print("sequence1 = ", sequence1)
     print("sequence2 = ", sequence2)
-    print("wells = ", factory.wells)
-    print("countOfRaces", countOfRaces)
+    print("И получился ребенок ")
+    print("children = ", children)
+    print("__________________________________________________________________________________________________________")
+    return children
+
+
+# Оператор HGreX
+def HGreX(sequence1, sequence2):
+    return
+
+
+# Оператор HRndX
+def HRndX(sequence1, sequence2):
+    return
+
+
+# Оператор HProX
+def HProX(sequence1, sequence2):
+    return
+
+
+# Функция вызывает выбранный оператор
+def UsedOperators(sequence1, sequence2, operator):
+    print("Запускаем оператор ", operator)
+    if operator == 'AEX':
+        return AEX(sequence1, sequence2)
+
+    elif operator == 'HGreX':
+        return HGreX(sequence1, sequence2)
+
+    elif operator == 'HRndX':
+        return HRndX(sequence1, sequence2)
+
+    elif operator == 'HProX':
+        return HProX(sequence1, sequence2)
+
+    else:
+        print("ERROR from UsedOperators: название такого оператора нет")
+
+
+# Локальный поиск (локально меняем решение)
+def LocalSearch(children):
+    print("Применяем локальный поиск (локально меняем решение)")
+
+
+# Функция которая позволяет родить ребенка (скрестить два решения)
+# и отдать его в хорошую школу (оператор локального перемещения)
+# и дальнейшее его помещение в популяцию решений, если он не хуже всех
+def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
+    for crossing in range(factory.param_crossing):
+        # Выбираем по каком сценарию будем брать родителей
+        scenario_cross = ['randomAndRandom', 'randomAndBad']
+        scenario = random.choice(scenario_cross)
+
+        # Выбираю как буду сохранять полученное решение
+        scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
+        scenario_add = random.choice(scenario_add_new_solution)
+
+        # TODO Задаю список с названиями операторов
+        # name_operators = ['AEX', 'HGreX', 'HRndX', 'HProX']
+        # operator = random.choice(name_operators)
+        operator = 'AEX'
+
+        # Идем по одному сценарию
+        if scenario == 'randomAndRandom':
+            print("Пошли по сценарию, два рандомных решения")
+            # Индекс первого родителя
+            index = random.randint(0, factory.population)
+
+            # Индекс второго родителя
+            jndex = random.randint(0, factory.population)
+
+            # Если вдруг индекс второго родителя равен первому
+            while jndex == index:
+                jndex = random.randint(0, factory.population)
+
+            print("Первое рандомное решение")
+            print(Sequence[index])
+            print("Второе рандомное решение")
+            print(Sequence[jndex])
+
+            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+
+        elif scenario == 'randomAndBad':
+            print("Пошли по сценарию, один рандомный второй самый худший")
+            # Индекс первого родителя
+            index = random.randint(0, factory.population)
+
+            # Ищем самое большое решение по целевой функции
+            maximum = max(Target_Function)
+            # Оно будет вторым родителем
+            jndex = Target_Function.count(maximum)
+
+            print("Первое рандомное решение")
+            print(Sequence[index])
+            print("Второе решение, худшие из всех")
+            print(Sequence[jndex])
+
+            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+
+        # Применяем локальный поиск
+        LocalSearch(children)
+
+        # Переводим последовательность в матрицы решений
+        x, y, s, a = SequenceDisplayInTheXYSA(children)
+
+        # Считаем целевую функцию
+        target_function = CalculationOfObjectiveFunction(x, y)
+        print("Целевая функция нового решения равна ", target_function)
+
+        # Проверяем что новое решение не хуже самого плохого
+        # Ищем самое большое решение по целевой функции
+        maximum = max(Target_Function)
+        i_max = Target_Function.index(maximum)
+        print("Самое плохое решение в популяции ", maximum)
+
+        if maximum >= target_function:
+            if scenario_add == 'deleteTheBad':
+                print("Удаляем самое плохое решение в популяции")
+                X.pop(i_max)
+                Y.pop(i_max)
+                Sresh.pop(i_max)
+                A.pop(i_max)
+                Target_Function.pop(i_max)
+                Sequence.pop(i_max)
+
+            elif scenario_add == 'deleteTheBadParents':
+                print("Удаляем самого плохого родителя")
+
+                if Target_Function[index] <= Target_Function[jndex]:
+                    print("с целевой функцией ", Target_Function[jndex])
+                    X.pop(jndex)
+                    Y.pop(jndex)
+                    Sresh.pop(jndex)
+                    A.pop(jndex)
+                    Target_Function.pop(jndex)
+                    Sequence.pop(jndex)
+
+                elif Target_Function[index] > Target_Function[jndex]:
+                    print("с целевой функцией ", Target_Function[index])
+                    X.pop(index)
+                    Y.pop(index)
+                    Sresh.pop(index)
+                    A.pop(index)
+                    Target_Function.pop(index)
+                    Sequence.pop(index)
+
+            print("Добавляем новое решение в конец")
+            X.append(x)
+            Y.append(y)
+            Sresh.append(s)
+            A.append(a)
+            Target_Function.append(target_function)
+            Sequence.append(children)
+
+
