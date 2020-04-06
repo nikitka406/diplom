@@ -1,5 +1,5 @@
 coordinate.txt
-output
+output/*
 1.txt
 2.txt
-input
+input/*
