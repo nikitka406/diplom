@@ -143,8 +143,12 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
 
 
 # Отчищаем файл
-def ClearFileSolutionPopulation():
+def ClearAllFile():
     file = open('output/SolutionPopulation.txt', 'w')
+    file.close()
+    file = open('output/population.txt', 'w')
+    file.close()
+    file = open('output/StartSolution.txt', 'w')
     file.close()
 
 
@@ -262,7 +266,7 @@ def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function
 def AmountCarUsed(lokal_y):
     summa = 0  # счетчик
     amount = 0  # число машин
-    for k in range(factory.KA):
+    for k in range(len(lokal_y[0])):
         for j in range(factory.N):
             summa += lokal_y[j][k]  # смотрим посещает ли К-ая машина хотя бы один город
         if summa != 0:  # если не 0 значит  посетила
@@ -290,7 +294,7 @@ def CopyingSolution(local_x, local_y, local_s, local_a):
 # подсчет значения целевой функции
 def CalculationOfObjectiveFunction(x, y, pinalty_function=0):
     target_function = 0
-    for k in range(factory.KA):
+    for k in range(len(y[0])):
         for i in range(factory.N):
             for j in range(factory.N):
                 target_function += factory.d[i][j] * x[i][j][k]
@@ -583,7 +587,7 @@ def OperatorJoin(x, y, s, a, client, sosed):
 def PenaltyFunction(s, a):
     penalty_sum = 0
     for i in range(factory.N):
-        for k in range(factory.KA):
+        for k in range(len(a[i])):
             if a[i][k] + s[i][k] > factory.l[i]:
                 # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
@@ -687,7 +691,7 @@ def X_join_Y(x, y):
     bufer1 = 0
     bufer2 = 0
     # Add constraint:
-    for k in range(factory.KA):
+    for k in range(len(y[0])):
         for j in range(factory.N):
             for i in range(factory.N):
                 bufer1 += x[i][j][k]
@@ -705,7 +709,7 @@ def V_jobs(s):
     # Add constraint: sum (s[i][k])==S[i]
     for i in range(1, factory.N):
         if i != 0:
-            for k in range(factory.KA):
+            for k in range(len(s[i])):
                 bufer1 += s[i][k]
             if bufer1 != factory.S[i]:
                 print("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте", i,
@@ -720,7 +724,7 @@ def TC_equal_KA(y):
     # Add constraint: sum (y[i][k])<=ka[i]
     for i in range(1, factory.N):
         if i != 0:
-            for k in range(factory.KA):
+            for k in range(len(y[i])):
                 bufer1 += y[i][k]
             if bufer1 > factory.wells[i]:
                 print("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте", i,
@@ -733,7 +737,7 @@ def TC_equal_KA(y):
 def ban_driling(s, y):
     # Add constraint: s[i][k] <=S[i]*y[i][k]
     for i in range(1, factory.N):
-        for k in range(factory.KA):
+        for k in range(len(y[i])):
             if s[i][k] > factory.S[i] * y[i][k]:
                 print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект", i,
                       ", но начало бурение")
@@ -744,7 +748,7 @@ def ban_driling(s, y):
 def window_time_down(a, y):
     # Add constraint: e[i]<=a[i][k]
     for i in range(1, factory.N):
-        for k in range(factory.KA):
+        for k in range(len(y[i])):
             if factory.e[i] > a[i][k] and y[i][k] == 1:
                 print("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект", i,
                       "меньше чем начало работ")  # не работает ээто ограничение
@@ -755,7 +759,7 @@ def window_time_down(a, y):
 def window_time_up(a, s, y):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, factory.N):
-        for k in range(factory.KA):
+        for k in range(len(a[i])):
             if a[i][k] + s[i][k] > factory.l[i] and y[i][k] == 1:
                 print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект", i,
                       "больше чем конец работ")
@@ -780,7 +784,7 @@ def positive_a_and_s(x, y, a, s):
     # Add constraint: s[i][k] >= 0 and a[i][k] >= 0
     for i in range(factory.N):
         for j in range(factory.N):
-            for k in range(factory.KA):
+            for k in range(len(y[i])):
                 if s[i][k] < 0 or a[i][k] < 0:
                     print("ERROR from ban_cycle: сломалось седьмое ограничение, неправельные значение переменных a, s")
                     return 0

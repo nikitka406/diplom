@@ -36,13 +36,109 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
                 XDisplayInTheSequenceX2(x, bufer, j, k, bul)
 
 
+# Подсчитывает число используемых машин в последовательности
+def CountUsedMachines(sequence):
+    return sequence.count([0, 0]) - 1
+
+
+# Выставляем сколько работает каждая машина на локации after
+def WorkTimeCounting(sequence, s, after, count_car):
+    local_count = sequence.count([after, 0])
+    print("На локации ", after, " работает ", local_count, " машин")
+
+    # Считаем сколько хватит каждому скважин
+    div = factory.wells[after] // local_count
+    if div > 0:
+        print("Присваиваем каждой машине, которая работает на локации ", after, " ", div, "кол-во скважин")
+        for i in range(count_car):
+            s[after][i] = div * (factory.S[after] / factory.wells[after])
+
+        div = factory.wells[after] % local_count
+        if div == 0:
+            print("Свободных скважин не осталось, мы все распределили")
+
+        else:
+            print("Но у нас еще осталось ", div, " свободных скважин")
+            print("Создадим массив, в котором будут номера машин которые обслуживают этот город. Он равен ")
+
+            k = 0
+            car_for_after = []
+            for i in range(1, len(sequence)):
+                if sequence[i][0] == 0:
+                    k += 1
+                elif sequence[i][0] != 0 and sequence[i][0] == after:
+                    car_for_after.append(k)
+
+            print(car_for_after)
+
+            print("Распределяем рандомным клиентам оставшиеся скважины")
+            while div != 0:
+                car = random.choice(car_for_after)
+                print("Назначаем машине с номером ", car, " еще одну скважину")
+                s[after][car] += factory.S[after] / factory.wells[after]
+                car_for_after.remove(car)
+                print("Осталось распределить ", div, " скважин")
+                div -= 1
+
+    else:
+        print("ERROR from WorkTimeCounting: Почему-то оказалось скважин меньше чем приехавших машин")
+
+
+# Находим время прибытия к after
+def ArrivalTime(a, s, before, after, k):
+    print("Считаем время прибытия на локацию")
+    time = a[before][k] + s[before][k] + factory.t[before][after]
+
+    print("Дерективный срок = ", factory.e[after])
+    print("Фактическое время прибытия = ", time)
+    if factory.e[after] >= time:
+        print("Приехали слишком рано ждем начало временного окна")
+        return factory.e[after]
+
+    elif factory.e[after] < time:
+        print("Опоздали на начало работ")
+        return time
+
+
 # Преобразуем последовательность в матрицы решений
 def SequenceDisplayInTheXYSA(sequence):
     print("Переделываем последовательность в матрицы решений")
-    x = []
-    y = []
-    s = []
-    a = []
+
+    count_car = CountUsedMachines(sequence)
+    print("Количество машин используемых ребенком = ", count_car)
+
+    x = [[[0 for k in range(count_car)] for j in range(factory.N)] for i in
+         range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    y = [[0 for k in range(count_car)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(count_car):
+        y[0][k] = 1
+    s = [[0 for k in range(count_car)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    a = [[0 for k in range(count_car)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
+    print("Сначала распределим сколько каждая машина работает на каждой локации")
+    for i in range(1, len(sequence)):
+        after = sequence[i][0]
+        print("Начнем с локации ", after)
+        WorkTimeCounting(sequence, s, after, count_car)
+
+    k = 0
+    print("Теперь перейдем к заполнению матрицы Х У А")
+    for i in range(1, len(sequence)):
+        if sequence[i][0] == 0:
+            k += 1
+            print("Увидели 0, значит переходим к следующей машине с номером ", k)
+            if k == count_car:
+                break
+
+        before = sequence[i - 1][0]
+        after = sequence[i][0]
+        print("Предыдущий посещенный ", before)
+        print("Которого вставляем ", after)
+
+        x[before][after][k] = 1
+        y[after][k] = 1
+        a[after][k] = ArrivalTime(a, s, before, after, k)
+
     return x, y, s, a
 
 
@@ -131,11 +227,15 @@ def RandNotVisitClient(countOfRaces, flag):
     print("Of RandNotVisitClient: создали массив, у каких клиентов остались свободные скважины")
     print(count_not_visit)
 
-    # берем рандомного из списка не посещенных
-    i = random.randint(0, len(count_not_visit) - 1)
+    try:
+        # берем рандомного из списка не посещенных
+        i = random.choice(count_not_visit)
+        print("Взяли рандомного из этого списка равного ", i)
+        return i
 
-    print("Взяли рандомного из этого списка равного ", count_not_visit[i])
-    return count_not_visit[i]
+    except IndexError:
+        print("Больше нет клиентов с свободными скважинами")
+        return -1
 
 
 # рекурсивный поиск для скрещивания
@@ -285,20 +385,34 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                 print(bufer_in)
                 print("равен ", i_in)
 
-                # ищем нового клиента, пока не найдем не посещенного и у которого
-                # остались свободные скважины
+                # ищем нового клиента, пока не найдем не посещенного (flag[next_client] == 0) и у которого
+                # остались свободные скважины (countOfRaces[next_client] > 0)
                 # Здесь все заебись, проверенно программой!!!!!!!!!!
                 count = 0
-                while (flag[next_client] == 1 or countOfRaces[next_client]
-                       <= 0) and count <= factory.N and bufer_in[next_client][1] == 1:
+                while ((flag[next_client] == 1 and countOfRaces[next_client]
+                        <= 0) or (flag[next_client] == 0 and countOfRaces[next_client]
+                                  <= 0) or (flag[next_client] == 1 and countOfRaces[next_client]
+                                            > 0)) and count <= factory.N:
                     print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
                                                     "этой машине либо нет свободных скважин")
 
                     # счетчик, чтобы вайл не был бесконечным
                     count += 1
-                    next_client = random.randint(0, factory.N - 1)
-                    # номер позиции клиента bufer_out[i_out] в bufer_in
-                    i_in = NumberClientaInSequence(bufer_in, next_client)
+
+                    if numberInCar >= factory.param_min_num_cl_in_car:
+
+                        next_client = random.randint(0, factory.N - 1)
+                        # номер позиции клиента bufer_out[i_out] в bufer_in
+                        i_in = NumberClientaInSequence(bufer_in, next_client)
+
+                    elif numberInCar < factory.param_min_num_cl_in_car:
+
+                        next_client = random.randint(1, factory.N - 1)
+                        # номер позиции клиента bufer_out[i_out] в bufer_in
+                        i_in = NumberClientaInSequence(bufer_in, next_client)
+
+                    else:
+                        print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
 
                 # Означает что нашли рандомного
                 if count <= factory.N:
@@ -386,16 +500,30 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         # остались свободные скважины
         # Здесь все заебись!!!!!!!!!!
         count = 0
-        while (flag[next_client] == 1 or countOfRaces[next_client]
-               <= 0) and count <= factory.N:
+        while ((flag[next_client] == 1 and countOfRaces[next_client]
+                <= 0) or (flag[next_client] == 0 and countOfRaces[next_client]
+                          <= 0) or (flag[next_client] == 1 and countOfRaces[next_client]
+                                    > 0)) and count <= factory.N:
             print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
                                             "этой машине либо нет свободных скважин")
 
             # счетчик, чтобы вайл не был бесконечным
             count += 1
-            next_client = random.randint(0, factory.N - 1)
-            # номер позиции клиента bufer_out[i_out] в bufer_in
-            i_in = NumberClientaInSequence(bufer_in, next_client)
+
+            if numberInCar >= factory.param_min_num_cl_in_car:
+
+                next_client = random.randint(0, factory.N - 1)
+                # номер позиции клиента bufer_out[i_out] в bufer_in
+                i_in = NumberClientaInSequence(bufer_in, next_client)
+
+            elif numberInCar < factory.param_min_num_cl_in_car:
+
+                next_client = random.randint(1, factory.N - 1)
+                # номер позиции клиента bufer_out[i_out] в bufer_in
+                i_in = NumberClientaInSequence(bufer_in, next_client)
+
+            else:
+                print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
 
         # Означает что нашли рандомного
         if count <= factory.N:
@@ -494,29 +622,53 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         print("Берем рандомного клиента у кторого есть не посещенные скважины с помощью функции RandNotVisitClient")
         rand_client = RandNotVisitClient(countOfRaces, flag)
 
-        # номер позиции клиента bufer_out[i_out][0] в bufer_in
-        i_in = NumberClientaInSequence(bufer_in, rand_client)
-        print("Новый рандомный клиент ", rand_client, "находится под номером ", i_in, "в последовательности ")
-        print(bufer_in)
+        # Нашли рандомного клиента
+        if rand_client != -1:
+            # номер позиции клиента bufer_out[i_out][0] в bufer_in
+            i_in = NumberClientaInSequence(bufer_in, rand_client)
+            print("Новый рандомный клиент ", rand_client, "находится под номером ", i_in, "в последовательности ")
+            print(bufer_in)
 
-        # добавляем в ребенка bufer_in[i_in + 1]
-        children.append([rand_client, 0])
+            # добавляем в ребенка bufer_in[i_in + 1]
+            children.append([rand_client, 0])
 
-        # ставим флажки
-        flag[bufer_in[i_in][0]] = 1
-        flagAll[bufer_in[i_in][0]] = 1
+            # ставим флажки
+            flag[bufer_in[i_in][0]] = 1
+            flagAll[bufer_in[i_in][0]] = 1
 
-        # Уменьшаем кол-во машин которые к этому клиенту могут приехать
-        countOfRaces[bufer_in[i_in][0]] -= 1
+            # Уменьшаем кол-во машин которые к этому клиенту могут приехать
+            countOfRaces[bufer_in[i_in][0]] -= 1
 
-        # плюс один клиент в машине
-        numberInCar += 1
+            # плюс один клиент в машине
+            numberInCar += 1
 
-        print("Ребенок выглядит пока вот так ")
-        print(children)
-        print("______________________________")
+            print("Ребенок выглядит пока вот так ")
+            print(children)
+            print("______________________________")
 
-        RecursiveSearchSosed(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosed(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+
+        elif rand_client == -1:
+            print("Возвращаемся в депо")
+            # добавляем в ребенка bufer_in[k_in][i_in + 1.txt]
+            children.append([0, 0])
+
+            # Ставим флаг в последовательности в которой искали ребро в доп ячееки
+            bufer_in[i_in][1] = 1
+
+            # ставим влаг
+            flag[0] = 1
+            flagAll[0] = 1
+
+            # зануляем сяетчик, так как следом будет уже другая машина
+            numberInCar = 0
+
+            print("Ребенок выглядит пока вот так ")
+            print(children)
+            print("Переходим к следующей машине")
+            print(
+                "_______________________________________________________________________________________________________")
+            return True
 
     # это значит что встретили ноль, цикл должен завершится
     # Здесь все заебись, проверенно программой!!!!!!!!!!
@@ -530,7 +682,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         bufer_in[i_in][1] = 1
 
         # ставим влаг
-        flag[bufer_in[i_in + 1][0]] += 1
+        flag[bufer_in[i_in + 1][0]] = 1
         flagAll[bufer_in[i_in + 1][0]] = 1
 
         # зануляем сяетчик, так как следом будет уже другая машина
@@ -590,12 +742,12 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         # bufer1[i][0] == 0 ищем ноль,
         # bufer1[i][1.txt] == 0 из которого еще не выезжали
         # bufer1[i+1.txt][0] > 0 у которого еще есть свободные скважины
-        if bufer1[i][0] == 0 and bufer1[i][1] == 0 and countOfRaces[bufer1[i + 1][0]] > 0:
+        if bufer1[i] == [0, 0] and countOfRaces[bufer1[i + 1][0]] > 0:
             print("Нашли 0 в решении")
             print(bufer1)
             print("из которого еще не выезжали и первый после него со скважинами ", bufer1[i + 1][0])
 
-            bufer1[i][0] = 1
+            bufer1[i][1] = 1
             AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, i + 1)
             RecursiveSearchSosed(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar)
             return
@@ -606,14 +758,14 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         # bufer2[i][0] == 0 ищем ноль,
         # bufer2[i][1.txt] == 0 из которого еще не выезжали
         # countOfRaces[bufer2[i + 1.txt][0]] > 0 у которого еще есть свободные скважины
-        if bufer2[i][0] == 0 and bufer2[i][1] == 0 and countOfRaces[bufer2[i + 1][0]] > 0:
+        if bufer2[i] == [0, 0] and countOfRaces[bufer2[i + 1][0]] > 0:
             print("Не нашли 0 в решении")
             print(bufer1)
             print("но, нашли 0 в решении")
             print(bufer2)
             print("из которого еще не выезжали и первый после него со скважинами ", bufer2[i + 1][0])
 
-            bufer1[i][0] = 1
+            bufer2[i][1] = 1
             AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, i + 1)
             RecursiveSearchSosed(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar)
             return
@@ -918,28 +1070,34 @@ def LocalSearch(x, y, s, a, target_function):
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
 def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
+    print("Начинаем процесс порождения нового решения")
     for crossing in range(factory.param_crossing):
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
+        print("Выбрали сценарий по выбору родителей", scenario)
 
         # Выбираю как буду сохранять полученное решение
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
         scenario_add = random.choice(scenario_add_new_solution)
+        print("Выбрали сценарий по сохранению нового решения", scenario_add)
 
         # TODO Задаю список с названиями операторов
-        # name_operators = ['AEX', 'HGreX', 'HRndX', 'HProX']
-        # operator = random.choice(name_operators)
-        operator = 'AEX'
+        name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
+        crossover = random.choice(name_crossover)
+        crossover = 'AEX'
+        print("Выбрали кроссовер для скрещивания", crossover)
 
         # Идем по одному сценарию
         if scenario == 'randomAndRandom':
             print("Пошли по сценарию, два рандомных решения")
             # Индекс первого родителя
-            index = random.randint(0, factory.param_population)
+            index = int(random.randint(0, factory.param_population))
+            print("Номер первого решения ", index)
 
             # Индекс второго родителя
-            jndex = random.randint(0, factory.param_population)
+            jndex = int(random.randint(0, factory.param_population))
+            print("Номер второго решения ", jndex)
 
             # Если вдруг индекс второго родителя равен первому
             while jndex == index:
@@ -950,41 +1108,45 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             print("Второе рандомное решение")
             print(Sequence[jndex])
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'randomAndBad':
             print("Пошли по сценарию, один рандомный второй самый худший")
             # Индекс первого родителя
             index = random.randint(0, factory.param_population)
+            print("Номер первого решения ", index)
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(maximum)
+            print("Номер второго решения ", jndex)
 
             print("Первое рандомное решение")
             print(Sequence[index])
             print("Второе решение, худшие из всех")
             print(Sequence[jndex])
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndRand':
             print("Пошли по сценарию, один рандомный второй самый лудший")
             # Индекс первого родителя
             index = random.randint(0, factory.param_population)
+            print("Номер первого решения ", index)
 
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(minimum)
+            print("Номер второго решения ", jndex)
 
             print("Первое рандомное решение")
             print(Sequence[index])
             print("Второе решение, лудшие из всех")
             print(Sequence[jndex])
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndBad':
             print("Пошли по сценарию, один самый лудший второй самый худший")
@@ -992,24 +1154,30 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             minimum = min(Target_Function)
             # Оно будет первым родителем
             index = Target_Function.count(minimum)
+            print("Номер первого решения ", index)
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(maximum)
+            print("Номер второго решения ", jndex)
 
             print("Первое решение, лудшие из всех")
             print(Sequence[index])
             print("Второе решение, худшие из всех")
             print(Sequence[jndex])
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], operator)
+            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+
+        # У ребенка в конце может не быть нуля
+        if children[-1] != [0, 0]:
+            children.append([0, 0])
 
         # Переводим последовательность в матрицы решений
         x, y, s, a = SequenceDisplayInTheXYSA(children)
 
         # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, y)
+        target_function = CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
         print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
 
         # Применяем локальный поиск
@@ -1066,3 +1234,11 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             Sequence.append(children)
 
 
+def CheckSequence(Sequence):
+    if Sequence.count([0, 0]) != 0 and Sequence.count([1, 0]) != 0 and Sequence.count([2, 0]) != 0 and Sequence.count(
+            [3, 0]) != 0 and Sequence.count([4, 0]) != 0 and Sequence.count([5, 0]) != 0 and Sequence.count(
+            [6, 0]) != 0 and Sequence.count([7, 0]) != 0 and Sequence.count([8, 0]) != 0 and Sequence.count(
+            [9, 0]) != 0:
+        return 1
+    else:
+        return 0

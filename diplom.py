@@ -2,7 +2,7 @@ from function import *
 import factory
 from crossover import *
 
-ClearFileSolutionPopulation()
+ClearAllFile()
 target_function = 0  # значение целевой функции
 # TODO надо разобраться почему время в А выставляется не правильно
 
@@ -38,7 +38,16 @@ ReadSolutionPopulationOnFile(X, Y, Sresh, A)
 # Создаем последовательность решения
 Sequence = CreateSequence(X)
 
+# Создаем новые решения
+GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function)
 
-print(Sequence[0])
-print(Sequence[1])
-AEX(Sequence[0], Sequence[1])
+print("Минимальная целевая функция ", min(Target_Function), " номер решения ", Target_Function.count(min(Target_Function)))
+
+
+#
+# for i in  range(factory.param_population):
+#     result = CheckSequence(Sequence[i])
+#     if result != 1:
+#         print("Последовательность строится не верно")
+#         print(Sequence[i])
+# AEX(Sequence[0], Sequence[1])
