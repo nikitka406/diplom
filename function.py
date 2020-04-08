@@ -771,7 +771,7 @@ def ban_cycle(a, x, s, y):
     # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1.txt-x[i][j][k])
     for i in range(1, factory.N):
         for j in range(1, factory.N):
-            for k in range(factory.KA):
+            for k in range(len(a[0])):
                 if a[i][k] - a[j][k] + x[i][j][k] * factory.t[i][j] + s[i][k] > factory.l[i] * (1 - x[i][j][k]) and \
                         y[i][k] == 1:
                     print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,

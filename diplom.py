@@ -1,6 +1,9 @@
 from function import *
 import factory
 from crossover import *
+import time
+start = time.time()
+
 
 ClearAllFile()
 target_function = 0  # значение целевой функции
@@ -42,6 +45,7 @@ Sequence = CreateSequence(X)
 GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function)
 
 print("Минимальная целевая функция ", min(Target_Function), " номер решения ", Target_Function.count(min(Target_Function)))
+print(time.time() - start, "seconds")
 
 
 #
