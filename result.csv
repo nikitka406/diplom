@@ -19,3 +19,13 @@ Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_
 94028.0,1.0177912712097168,5,5,2,10,5
 Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search
 95027.0,0.8541104793548584,5,5,2,10,5
+Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search
+0,5.086968898773193,5,5,2,10,5
+Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search
+0,4.431257247924805,5,5,2,10,5
+Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search,Sequence
+1420047.3970987361,4.978840589523315,5,5,2,10,5,"[[0, 0], [1, 0], [0, 0], [2, 0], [0, 0], [3, 0], [0, 0], [6, 0], [5, 0], [0, 0], [8, 0], [7, 0], [0, 0], [9, 0], [0, 0], [11, 0], [0, 0], [12, 0], [0, 0], [13, 0], [0, 0], [14, 0], [10, 0], [4, 0], [0, 0], [15, 0], [0, 0]]"
+Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search,Sequence
+1574013.2354958996,8.090243101119995,5,5,2,10,5,"[[0, 0], [2, 0], [0, 0], [3, 0], [0, 0], [5, 0], [0, 0], [6, 0], [0, 0], [7, 0], [0, 0], [8, 0], [0, 0], [9, 0], [0, 0], [10, 0], [4, 0], [0, 0], [11, 0], [13, 0], [0, 0], [12, 0], [0, 0], [14, 0], [0, 0], [15, 0], [1, 0], [0, 0]]"
+Target_function,Time_job,param_start_solution,param_population,param_min_num_cl_in_car,param_crossing,param_local_search,Sequence
+958062.1493563924,70.7200698852539,14,50,4,100,14,"[[0, 0], [4, 0], [0, 0], [7, 0], [0, 0], [9, 0], [8, 0], [0, 0], [10, 0], [0, 0], [12, 0], [5, 0], [3, 0], [0, 0], [13, 0], [2, 0], [1, 0], [0, 0], [14, 0], [11, 0], [0, 0], [15, 0], [6, 0], [0, 0]]"

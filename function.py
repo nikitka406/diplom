@@ -6,10 +6,10 @@ sys.setrecursionlimit(1000)
 
 
 # Сохраняем решение в файл
-def SaveDateResult(result, time):
+def SaveDateResult(result, time, sequence):
     with open('result.csv', 'a') as csvfile:
         fieldnames = ['Target_function', 'Time_job', 'param_start_solution', 'param_population',
-                      'param_min_num_cl_in_car', 'param_crossing', 'param_local_search']#, 'Sequence']
+                      'param_min_num_cl_in_car', 'param_crossing', 'param_local_search', 'Sequence']
         writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
 
         writer.writeheader()
@@ -19,7 +19,7 @@ def SaveDateResult(result, time):
                          'param_min_num_cl_in_car': factory.param_min_num_cl_in_car,
                          'param_crossing': factory.param_crossing,
                          'param_local_search': factory.param_local_search,
-                         })
+                         'Sequence': sequence})
 
     print("Writing complete")
 
@@ -94,8 +94,8 @@ def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
 
 
 # Сохраняем популяцию, добавляя новое решение в конец
-def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A, number):
-    file = open('output/population/SolutionPopulation' + str(number) + '.txt', 'w')
+def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A):
+    file = open('output/SolutionPopulation.txt', 'a')
 
     # Печатаем в файл Х
     for i in range(factory.N):
@@ -124,49 +124,48 @@ def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A, number):
 
 
 # Считываем популяцию
-def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a, number):
-    file = open('output/population/SolutionPopulation' + str(number) + '.txt', 'r')
+def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
+    file = open('output/SolutionPopulation.txt', 'r')
     print("Считываем популяцию из файла output/SolutionPopulation.txt")
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
     index = 0
-    # for n in range(factory.param_population):
-    # Печатаем в файл Х
-    for i in range(factory.N):
-        for j in range(factory.N):
-            # for k in range(factory.KA):
-            local_x[i][j] = line[index].split()
-            for k in range(len(local_x[i][j])):
-                local_x[i][j][k] = int(local_x[i][j][k])
+    for n in range(factory.param_population):
+        # Печатаем в файл Х
+        for i in range(factory.N):
+            for j in range(factory.N):
+                # for k in range(factory.KA):
+                local_x[n][i][j] = line[index].split()
+                for k in range(len(local_x[n][i][j])):
+                    local_x[n][i][j][k] = int(local_x[n][i][j][k])
+                index += 1
+
+        # Печатаем в файл Y
+        for i in range(factory.N):
+            local_y[n][i] = line[index].split()
+            for k in range(len(local_y[n][i])):
+                local_y[n][i][k] = int(local_y[n][i][k])
             index += 1
 
-    # Печатаем в файл Y
-    for i in range(factory.N):
-        local_y[i] = line[index].split()
-        for k in range(len(local_y[i])):
-            local_y[i][k] = int(local_y[i][k])
-        index += 1
-
-    # Печатаем в файл S
-    for i in range(factory.N):
-        local_s[i] = line[index].split()
-        for k in range(len(local_s[i])):
-            local_s[i][k] = float(local_s[i][k])
-        index += 1
-
-    # Печатаем в файл A
-    for i in range(factory.N):
-        local_a[i] = line[index].split()
-        for k in range(len(local_a[i])):
-            local_a[i][k] = float(local_a[i][k])
-        index += 1
+        # Печатаем в файл S
+        for i in range(factory.N):
+            local_s[n][i] = line[index].split()
+            for k in range(len(local_s[n][i])):
+                local_s[n][i][k] = float(local_s[n][i][k])
+            index += 1
+        # Печатаем в файл A
+        for i in range(factory.N):
+            local_a[n][i] = line[index].split()
+            for k in range(len(local_a[n][i])):
+                local_a[n][i][k] = float(local_a[n][i][k])
+            index += 1
     file.close()
 
 
 # Отчищаем файл
 def ClearAllFile():
-    file = open('output/population/SolutionPopulation.txt', 'w')
+    file = open('output/SolutionPopulation.txt', 'w')
     file.close()
     file = open('output/population.txt', 'w')
     file.close()
@@ -503,9 +502,9 @@ def CarIsWork(y, k):
 
 
 # Рекурсия чтобы заполнить время прибытия
-def RecursiaForTime(x, s, a, i, k):
+def RecursiaForTime(x, s, a, i, k, recurs):
     for j in range(factory.N):
-        if x[i][j][k] != 0 and j != 0:
+        if x[i][j][k] != 0 and j != 0 and recurs < factory.N:
             print("Нашли соседа для ", i, " справа ", j)
             print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
             # если время прибытия меньше начала работ, то ждем
@@ -519,8 +518,9 @@ def RecursiaForTime(x, s, a, i, k):
                 a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
                 print("a[j][k] = ", a[j][k])
 
-            RecursiaForTime(x, s, a, j, k)
-        elif x[i][j][k] != 0 and j == 0:
+            recurs += 1
+            RecursiaForTime(x, s, a, j, k, recurs)
+        elif x[i][j][k] != 0 and j == 0 and recurs < factory.N:
             print("Встретили ноль, пора заканчивать рекурсию")
             print("Время прибытия в ", i, " = ", a[i][k])
             print("Время работы в ", i, " = ", s[i][k])
@@ -535,16 +535,23 @@ def RecursiaForTime(x, s, a, i, k):
 
             return True
 
+        elif recurs > factory.N:
+            return -1
+
 
 # определяем время приезда на конкретную локацию
 def TimeOfArrival(x, y, s):
+    recurs = 0
     print("Начнем заполнять время прибытия")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k) == 1:
             print("ЗАходим в рекурсию")
-            RecursiaForTime(x, s, a, 0, k)
-    return a
+            flag = RecursiaForTime(x, s, a, 0, k, recurs)
+    if flag != -1:
+        return a
+    elif flag == -1:
+        return flag
 
 
 # удаляем клиента из выбранного  маршрут
@@ -676,55 +683,56 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
     A = TimeOfArrival(X, Y, Sresh)
     # X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
-    # проверка на успеваемость выполнения работ
-    # если не успел уложиться в срок, штраф
-    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
-    if window_time_up(A, Sresh, Y) == 0:
-        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
-            print("NOTIFICATION from JoiningClientToNewSosed: вставили с нарушением временного окна")
+    if A != -1:
+        # проверка на успеваемость выполнения работ
+        # если не успел уложиться в срок, штраф
+        print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
+        if window_time_up(A, Sresh, Y) == 0:
+            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
+                print("NOTIFICATION from JoiningClientToNewSosed: вставили с нарушением временного окна")
+                target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
+                x, y, s, a = CopyingSolution(X, Y, Sresh, A)
+            else:
+                print(
+                    "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+        elif VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
+            print("NOTIFICATION from JoiningClientToNewSosed: вставили без нарушений ограничений")
             target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
         else:
-            print(
-                "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
-    elif VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
-        print("NOTIFICATION from JoiningClientToNewSosed: вставили без нарушений ограничений")
-        target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-        x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-    else:
-        print("ERROR from JoiningClientToNewSosed: не получилось переставить, что-то пошло нет")
+            print("ERROR from JoiningClientToNewSosed: не получилось переставить, что-то пошло нет")
+
     return target_function, x, y, s, a
 
 
 # Создаем хранилище решений, для большего числа рещений
 def SolutionStore():
     # Хранилище решений, первый индекс это номер решения, со второго начинается само решение
-    # X = [0 for n in range(factory.param_population)]  # едет или нет ТС с номером К из города I в J
-    # for n in range(factory.param_population):
-    X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
+    X = [0 for n in range(factory.param_population)]  # едет или нет ТС с номером К из города I в J
+    for n in range(factory.param_population):
+        X[n] = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
 
-    # Y = [0 for n in range(factory.param_population)]  # посещает или нет ТС с номером К объект i
-    # for n in range(factory.param_population):
-    Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    Y = [0 for n in range(factory.param_population)]  # посещает или нет ТС с номером К объект i
+    for n in range(factory.param_population):
+        Y[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-    # Sresh = [0 for n in range(factory.param_population)]  # время работы ТС c номером К на объекте i
-    # for n in range(factory.param_population):
-    Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    Sresh = [0 for n in range(factory.param_population)]  # время работы ТС c номером К на объекте i
+    for n in range(factory.param_population):
+        Sresh[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-    # A = [0 for n in range(factory.param_population)]  # время прибытия ТС с номером К на объект i
-    # for n in range(factory.param_population):
-    A = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+    A = [0 for n in range(factory.param_population)]  # время прибытия ТС с номером К на объект i
+    for n in range(factory.param_population):
+        A[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
 
-    # Target_Function = [0 for n in
-    #                  range(factory.param_population)]  # здесь сохраняем результат целевой функции для каждого решения
+    Target_Function = [0 for n in
+                       range(factory.param_population)]  # здесь сохраняем результат целевой функции для каждого решения
 
-    return X, Y, Sresh, A
+    return X, Y, Sresh, A, Target_Function
 
 
 # Cоздаем популяцию решений
 def PopulationOfSolutions(Target_Function, x, y, s, a):
     for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
-
         # Берем стартовое решение из файла, потому что какой-то пиздюк его испортил
         ReadStartSolutionOfFile(x, y, s, a)
 
@@ -734,9 +742,9 @@ def PopulationOfSolutions(Target_Function, x, y, s, a):
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
-        SavePopulation(x, y, s, a, n)
 
-    ReadStartSolutionOfFile(x, y, s, a)
+        SavePopulation(x, y, s, a)
+
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
 
