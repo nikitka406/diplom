@@ -14,6 +14,7 @@ x, y, s, a = OneCarOneLocation()
 target_function = CalculationOfObjectiveFunction(x, y)
 print(target_function)
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
+print("Проверка стартового решения пройдена")
 
 # Освобождаем машины если позволяют гран усл
 DeleteCarNonNarushOgr(x, y, s, a)
@@ -22,8 +23,8 @@ DeleteCarNonNarushOgr(x, y, s, a)
 # x, y, s, a = DeleteNotUsedCar(x, y, s, a)
 
 # Проверяем что ничего не сломалось
-target_function = CalculationOfObjectiveFunction(x, y)
-assert VerificationOfBoundaryConditions(x, y, s, a) == 1
+target_function = CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
+assert VerificationOfBoundaryConditions(x, y, s, a, "true") == 1
 print(target_function)
 
 # Сохраняем стартовое решение в файл
@@ -44,10 +45,13 @@ Sequence = CreateSequence(X)
 # Создаем новые решения
 GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function)
 
-print("Минимальная целевая функция ", min(Target_Function), " номер решения ", Target_Function.count(min(Target_Function)))
-print(time.time() - start, "seconds")
+min_result = min(Target_Function)
+number_solution = Target_Function.count(min(Target_Function))
+print("Минимальная целевая функция ", min_result, " номер решения ", number_solution)
+Time = time.time() - start
+print(Time, "seconds")
 
-
+SaveDateResult(min_result, Time, Sequence[number_solution])
 #
 # for i in  range(factory.param_population):
 #     result = CheckSequence(Sequence[i])

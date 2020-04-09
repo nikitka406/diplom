@@ -1,6 +1,27 @@
 import random
+import sys
 import factory
-import copy
+import csv
+sys.setrecursionlimit(10000)
+
+
+# Сохраняем решение в файл
+def SaveDateResult(result, time, sequence):
+    with open('result.csv', 'a') as csvfile:
+        fieldnames = ['Target_function', 'Time_job', 'param_start_solution', 'param_population',
+                      'param_min_num_cl_in_car', 'param_crossing', 'param_local_search', 'Sequence']
+        writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+
+        writer.writeheader()
+        writer.writerow({'Target_function': result, 'Time_job': time,
+                         'param_start_solution': factory.param_start_solution,
+                         'param_population': factory.param_population,
+                         'param_min_num_cl_in_car': factory.param_min_num_cl_in_car,
+                         'param_crossing': factory.param_crossing,
+                         'param_local_search': factory.param_local_search,
+                         'Sequence': sequence})
+
+    print("Writing complete")
 
 
 # Сохраняем стартовое решение в файл
@@ -73,8 +94,8 @@ def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
 
 
 # Сохраняем популяцию, добавляя новое решение в конец
-def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A):
-    file = open('output/SolutionPopulation.txt', 'a')
+def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A, number):
+    file = open('output/population/SolutionPopulation' + str(number) + '.txt', 'w')
 
     # Печатаем в файл Х
     for i in range(factory.N):
@@ -104,7 +125,7 @@ def SavePopulation(lokal_X, lokal_Y, lokal_Sresh, lokal_A):
 
 # Считываем популяцию
 def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
-    file = open('output/SolutionPopulation.txt', 'r')
+    file = open('output/population/SolutionPopulation.txt', 'r')
     print("Считываем популяцию из файла output/SolutionPopulation.txt")
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
@@ -144,7 +165,7 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
 
 # Отчищаем файл
 def ClearAllFile():
-    file = open('output/SolutionPopulation.txt', 'w')
+    file = open('output/population/SolutionPopulation.txt', 'w')
     file.close()
     file = open('output/population.txt', 'w')
     file.close()
@@ -327,6 +348,7 @@ def OneCarOneLocation():
                     s[j][k] = factory.S[j] / factory.wells[j]
                 else:
                     s[j][k] = factory.S[j]
+                    # TODO время в депо надо поставить
                 if factory.e[j] > factory.t[0][j]:
                     a[j][k] = factory.e[j]
                 else:
@@ -362,7 +384,7 @@ def DeleteCarNonNarushOgr(lokal_x, lokal_y, lokal_s, lokal_a):
 
 # перезапись одного маршрута на другой
 def Rewriting(lokal, k, m, flag):
-    if flag == "1.txt":
+    if flag == "1":
         for j in range(factory.N):
             lokal[j][k] = lokal[j][m]
             lokal[j][m] = 0
@@ -467,14 +489,61 @@ def SearchSosedLeftOrRight(x, y, client, leftOrRight):
         print("ERROR from SearchSosedLeftOrRight: неверное значение переменной leftOrRight")
 
 
-# определяем время приезда на конкретную локацию
-def TimeOfArrival(a, s, client, sosed, sosedK):
-    # если время прибытия меньше начала работ, то ждем
-    if factory.e[client] > a[sosed][sosedK] + s[sosed][sosedK] + factory.t[sosed][client]:
-        a[client][sosedK] = factory.e[client]
-    # иначе ставим время прибытия
+def CarIsWork(y, k):
+    suma = 0
+    for i in range(factory.N):
+        if y[i][k] == 1:
+            suma += 1
+
+    if suma != 0:
+        return 1
     else:
-        a[client][sosedK] = a[sosed][sosedK] + s[sosed][sosedK] + factory.t[sosed][client]
+        return -1
+
+
+# Рекурсия чтобы заполнить время прибытия
+def RecursiaForTime(x, s, a, i, k):
+    for j in range(factory.N):
+        if x[i][j][k] != 0 and j != 0:
+            print("Нашли соседа для ", i, " справа ", j)
+            print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
+            # если время прибытия меньше начала работ, то ждем
+            if factory.e[j] > a[i][k] + s[i][k] + factory.t[i][j]:
+                print("Приехали слишком рано ждем")
+                a[j][k] = factory.e[j]
+                print("a[j][k] = ", a[j][k])
+            # иначе ставим время прибытия
+            else:
+                print("Опоздали")
+                a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
+                print("a[j][k] = ", a[j][k])
+
+            RecursiaForTime(x, s, a, j, k)
+        elif x[i][j][k] != 0 and j == 0:
+            print("Встретили ноль, пора заканчивать рекурсию")
+            print("Время прибытия в ", i, " = ", a[i][k])
+            print("Время работы в ", i, " = ", s[i][k])
+            print("Время переиещения из ", i, " в ", j, " = ", factory.t[i][j])
+
+            a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
+
+            print("Время прибытия в депо = ", a[j][k])
+            for i in range(factory.N):
+                print(a[i][k], end=' ')
+            print('\n')
+
+            return True
+
+
+# определяем время приезда на конкретную локацию
+def TimeOfArrival(x, y, s):
+    print("Начнем заполнять время прибытия")
+    a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
+    for k in range(len(s[0])):
+        if CarIsWork(y, k) == 1:
+            print("ЗАходим в рекурсию")
+            RecursiaForTime(x, s, a, 0, k)
+    return a
 
 
 # удаляем клиента из выбранного  маршрут
@@ -496,7 +565,7 @@ def DeleteClientaFromPath(x, y, s, a, client):
         y[client][k] = 0  # машина К больше не обслуживает клиента
         s[client][k] = 0  # время работы машины К у клиента = 0
         a[client][k] = 0  # машина не прибывает к клиенту
-        TimeOfArrival(a, s, clientRight, clientLeft, k)
+        # a = TimeOfArrival(x, y, s)
         # если удаляем клиента и остается только депо, ставим там 0
         summa = 0
         for i in range(1, factory.N):
@@ -505,27 +574,8 @@ def DeleteClientaFromPath(x, y, s, a, client):
             y[0][k] = 0
     # если клиент лист
     if clientLeft == -1 or clientRight == -1:
-        print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")  # logir
+        print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")  # log
 
-
-#
-# #присоеденям к листу
-# def JoinClientaList(x, y, s, a, client, sosed):
-#     clientK = NumberCarClienta(y, client)                   #ищем номер машины клиента
-#     sosedK = NumberCarClienta(y, sosed)                     #ищем номер машины соседа
-#
-#     s[client][sosedK] = s[client][clientK]                  #машина соседа будет работать у клиента столько же
-#     TimeOfArrival(a, s, client, sosed, sosedK)              #Подсчет времени приезда к клиенту от соседа
-#     #Чтобы все корректно работало, сначала надонаписать
-#     # новое время приезда и новое время работы, потом
-#     # удалить старое решение, и только потом заполнять Х и У
-#     DeleteClientaFromPath(x, y, s, a, client)
-#
-#     x[sosed][0][sosedK] = 0                                 #теперь сосед не лист, значит из него не едет в депо
-#     x[sosed][client][sosedK] = 1.txt                            #вставляем клиента после соседа
-#     x[client][0][sosedK] = 1.txt                                #теперь клиент литс, значит он возвращается в депо
-#     y[client][sosedK] = 1.txt                                   #тепреь машина соседа обслуживает клиента
-#
 
 # вклиниваем между
 def OperatorJoin(x, y, s, a, client, sosed):
@@ -553,23 +603,27 @@ def OperatorJoin(x, y, s, a, client, sosed):
     if (factory.l[sosed] <= factory.l[client] <= factory.l[sosedRight] and sosedRight != 0) or (
             sosedRight == 0 and factory.l[sosed] <= factory.l[client]):
         print("Вставляем клиента к соседу справа")
-        s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
-        TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
+        # машина соседа будет работать у клиента столько же
+        s[client][sosedK] = s[client][clientK]
+
         # Чтобы все корректно работало, сначала надо написать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
         DeleteClientaFromPath(x, y, s, a, client)
-
         x[sosed][sosedRight][sosedK] = 0
         x[sosed][client][sosedK] = 1
         x[client][sosedRight][sosedK] = 1
         y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
+        # Подсчет времени приезда к клиенту от соседа
+        # TimeOfArrival(x, y, a, s, client, sosed, sosedK)
+
     elif (sosedLeft != 0 and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]) or (
             sosedLeft == 0 and factory.l[client] < factory.l[sosed]):
         print("Вставляем клиента к соседу слева")
-        s[client][sosedK] = s[client][clientK]  # машина соседа будет работать у клиента столько же
-        TimeOfArrival(a, s, client, sosed, sosedK)  # Подсчет времени приезда к клиенту от соседа
+        # машина соседа будет работать у клиента столько же
+        s[client][sosedK] = s[client][clientK]
+
         # Чтобы все корректно работало, сначала надонаписать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
@@ -578,6 +632,9 @@ def OperatorJoin(x, y, s, a, client, sosed):
         x[sosedLeft][client][sosedK] = 1
         x[client][sosed][sosedK] = 1
         y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+
+        # Подсчет времени приезда к клиенту от соседа
+        # TimeOfArrival(x, y, a, s, sosedLeft, client, sosedK)
 
     else:
         print("EXCEPTION from OperatorJoin: не получилось вставить ни слева ни справа из-за временных окон сверху")
@@ -615,6 +672,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
     print("К соседу ", sosed)
     print("На машине ", sosedK)
     OperatorJoin(X, Y, Sresh, A, client, sosed)
+    A = TimeOfArrival(X, Y, Sresh)
     # X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
     # проверка на успеваемость выполнения работ
@@ -634,7 +692,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
         x, y, s, a = CopyingSolution(X, Y, Sresh, A)
     else:
         print("ERROR from JoiningClientToNewSosed: не получилось переставить, что-то пошло нет")
-    return target_function
+    return target_function, x, y, s, a
 
 
 # Создаем хранилище решений, для большего числа рещений
@@ -659,28 +717,24 @@ def SolutionStore():
     Target_Function = [0 for n in
                        range(factory.param_population)]  # здесь сохраняем результат целевой функции для каждого решения
 
-    # # сохраняет последовательное посещение городов для каждой машины
-    # bufer = [0 for n in range(factory.param_population)]
-    # for n in range(factory.param_population):
-    #     bufer[n] = [[0 for j in range(factory.N + 1.txt)] for i in range(factory.KA)]  # первы индекс это номер машины,
-    #     # второй это последовательность посещения
     return X, Y, Sresh, A, Target_Function
 
 
 # Cоздаем популяцию решений
 def PopulationOfSolutions(Target_Function, x, y, s, a):
     for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
-        # Берем стартовое решение, потому что какой-то пиздюк его испортил
+        # Берем стартовое решение из файла, потому что какой-то пиздюк его испортил
         ReadStartSolutionOfFile(x, y, s, a)
 
         for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
             print("\nПереставление № ", local_s)
-            Target_Function[n] = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
+            Target_Function[n], x, y, s, a = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
 
-        SavePopulation(x, y, s, a)
+        SavePopulation(x, y, s, a, n)
+
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
 
