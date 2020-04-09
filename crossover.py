@@ -5,15 +5,17 @@ import random
 
 # Создание последовательности для каждого решения
 def CreateSequence(X):
-    # Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
-    sequenceX1 = [0 for n in range(factory.param_population)]
-    sequenceX2 = [0 for n in range(factory.param_population)]
+    # Создаем спсиок, в которой будем хранить последовательности для index решения
+    sequenceX1 = []
+    sequenceX2 = []
 
-    for m in range(factory.param_population):
-        # Интерпритируем матрицу Х на двумерный массив
-        sequenceX2[m] = GettingTheSequence(X[m])
-        sequenceX1[m] = TransferX2toX1(sequenceX2[m], X[m])
-        # print(sequenceX1[m], "\n")
+    # for m in range(factory.param_population):
+
+    # Интерпритируем матрицу Х на двумерный массив
+    sequenceX2 = GettingTheSequence(X)
+    sequenceX1 = TransferX2toX1(sequenceX2, X)
+    # print(sequenceX1[m], "\n")
+
     print("Матрица Х из популяция решений преобразованна в последовательность посещений для каждого решения")
     return sequenceX1
 
@@ -174,9 +176,9 @@ def SequenceDisplayInTheXYSA(sequence):
 # 0 9 0 0 0 0 0 0 0 0
 # Заебись, работает!!!
 def GettingTheSequence(X):
-    # factory.N+1.txt потому что последовательность может посещать все города и при этом возвращается в 0
+    # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
     sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(factory.KA)]
-    for k in range(factory.KA):
+    for k in range(len(X[0][0])):
         XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
     return sequenceX2
 
@@ -1184,10 +1186,12 @@ def Mutation(sequence):
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
-def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
+def GetNewSolution(Target_Function):
     print("Начинаем процесс порождения нового решения")
+
     for crossing in range(factory.param_crossing):
-        print("Запускаем ", crossing, " раз")
+        print("Запускаем ", crossing, "-ый раз")
+
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
@@ -1219,14 +1223,6 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             while jndex == index:
                 jndex = random.randint(0, factory.param_population - 1)
 
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе рандомное решение")
-            print(Sequence[jndex])
-
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
-
         elif scenario == 'randomAndBad':
             print("Пошли по сценарию, один рандомный второй самый худший")
             # Индекс первого родителя
@@ -1239,14 +1235,6 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             jndex = Target_Function.count(maximum)
             print("Номер второго решения ", jndex)
 
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе решение, худшие из всех")
-            print(Sequence[jndex])
-
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
-
         elif scenario == 'BestAndRand':
             print("Пошли по сценарию, один рандомный второй самый лудший")
             # Индекс первого родителя
@@ -1258,14 +1246,6 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             # Оно будет вторым родителем
             jndex = Target_Function.count(minimum)
             print("Номер второго решения ", jndex)
-
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе решение, лудшие из всех")
-            print(Sequence[jndex])
-
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndBad':
             print("Пошли по сценарию, один самый лудший второй самый худший")
@@ -1281,13 +1261,21 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             jndex = Target_Function.count(maximum)
             print("Номер второго решения ", jndex)
 
-            print(Sequence)
-            print("Первое решение, лудшие из всех")
-            print(Sequence[index])
-            print("Второе решение, худшие из всех")
-            print(Sequence[jndex])
+        X1, Y1, Sresh1, A1 = SolutionStore()
+        X2, Y2, Sresh2, A2 = SolutionStore()
+        ReadSolutionPopulationOnFile(X1, Y1, Sresh1, A1, index)
+        ReadSolutionPopulationOnFile(X2, Y2, Sresh2, A2, jndex)
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+        print("Считываем решение из файла ")
+        Sequence1 = CreateSequence(X1)
+        Sequence2 = CreateSequence(X2)
+
+        print("Первое рандомное решение")
+        print(Sequence1)
+        print("Второе рандомное решение")
+        print(Sequence2)
+
+        children = UsedOperators(Sequence1, Sequence2, crossover)
 
         # У ребенка в конце может не быть нуля
         if children[-1] != [0, 0]:
@@ -1321,41 +1309,21 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         if maximum >= target_function:
             if scenario_add == 'deleteTheBad':
                 print("Удаляем самое плохое решение в популяции")
-                X.pop(i_max)
-                Y.pop(i_max)
-                Sresh.pop(i_max)
-                A.pop(i_max)
-                Target_Function.pop(i_max)
-                Sequence.pop(i_max)
+                SavePopulation(x, y, s, a, i_max)
+                Target_Function[i_max] = target_function
 
             elif scenario_add == 'deleteTheBadParents':
                 print("Удаляем самого плохого родителя")
 
                 if Target_Function[index] <= Target_Function[jndex]:
                     print("с целевой функцией ", Target_Function[jndex])
-                    X.pop(jndex)
-                    Y.pop(jndex)
-                    Sresh.pop(jndex)
-                    A.pop(jndex)
-                    Target_Function.pop(jndex)
-                    Sequence.pop(jndex)
+                    SavePopulation(x, y, s, a, jndex)
+                    Target_Function[jndex] = target_function
 
                 elif Target_Function[index] > Target_Function[jndex]:
                     print("с целевой функцией ", Target_Function[index])
-                    X.pop(index)
-                    Y.pop(index)
-                    Sresh.pop(index)
-                    A.pop(index)
-                    Target_Function.pop(index)
-                    Sequence.pop(index)
-
-            print("Добавляем новое решение в конец")
-            X.append(x)
-            Y.append(y)
-            Sresh.append(s)
-            A.append(a)
-            Target_Function.append(target_function)
-            Sequence.append(children)
+                    SavePopulation(x, y, s, a, index)
+                    Target_Function[jndex] = target_function
 
 
 def CheckSequence(Sequence):
