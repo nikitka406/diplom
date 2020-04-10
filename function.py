@@ -319,7 +319,8 @@ def CalculationOfObjectiveFunction(x, y, pinalty_function=0):
         for i in range(factory.N):
             for j in range(factory.N):
                 target_function += factory.d[i][j] * x[i][j][k]
-    if AmountCarUsed(y) > factory.K:  # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
+    # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
+    if AmountCarUsed(y) > factory.K:
         target_function += (AmountCarUsed(y) - factory.K) * factory.car_cost
     target_function += pinalty_function
     return target_function
@@ -580,9 +581,12 @@ def DeleteClientaFromPath(x, y, s, a, client):
             summa += y[i][k]
         if summa == 0 and y[0][k] == 1:
             y[0][k] = 0
-    # если клиент лист
-    if clientLeft == -1 or clientRight == -1:
+
+    elif clientLeft == -1 or clientRight == -1:
         print("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")  # log
+        raise IOError("ERROR from DeleteClientaFromPath: такого не может быть нет ни левого ни правого соседа")
+
+    return x, y, s, a
 
 
 # вклиниваем между
@@ -610,39 +614,53 @@ def OperatorJoin(x, y, s, a, client, sosed):
     # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
     if (factory.l[sosed] <= factory.l[client] <= factory.l[sosedRight] and sosedRight != 0) or (
             sosedRight == 0 and factory.l[sosed] <= factory.l[client]):
-        print("Вставляем клиента к соседу справа")
-        # машина соседа будет работать у клиента столько же
-        s[client][sosedK] = s[client][clientK]
+        try:
+            print("Вставляем клиента к соседу справа")
+            # машина соседа будет работать у клиента столько же
+            s[client][sosedK] = s[client][clientK]
 
-        # Чтобы все корректно работало, сначала надо написать
-        # новое время приезда и новое время работы, потом
-        # удалить старое решение, и только потом заполнять Х и У
-        DeleteClientaFromPath(x, y, s, a, client)
-        x[sosed][sosedRight][sosedK] = 0
-        x[sosed][client][sosedK] = 1
-        x[client][sosedRight][sosedK] = 1
-        y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
+            # Чтобы все корректно работало, сначала надо написать
+            # новое время приезда и новое время работы, потом
+            # удалить старое решение, и только потом заполнять Х и У
+            x, y, s, a = DeleteClientaFromPath(x, y, s, a, client)
+            x[sosed][sosedRight][sosedK] = 0
+            x[sosed][client][sosedK] = 1
+            x[client][sosedRight][sosedK] = 1
+            y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-        # Подсчет времени приезда к клиенту от соседа
-        # TimeOfArrival(x, y, a, s, client, sosed, sosedK)
+            # Подсчет времени приезда к клиенту от соседа
+            # TimeOfArrival(x, y, a, s, client, sosed, sosedK)
+            a = TimeOfArrival(x, y, s)
+
+            return x, y, s, a
+
+        except IOError:
+            print("Объект не удален")
 
     elif (sosedLeft != 0 and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]) or (
             sosedLeft == 0 and factory.l[client] < factory.l[sosed]):
-        print("Вставляем клиента к соседу слева")
-        # машина соседа будет работать у клиента столько же
-        s[client][sosedK] = s[client][clientK]
+        try:
+            print("Вставляем клиента к соседу слева")
+            # машина соседа будет работать у клиента столько же
+            s[client][sosedK] = s[client][clientK]
 
-        # Чтобы все корректно работало, сначала надонаписать
-        # новое время приезда и новое время работы, потом
-        # удалить старое решение, и только потом заполнять Х и У
-        DeleteClientaFromPath(x, y, s, a, client)
-        x[sosedLeft][sosed][sosedK] = 0
-        x[sosedLeft][client][sosedK] = 1
-        x[client][sosed][sosedK] = 1
-        y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+            # Чтобы все корректно работало, сначала надонаписать
+            # новое время приезда и новое время работы, потом
+            # удалить старое решение, и только потом заполнять Х и У
+            x, y, s, a = DeleteClientaFromPath(x, y, s, a, client)
+            x[sosedLeft][sosed][sosedK] = 0
+            x[sosedLeft][client][sosedK] = 1
+            x[client][sosed][sosedK] = 1
+            y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
 
-        # Подсчет времени приезда к клиенту от соседа
-        # TimeOfArrival(x, y, a, s, sosedLeft, client, sosedK)
+            # Подсчет времени приезда к клиенту от соседа
+            # TimeOfArrival(x, y, a, s, sosedLeft, client, sosedK)
+            a = TimeOfArrival(x, y, s)
+
+            return x, y, s, a
+
+        except IOError:
+            print("Объект не удален")
 
     else:
         print("EXCEPTION from OperatorJoin: не получилось вставить ни слева ни справа из-за временных окон сверху")
@@ -660,7 +678,7 @@ def PenaltyFunction(s, a):
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def JoiningClientToNewSosed(x, y, s, a, target_function):
+def Relocate(x, y, s, a, target_function):
     # копируем чтобы не испортить решение
     X, Y, Sresh, A = CopyingSolution(x, y, s, a)
 
@@ -679,8 +697,7 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
 
     print("К соседу ", sosed)
     print("На машине ", sosedK)
-    OperatorJoin(X, Y, Sresh, A, client, sosed)
-    A = TimeOfArrival(X, Y, Sresh)
+    X, Y, Sresh, A = OperatorJoin(X, Y, Sresh, A, client, sosed)
     # X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
 
     if A != -1:
@@ -689,18 +706,18 @@ def JoiningClientToNewSosed(x, y, s, a, target_function):
         print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
         if window_time_up(A, Sresh, Y) == 0:
             if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
-                print("NOTIFICATION from JoiningClientToNewSosed: вставили с нарушением временного окна")
+                print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
                 target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
                 x, y, s, a = CopyingSolution(X, Y, Sresh, A)
             else:
                 print(
-                    "ERROR from JoiningClientToNewSosed: из-за сломанных вышестоящих ограничений, решение не сохранено")
+                    "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
         elif VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
-            print("NOTIFICATION from JoiningClientToNewSosed: вставили без нарушений ограничений")
+            print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
             target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
             x, y, s, a = CopyingSolution(X, Y, Sresh, A)
         else:
-            print("ERROR from JoiningClientToNewSosed: не получилось переставить, что-то пошло нет")
+            print("ERROR from Relocate: не получилось переставить, что-то пошло нет")
 
     return target_function, x, y, s, a
 
@@ -738,7 +755,7 @@ def PopulationOfSolutions(Target_Function, x, y, s, a):
 
         for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
             print("\nПереставление № ", local_s)
-            Target_Function[n], x, y, s, a = JoiningClientToNewSosed(x, y, s, a, Target_Function[n])
+            Target_Function[n], x, y, s, a = Relocate(x, y, s, a, Target_Function[n])
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
@@ -749,7 +766,6 @@ def PopulationOfSolutions(Target_Function, x, y, s, a):
     print("___________________________________________________________________________________________________________")
 
 
-# TODO когда верну делит не используемых, надо пометь цикл  на лен от х
 # Граничные условия
 def X_join_Y(x, y):
     bufer1 = 0

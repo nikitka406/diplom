@@ -175,7 +175,7 @@ def SequenceDisplayInTheXYSA(sequence):
 # Заебись, работает!!!
 def GettingTheSequence(X):
     # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
-    sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(factory.KA)]
+    sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(len(X[0][0]))]
     for k in range(len(X[0][0])):
         XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
     return sequenceX2
@@ -266,7 +266,7 @@ def RandNotVisitClient(countOfRaces, flag):
 # flag флаг для машины
 # flagAll флаг для всего решения
 # countOfRaces - сколько машин мжно отправить на локацию
-def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar):
+def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar):
     # номер позиции клиента bufer_out[i_out][0] в bufer_in
     i_in = NumberClientaInSequence(bufer_in, bufer_out[i_out][0])
 
@@ -313,7 +313,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         print(children)
         print("______________________________")
 
-        RecursiveSearchSosed(children, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces, numberInCar)
 
     # если конкретно это ребро уже использовали, то
     elif bufer_in[i_in][1] != 0:
@@ -350,7 +350,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
             print(children)
             print("______________________________")
 
-            RecursiveSearchSosed(children, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces, numberInCar)
 
         # если не нашли такой индекс
         else:
@@ -389,7 +389,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                 print(children)
                 print("______________________________")
 
-                RecursiveSearchSosed(children, bufer_in, bufer_out, i_in_buf + 1, flag, flagAll, countOfRaces,
+                RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_in_buf + 1, flag, flagAll, countOfRaces,
                                      numberInCar)
 
             else:
@@ -501,11 +501,11 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                         print(children)
                         print("______________________________")
 
-                        RecursiveSearchSosed(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces,
+                        RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces,
                                              numberInCar)
 
                     else:
-                        print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
+                        print("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента")
 
                 # Означает что вывалились из вайла,
                 # потому что долго ждали, поэтому возвращаем машину в депо
@@ -648,10 +648,10 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
                 print(children)
                 print("______________________________")
 
-                RecursiveSearchSosed(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+                RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
 
             else:
-                print("ERROR from RecursiveSearchSosed inside: ошибка в поске рандомного нового клиента")
+                print("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента")
 
         # Означает что вывалились из вайла,
         # потому что долго ждали, поэтому возвращаем машину в депо
@@ -715,7 +715,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
             print(children)
             print("______________________________")
 
-            RecursiveSearchSosed(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
 
         elif rand_client == -1:
             print("Возвращаемся в депо")
@@ -764,7 +764,7 @@ def RecursiveSearchSosed(children, bufer_in, bufer_out, i_out, flag, flagAll, co
         return True
 
     else:
-        print("ERROR from RecursiveSearchSosed outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
+        print("ERROR from RecursiveSearchSosedFromAex outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
 
 
 # Добавляем клиента в последовательность, со всеми флагами
@@ -818,7 +818,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 
             bufer1[i][1] = 1
             AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, i + 1)
-            RecursiveSearchSosed(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar)
             return
             # return i+1.txt
 
@@ -836,7 +836,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 
             bufer2[i][1] = 1
             AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, i + 1)
-            RecursiveSearchSosed(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar)
             return
             # return i+1.txt
 
@@ -858,7 +858,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                     print("Нашли этот город в решении")
                     print(bufer1)
                     AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, j)
-                    RecursiveSearchSosed(children, bufer2, bufer1, j, flag, flagAll, countOfRaces, numberInCar)
+                    RecursiveSearchSosedFromAex(children, bufer2, bufer1, j, flag, flagAll, countOfRaces, numberInCar)
                     return
                     # return j
             # если не нашли в большем, ищем в меньшем
@@ -869,11 +869,188 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                     print("Нашли этот город в решении")
                     print(bufer1)
                     AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, j)
-                    RecursiveSearchSosed(children, bufer1, bufer2, j, flag, flagAll, countOfRaces, numberInCar)
+                    RecursiveSearchSosedFromAex(children, bufer1, bufer2, j, flag, flagAll, countOfRaces, numberInCar)
                     return
                     # return j
 
     print("Notification from SearchForAnUnvisitedZero: не нашли куда ехать")
+
+
+# Рекурсия для HGreX
+def RecursiveSearchSosedFromHGreX(children, inserted, sequence1, sequence2, flagAll, flag, numberInCar):
+    if inserted == 0:
+# TODO для начала надо разсмотреть ситуацию если ноль
+    print("Добавили в ребенка ", inserted)
+    children.append([inserted, 0])
+    flag[inserted] = 1
+    flagAll[inserted] += 1
+    numberInCar += 1
+    print("Ребенок сейчас выглядит вот так ", children)
+    print("flag = ", flag)
+    print("flagAll = ", flagAll)
+
+    index = sequence1.index([inserted, 0])
+    sequence1[index][1] = 1
+    jndex = sequence2.index([inserted, 0])
+
+    i = sequence1[index + 1][0]
+    j = sequence2[jndex + 1][0]
+    print("Объект из sequence1 = ", i)
+    print("Объект из sequence2 = ", j)
+
+    if numberInCar < factory.param_min_num_cl_in_car:
+        print("В машине еще не достаточно клиентов чтобы в любой момент вернуться в депо")
+        if factory.t[inserted][i] < factory.t[inserted][j] and i != 0 and flag[i] == 0 and \
+                sequence1[index + 1][1] == 0 and flagAll[i] <= factory.wells[i]:
+            print("Если i < j и i не ноль и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] < factory.t[inserted][j] and j != 0 and flag[j] == 0 and \
+                sequence2[jndex + 1][1] == 0 and flagAll[j] <= factory.wells[j]:
+            print("Если i < j и j не ноль и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] >= factory.t[inserted][j] and j != 0 and flag[j] == 0 and \
+                sequence2[jndex + 1][1] == 0 and flagAll[j] <= factory.wells[j]:
+            print("Если j < i и j не ноль и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] >= factory.t[inserted][j] and i != 0 and flag[i] == 0 and \
+                sequence1[index + 1][1] == 0 and flagAll[i] <= factory.wells[i]:
+            print("Если j < i и j не ноль и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+        else:
+            print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
+            ti = factory.t[inserted].copy()
+            print("Кондидаты на выбор самого короткого ", ti)
+
+            minimum = min(ti)
+            index = ti.index(minimum)
+            print("Самое короткое ребро = ", index)
+            ti[index] = 999999
+            print("Теперь кондидаты выглядят так")
+
+            while index == inserted or index == 0:
+                print("Предыдущие короткое ребро не подошло ищем новое")
+                minimum = min(ti)
+                index = ti.index(minimum)
+                print("Самое короткое ребро = ", index)
+                ti[index] = 999999
+                print("Теперь кондидаты выглядят так")
+
+            print("Итоговое короткое ребро = ", index)
+            print("Добавим его через рекурсию")
+            number = random.randint(1, 2)
+            if number == 1:
+                RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
+            elif number == 2:
+                RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
+
+    elif numberInCar >= factory.param_min_num_cl_in_car:
+        print("В машине уже достаточно клиентов чтобы в любой момент вернуться в депо")
+        if factory.t[inserted][i] < factory.t[inserted][j] and flag[i] == 0 and \
+                sequence1[index + 1][1] == 0 and flagAll[i] <= factory.wells[i]:
+            print("Если i < j и i и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] < factory.t[inserted][j] and flag[j] == 0 and \
+                sequence2[jndex + 1][1] == 0 and flagAll[j] <= factory.wells[j]:
+            print("Если i < j и j и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] >= factory.t[inserted][j] and flag[j] == 0 and \
+                sequence2[jndex + 1][1] == 0 and flagAll[j] <= factory.wells[j]:
+            print("Если j < i и j и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+        elif factory.t[inserted][i] >= factory.t[inserted][j] and flag[i] == 0 and \
+                sequence1[index + 1][1] == 0 and flagAll[i] <= factory.wells[i]:
+            print("Если j < i и j и в этой машине не посещали и конкретно "
+                  "это ребро не брали и есть свободные скважины")
+            RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+        else:
+            print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
+            ti = factory.t[inserted].copy()
+            print("Кондидаты на выбор самого короткого ", ti)
+
+            minimum = min(ti)
+            index = ti.index(minimum)
+            print("Самое короткое ребро = ", index)
+            ti[index] = 999999
+            print("Теперь кондидаты выглядят так")
+
+            while index == inserted or index == 0:
+                print("Предыдущие короткое ребро не подошло ищем новое")
+                minimum = min(ti)
+                index = ti.index(minimum)
+                print("Самое короткое ребро = ", index)
+                ti[index] = 999999
+                print("Теперь кондидаты выглядят так")
+
+            print("Итоговое короткое ребро = ", index)
+            print("Добавим его через рекурсию")
+            number = random.randint(1, 2)
+            if number == 1:
+                RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
+            elif number == 2:
+                RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
+
+
+
+
+# Выбор первого клиента с минимальным временем начала
+def SelectFirstObj(flagAll):
+    # Копируем время начала
+    E = factory.e.copy()
+    E[0] = 99999999
+
+    minimum = min(E)
+    print(" Минимальное время начала = ", minimum)
+
+    count_min = E.count(minimum)
+    print("Всего ", count_min, " объектов начинают свою работу в это время")
+
+    arrE = []
+    print("Создаем массив для объектов с одинаковым временем начала")
+
+    index = 0
+    for i in range(count_min):
+        index = E.index(minimum, index + 1)
+        if flagAll[index] == 0:
+            arrE.append(index)
+            print("Cейчас массив выглядит следующим образом ", arrE)
+
+    arrL = []
+    print("Создаем массив в котором время окончания всех этих объектов")
+
+    for i in range(len(arrE)):
+        arrL.append(factory.l[arrE[i]])
+        print("Cейчас массив выглядит следующим образом ", arrL)
+
+    minimum = min(arrL)
+    count_min = arrL.count(minimum)
+    print("Минимальное время окончания из всех этих объектов = ", minimum, " их число = ", count_min)
+
+    result = []
+    print("Создаем массив для выбора случайного клиента из тех кто с одинаковым временем окончания")
+
+    index = -1
+    for i in range(count_min):
+        index = arrL.index(minimum, index + 1)
+        result.append(arrE[index])
+        print("Cейчас массив выглядит следующим образом ", result)
+
+    E[0] = 0
+    return random.choice(result)
 
 
 # кроссовер AEX
@@ -942,7 +1119,7 @@ def AEX(sequence1, sequence2):
         print("______________________________")
 
         # Для первого добавления запустим без цикла
-        RecursiveSearchSosed(children, sequence2, sequence1, 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, sequence2, sequence1, 1, flag, flagAll, countOfRaces, numberInCar)
 
         # Обнуляем флаг для следующей машины
         for i in range(factory.N):
@@ -1019,7 +1196,7 @@ def AEX(sequence1, sequence2):
         print("______________________________")
 
         # Для первого добавления запустим без цикла
-        RecursiveSearchSosed(children, sequence1, sequence2, 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, sequence1, sequence2, 1, flag, flagAll, countOfRaces, numberInCar)
 
         # Обнуляем флаг для следующей машины
         for i in range(factory.N):
@@ -1080,9 +1257,84 @@ def AEX(sequence1, sequence2):
     return children
 
 
-# Оператор HGreX
+# кроссовер HGreX
 def HGreX(sequence1, sequence2):
-    return
+    children = [[0, 0]]
+    numberInCar = 0
+    flag = [0 for i in range(factory.N)]
+    flag[0] = -1
+    flagAll = [0 for i in range(factory.N)]
+    flagAll[0] = 1
+
+    first = SelectFirstObj(flag)
+    print("Выбираем случайную вершину = ", first)
+
+    print("Расставляем флаги")
+    flagAll[first] += 1
+    flag[first] = 1
+    print("flag = ", flag)
+    print("flagAll = ", flagAll)
+
+    print("Добавили первое ребро в ребенка, ")
+    children.append([first, 0])
+    numberInCar += 1
+    print(children)
+
+    number = random.randint(1, 2)
+    if number == 1:
+        sequence1[first][1] = 1
+    elif number == 2:
+        sequence2[first][1] = 1
+
+    index = sequence1.index([first, 0])
+    jndex = sequence2.index([first, 0])
+    i = sequence1[index + 1][0]
+    j = sequence2[jndex + 1][0]
+
+    if factory.t[first][i] < factory.t[first][j] and i != 0:
+        print("Если i < j и i не ноль")
+        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+    elif factory.t[first][i] < factory.t[first][j] and j != 0:
+        print("Если i < j и j не ноль")
+        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+    elif factory.t[first][i] >= factory.t[first][j] and j != 0:
+        print("Если j < i и j не ноль")
+        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+
+    elif factory.t[first][i] >= factory.t[first][j] and i != 0:
+        print("Если j < i и j не ноль")
+        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+
+    else:
+        print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
+        ti = factory.t[first].copy()
+        print("Кондидаты на выбор самого короткого ", ti)
+
+        minimum = min(ti)
+        index = ti.index(minimum)
+        print("Самое короткое ребро = ", index)
+        ti[index] = 999999
+        print("Теперь кондидаты выглядят так")
+
+        while index == first or index == 0:
+            print("Предыдущие короткое ребро не подошло ищем новое")
+            minimum = min(ti)
+            index = ti.index(minimum)
+            print("Самое короткое ребро = ", index)
+            ti[index] = 999999
+            print("Теперь кондидаты выглядят так")
+
+        print("Итоговое короткое ребро = ", index)
+        print("Добавим его через рекурсию")
+
+        if number == 1:
+            RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
+        elif number == 2:
+            RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
+
+    return children
 
 
 # Оператор HRndX
@@ -1126,7 +1378,7 @@ def LocalSearch(x, y, s, a, target_function):
     print("Используем оператор ", oper)
     if oper == 'relocate':
         for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
-            target_function = JoiningClientToNewSosed(x, y, s, a, target_function)
+            target_function = Relocate(x, y, s, a, target_function)
     elif oper == '2Opt':
         print("")
 
