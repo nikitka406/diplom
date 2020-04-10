@@ -879,6 +879,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 # Рекурсия для HGreX
 def RecursiveSearchSosedFromHGreX(children, inserted, sequence1, sequence2, flagAll, flag, numberInCar):
     if inserted == 0:
+        return
 # TODO для начала надо разсмотреть ситуацию если ноль
     print("Добавили в ребенка ", inserted)
     children.append([inserted, 0])

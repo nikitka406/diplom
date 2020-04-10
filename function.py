@@ -32,23 +32,23 @@ def SaveStartSolution(local_x, local_y, local_s, local_a):
     # Печатаем в файл Х
     for i in range(factory.N):
         for j in range(factory.N):
-            for k in range(factory.KA):
+            for k in range(len(local_y[0])):
                 file.write(str(local_x[i][j][k]) + ' ')
             file.write("\n")
         # file.write("\n")
     # Печатаем в файл Y
     for i in range(factory.N):
-        for k in range(factory.KA):
+        for k in range(len(local_y[0])):
             file.write(str(local_y[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл S
     for i in range(factory.N):
-        for k in range(factory.KA):
+        for k in range(len(local_y[0])):
             file.write(str(local_s[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл A
     for i in range(factory.N):
-        for k in range(factory.KA):
+        for k in range(len(local_y[0])):
             file.write(str(local_a[i][k]) + ' ')
         file.write("\n")
 
@@ -57,8 +57,91 @@ def SaveStartSolution(local_x, local_y, local_s, local_a):
 
 # Cчитываем стартовое решение в файл
 # Заебись работает!!!
-def ReadStartSolutionOfFile(local_x, local_y, local_s, local_a):
+def ReadStartSolutionOfFile(sizeK):
+    local_x = [[[0 for k in range(sizeK)] for j in range(factory.N)] for i in
+         range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    local_y = [[0 for k in range(sizeK)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(factory.KA):
+        local_y[0][k] = 1
+    local_s = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    local_a = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
     file = open('output/StartSolution.txt', 'r')
+    # прочитали весь файл, получился список из строк файла
+    line = file.readlines()
+
+    index = 0
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            # for k in range(factory.KA):
+            local_x[i][j] = line[index].split()
+            for k in range(len(local_x[i][j])):
+                local_x[i][j][k] = int(local_x[i][j][k])
+            index += 1
+
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        local_y[i] = line[index].split()
+        for k in range(len(local_y[i])):
+            local_y[i][k] = int(local_y[i][k])
+        index += 1
+    # Печатаем в файл S
+    for i in range(factory.N):
+        local_s[i] = line[index].split()
+        for k in range(len(local_s[i])):
+            local_s[i][k] = float(local_s[i][k])
+        index += 1
+    # Печатаем в файл A
+    for i in range(factory.N):
+        local_a[i] = line[index].split()
+        for k in range(len(local_a[i])):
+            local_a[i][k] = float(local_a[i][k])
+        index += 1
+    file.close()
+    return local_x, local_y, local_s, local_a
+
+
+# Cохраняем промежуточное решение в релоке
+def SaveRelocate(local_x, local_y, local_s, local_a, sizeK):
+    file = open('output/Relocate.txt', 'w')
+
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            for k in range(sizeK):
+                file.write(str(local_x[i][j][k]) + ' ')
+            file.write("\n")
+        # file.write("\n")
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_y[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл S
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_s[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл A
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_a[i][k]) + ' ')
+        file.write("\n")
+
+    file.close()
+
+
+def ReadRelocateOfFile(local_x, local_y, local_s, local_a):
+    local_x = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
+               range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    local_y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(factory.KA):
+        local_y[0][k] = 1
+    local_s = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    local_a = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
+    file = open('output/Relocate.txt', 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
@@ -506,33 +589,33 @@ def CarIsWork(y, k):
 def RecursiaForTime(x, s, a, i, k, recurs):
     for j in range(factory.N):
         if x[i][j][k] != 0 and j != 0 and recurs < factory.N:
-            print("Нашли соседа для ", i, " справа ", j)
-            print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
+            # print("Нашли соседа для ", i, " справа ", j)
+            # print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
             # если время прибытия меньше начала работ, то ждем
             if factory.e[j] > a[i][k] + s[i][k] + factory.t[i][j]:
-                print("Приехали слишком рано ждем")
+                # print("Приехали слишком рано ждем")
                 a[j][k] = factory.e[j]
-                print("a[j][k] = ", a[j][k])
+                # print("a[j][k] = ", a[j][k])
             # иначе ставим время прибытия
             else:
-                print("Опоздали")
+                # print("Опоздали")
                 a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
-                print("a[j][k] = ", a[j][k])
+                # print("a[j][k] = ", a[j][k])
 
             recurs += 1
             RecursiaForTime(x, s, a, j, k, recurs)
         elif x[i][j][k] != 0 and j == 0 and recurs < factory.N:
-            print("Встретили ноль, пора заканчивать рекурсию")
-            print("Время прибытия в ", i, " = ", a[i][k])
-            print("Время работы в ", i, " = ", s[i][k])
-            print("Время переиещения из ", i, " в ", j, " = ", factory.t[i][j])
+            # print("Встретили ноль, пора заканчивать рекурсию")
+            # print("Время прибытия в ", i, " = ", a[i][k])
+            # print("Время работы в ", i, " = ", s[i][k])
+            # print("Время переиещения из ", i, " в ", j, " = ", factory.t[i][j])
 
             a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
 
-            print("Время прибытия в депо = ", a[j][k])
-            for i in range(factory.N):
-                print(a[i][k], end=' ')
-            print('\n')
+            # print("Время прибытия в депо = ", a[j][k])
+            # for i in range(factory.N):
+            #     print(a[i][k], end=' ')
+            # print('\n')
 
             return True
 
@@ -547,7 +630,7 @@ def TimeOfArrival(x, y, s):
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k) == 1:
-            print("ЗАходим в рекурсию")
+            # print("ЗАходим в рекурсию")
             flag = RecursiaForTime(x, s, a, 0, k, recurs)
     if flag != -1:
         return a
@@ -590,12 +673,15 @@ def DeleteClientaFromPath(x, y, s, a, client):
 
 
 # вклиниваем между
-def OperatorJoin(x, y, s, a, client, sosed):
-    sosedK = NumberCarClienta(y, sosed)
-    clientK = NumberCarClienta(y, client)
+def OperatorJoin(x, y, s, a, client, sosed, sizeK):
+    Xl, Yl, Sl, Al = ReadStartSolutionOfFile(sizeK)
+    XR, YR, SR, AR = ReadStartSolutionOfFile(sizeK)
 
-    sosedLeft = SearchSosedLeftOrRight(x, y, sosed, "left")  # левый сосед соседа
-    sosedRight = SearchSosedLeftOrRight(x, y, sosed, "right")  # правый сосед соседа
+    sosedK = NumberCarClienta(Yl, sosed)
+    clientK = NumberCarClienta(Yl, client)
+
+    sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left")  # левый сосед соседа
+    sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right")  # правый сосед соседа
 
     print("sosed_left = ", sosedLeft)
     print("sosed_right = ", sosedRight)
@@ -605,65 +691,112 @@ def OperatorJoin(x, y, s, a, client, sosed):
     print("Время окончание sosedLeft = ", factory.l[sosedLeft])
     print("Время окончание sosedRight = ", factory.l[sosedRight])
 
-    # смотрим временные затраты так как время напрямую связано с км zatratLeft = factory.t[sosedLeft][client] +
-    # factory.t[client][sosed] + factory.t[sosed][sosedRight] #временные затраты присунуть слева zatratRight =
-    # factory.t[sosedLeft][sosed] + factory.t[sosed][client] + factory.t[client][sosedRight]#затраты присунуть справа
-
-    # TODO написать рандом на вставление слева или справа
     # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
     # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-    if (factory.l[sosed] <= factory.l[client] <= factory.l[sosedRight] and sosedRight != 0) or (
-            sosedRight == 0 and factory.l[sosed] <= factory.l[client]):
-        try:
-            print("Вставляем клиента к соседу справа")
-            # машина соседа будет работать у клиента столько же
-            s[client][sosedK] = s[client][clientK]
+    try:
+        print("Вставляем клиента к соседу справа")
+        # машина соседа будет работать у клиента столько же
+        SR[client][sosedK] = SR[client][clientK]
 
-            # Чтобы все корректно работало, сначала надо написать
-            # новое время приезда и новое время работы, потом
-            # удалить старое решение, и только потом заполнять Х и У
-            x, y, s, a = DeleteClientaFromPath(x, y, s, a, client)
-            x[sosed][sosedRight][sosedK] = 0
-            x[sosed][client][sosedK] = 1
-            x[client][sosedRight][sosedK] = 1
-            y[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-            # Подсчет времени приезда к клиенту от соседа
-            # TimeOfArrival(x, y, a, s, client, sosed, sosedK)
-            a = TimeOfArrival(x, y, s)
+        # Чтобы все корректно работало, сначала надо написать
+        # новое время приезда и новое время работы, потом
+        # удалить старое решение, и только потом заполнять Х и У
+        XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client)
+        XR[sosed][sosedRight][sosedK] = 0
+        XR[sosed][client][sosedK] = 1
+        XR[client][sosedRight][sosedK] = 1
+        YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-            return x, y, s, a
+        # Подсчет времени приезда к клиенту от соседа
+        AR = TimeOfArrival(XR, YR, SR)
 
-        except IOError:
-            print("Объект не удален")
+    except IOError:
+        print("Объект не удален")
+        XR[sosed][sosedRight][sosedK] = 1
+        XR[sosed][client][sosedK] = 0
+        XR[client][sosedRight][sosedK] = 0
+        YR[client][sosedK] = 0  # тепреь машина соседа обслуживает клиента
 
-    elif (sosedLeft != 0 and factory.l[sosedLeft] < factory.l[client] < factory.l[sosed]) or (
-            sosedLeft == 0 and factory.l[client] < factory.l[sosed]):
-        try:
-            print("Вставляем клиента к соседу слева")
-            # машина соседа будет работать у клиента столько же
-            s[client][sosedK] = s[client][clientK]
+        # Подсчет времени приезда к клиенту от соседа
+        AR = TimeOfArrival(XR, YR, SR)
 
-            # Чтобы все корректно работало, сначала надонаписать
-            # новое время приезда и новое время работы, потом
-            # удалить старое решение, и только потом заполнять Х и У
-            x, y, s, a = DeleteClientaFromPath(x, y, s, a, client)
-            x[sosedLeft][sosed][sosedK] = 0
-            x[sosedLeft][client][sosedK] = 1
-            x[client][sosed][sosedK] = 1
-            y[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+    try:
+        print("Вставляем клиента к соседу слева")
+        # машина соседа будет работать у клиента столько же
+        Sl[client][sosedK] = Sl[client][clientK]
 
-            # Подсчет времени приезда к клиенту от соседа
-            # TimeOfArrival(x, y, a, s, sosedLeft, client, sosedK)
-            a = TimeOfArrival(x, y, s)
+        # Чтобы все корректно работало, сначала надонаписать
+        # новое время приезда и новое время работы, потом
+        # удалить старое решение, и только потом заполнять Х и У
+        Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client)
+        Xl[sosedLeft][sosed][sosedK] = 0
+        Xl[sosedLeft][client][sosedK] = 1
+        Xl[client][sosed][sosedK] = 1
+        Yl[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
 
-            return x, y, s, a
+        # Подсчет времени приезда к клиенту от соседа
+        Al = TimeOfArrival(Xl, Yl, Sl)
 
-        except IOError:
-            print("Объект не удален")
+    except IOError:
+        print("Объект не удален")
+        Xl[sosedLeft][sosed][sosedK] = 1
+        Xl[sosedLeft][client][sosedK] = 0
+        Xl[client][sosed][sosedK] = 0
+        Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
+
+        # Подсчет времени приезда к клиенту от соседа
+        Al = TimeOfArrival(Xl, Yl, Sl)
+
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого")
+    if window_time_up(Al, Sl, Yl) == 0:
+        if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true") == 1:
+            print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
+            targetL = CalculationOfObjectiveFunction(Xl, Yl, PenaltyFunction(Sl, Al))
+            print("Подсчет целевой функции для левого вставления ", targetL)
+        else:
+            targetL = -1
+            print(
+                "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
+    elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al) == 1:
+        print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
+        targetL = CalculationOfObjectiveFunction(Xl, Yl, PenaltyFunction(Sl, Al))
+        print("Подсчет целевой функции для левого вставления ", targetL)
+    else:
+        targetL = -1
+        print("ERROR from Relocate: не получилось переставить, что-то пошло нет")
+
+    print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для правого")
+    if window_time_up(AR, SR, YR) == 0:
+        if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true") == 1:
+            print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
+            targetR = CalculationOfObjectiveFunction(XR, YR, PenaltyFunction(SR, AR))
+            print("Подсчет целевой функции для правого вставления ", targetR)
+        else:
+            targetR = -1
+            print(
+                "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
+    elif VerificationOfBoundaryConditions(XR, YR, SR, AR) == 1:
+        print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
+        targetR = CalculationOfObjectiveFunction(XR, YR, PenaltyFunction(SR, AR))
+        print("Подсчет целевой функции для правого вставления ", targetR)
+    else:
+        targetR = -1
+        print("ERROR from Relocate: не получилось переставить, что-то пошло нет")
+
+    print("Теперь ищем минимум из двух целевых")
+    minimum = min(targetL, targetR)
+    if minimum == targetL and minimum != -1:
+        print("Выбрали левого у него целевая меньше")
+        return Xl, Yl, Sl, Al, targetL
+
+    elif minimum == targetR and minimum != -1:
+        print("Выбрали правого у него целевая меньше")
+        return XR, YR, SR, AR, targetR
 
     else:
-        print("EXCEPTION from OperatorJoin: не получилось вставить ни слева ни справа из-за временных окон сверху")
+        print("Все пошло по пизде ничего не сохранили")
+        return x, y, s, a, CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
 
 
 # штрафнвя функция
@@ -673,53 +806,54 @@ def PenaltyFunction(s, a):
         for k in range(len(a[i])):
             if a[i][k] + s[i][k] > factory.l[i]:
                 # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
-                penalty_sum += ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty
+                penalty_sum += max(0, ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty)
     return penalty_sum
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x, y, s, a, target_function):
+def Relocate(target_function_start, sizeK):
     # копируем чтобы не испортить решение
-    X, Y, Sresh, A = CopyingSolution(x, y, s, a)
+    X, Y, Sresh, A = ReadStartSolutionOfFile(sizeK)
+    SaveRelocate(X, Y, Sresh, A, sizeK)
+    TargetFunction = target_function_start
+    buf_targ = 0
 
-    # Bыбираем клиента
-    client = random.randint(1, (
-            factory.N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
+    while TargetFunction != buf_targ:
+        buf_targ = TargetFunction
+        ReadRelocateOfFile(X, Y, Sresh, A)
 
-    print("Переставляем клиент ", client)
-    print("С машины", NumberCarClienta(y, client))
+        # Bыбираем клиента
+        client = random.randint(1, (
+                factory.N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
 
-    sosedK = NumberCarClienta(y, client)  # берем рандомного соседа, главное чтобы не совпал с клиентом
-    while sosedK == NumberCarClienta(y, client):
-        sosed = random.randint(1, (
-                factory.N - 1))  # выбираем нового соседа
-        sosedK = NumberCarClienta(y, sosed)
+        print("Переставляем клиентa ", client)
+        print("С машины", NumberCarClienta(Y, client))
 
-    print("К соседу ", sosed)
-    print("На машине ", sosedK)
-    X, Y, Sresh, A = OperatorJoin(X, Y, Sresh, A, client, sosed)
-    # X, Y, Sresh, A = DeleteNotUsedCar(X, Y, Sresh, A)
+        for sosed in range(1, factory.N):
 
-    if A != -1:
-        # проверка на успеваемость выполнения работ
-        # если не успел уложиться в срок, штраф
-        print("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ")
-        if window_time_up(A, Sresh, Y) == 0:
-            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true") == 1:
-                print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
-                target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-                x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-            else:
-                print(
-                    "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
-        elif VerificationOfBoundaryConditions(X, Y, Sresh, A) == 1:
-            print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
-            target_function = CalculationOfObjectiveFunction(X, Y, PenaltyFunction(Sresh, A))
-            x, y, s, a = CopyingSolution(X, Y, Sresh, A)
-        else:
-            print("ERROR from Relocate: не получилось переставить, что-то пошло нет")
+            sosedK = NumberCarClienta(Y, sosed)
 
-    return target_function, x, y, s, a
+            print("К соседу ", sosed)
+            print("На машине ", sosedK)
+            print("Время перемещение от 0 до всех ", factory.t[0])
+            print("Время перемещение от ", client, " до ", sosed, " = ", factory.t[client][sosed])
+            print("Время перемещение от соседа до 0 ", factory.t[sosed][0])
+
+            x, y, s, a, target_function = OperatorJoin(X, Y, Sresh, A, client, sosed, sizeK)
+
+            print("Выбираем минимальное решение")
+            minimum = min(TargetFunction, target_function)
+            if minimum == target_function:
+                print("Новое перемещение, лучше чем то что было, сохраняем это решение")
+                SaveRelocate(x, y, s, a, sizeK)
+                TargetFunction = target_function
+            elif minimum == TargetFunction:
+                print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение")
+                # ReadRelocateOfFile(X, Y, Sresh, A)
+
+    ReadRelocateOfFile(X, Y, Sresh, A)
+
+    return TargetFunction, X, Y, Sresh, A
 
 
 # Создаем хранилище решений, для большего числа рещений
@@ -755,7 +889,7 @@ def PopulationOfSolutions(Target_Function, x, y, s, a):
 
         for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
             print("\nПереставление № ", local_s)
-            Target_Function[n], x, y, s, a = Relocate(x, y, s, a, Target_Function[n])
+            Target_Function[n], x, y, s, a = Relocate(Target_Function[n])
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
