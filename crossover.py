@@ -159,7 +159,8 @@ def SequenceDisplayInTheXYSA(sequence):
                 WorkTimeCounting(sequence, y, s, after)
 
             a[after][k] = ArrivalTime(a, s, before, after, k)
-    return x, y, s, a
+
+    return x, y, s, a, count_car
 
 
 # Получаем двумерную последовательность вида
@@ -1006,8 +1007,6 @@ def RecursiveSearchSosedFromHGreX(children, inserted, sequence1, sequence2, flag
                 RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
 
 
-
-
 # Выбор первого клиента с минимальным временем начала
 def SelectFirstObj(flagAll):
     # Копируем время начала
@@ -1368,7 +1367,7 @@ def UsedOperators(sequence1, sequence2, operator):
 
 
 # Локальный поиск (локально меняем решение)
-def LocalSearch(x, y, s, a, target_function):
+def LocalSearch(x, y, s, a, target_function, sizeK):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
@@ -1378,8 +1377,9 @@ def LocalSearch(x, y, s, a, target_function):
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
-        for local_s in range(factory.param_local_search):  # производим param_local_search кол-во перестановок
-            target_function = Relocate(x, y, s, a, target_function)
+        x, y, s, a, target_function,  sizeK = Relocate(x, y, s, a, target_function, sizeK)
+        return x, y, s, a, target_function,  sizeK
+
     elif oper == '2Opt':
         print("")
 
@@ -1437,7 +1437,7 @@ def Mutation(sequence):
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
-def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
+def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
     print("Начинаем процесс порождения нового решения")
 
     for crossing in range(factory.param_crossing):
@@ -1552,7 +1552,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         Mutation(children)
 
         # Переводим последовательность в матрицы решений
-        x, y, s, a = SequenceDisplayInTheXYSA(children)
+        x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
 
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
@@ -1560,7 +1560,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
         print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
 
         # Применяем локальный поиск
-        LocalSearch(x, y, s, a, target_function)
+        x, y, s, a, target_function, sizek = LocalSearch(x, y, s, a, target_function, sizek)
 
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
@@ -1582,6 +1582,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
                 A.pop(i_max)
                 Target_Function.pop(i_max)
                 Sequence.pop(i_max)
+                SizeK.pop(i_max)
 
             elif scenario_add == 'deleteTheBadParents':
                 print("Удаляем самого плохого родителя")
@@ -1594,6 +1595,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
                     A.pop(jndex)
                     Target_Function.pop(jndex)
                     Sequence.pop(jndex)
+                    SizeK.pop(jndex)
 
                 elif Target_Function[index] > Target_Function[jndex]:
                     print("с целевой функцией ", Target_Function[index])
@@ -1603,6 +1605,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
                     A.pop(index)
                     Target_Function.pop(index)
                     Sequence.pop(index)
+                    SizeK.pop(index)
 
             print("Добавляем новое решение в конец")
             X.append(x)
@@ -1611,6 +1614,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function):
             A.append(a)
             Target_Function.append(target_function)
             Sequence.append(children)
+            SizeK.append(sizek)
 
 
 def CheckSequence(Sequence):

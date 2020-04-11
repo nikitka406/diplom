@@ -2,23 +2,20 @@ import random
 import sys
 import factory
 import csv
-sys.setrecursionlimit(1000)
 
 
 # Сохраняем решение в файл
-def SaveDateResult(result, time, sequence):
+def SaveDateResult(resultStart, result, time, sequence):
     with open('result.csv', 'a') as csvfile:
-        fieldnames = ['Target_function', 'Time_job', 'param_start_solution', 'param_population',
+        fieldnames = ['Start_Target', 'Target_function', 'Time_job', 'param_start_solution', 'param_population',
                       'param_min_num_cl_in_car', 'param_crossing', 'param_local_search', 'Sequence']
         writer = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
 
         writer.writeheader()
-        writer.writerow({'Target_function': result, 'Time_job': time,
-                         'param_start_solution': factory.param_start_solution,
+        writer.writerow({'Start_Target': resultStart, 'Target_function': result, 'Time_job': time,
                          'param_population': factory.param_population,
                          'param_min_num_cl_in_car': factory.param_min_num_cl_in_car,
                          'param_crossing': factory.param_crossing,
-                         'param_local_search': factory.param_local_search,
                          'Sequence': sequence})
 
     print("Writing complete")
@@ -132,14 +129,14 @@ def SaveRelocate(local_x, local_y, local_s, local_a, sizeK):
     file.close()
 
 
-def ReadRelocateOfFile(local_x, local_y, local_s, local_a):
-    local_x = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
+def ReadRelocateOfFile(sizeK):
+    local_x = [[[0 for k in range(sizeK)] for j in range(factory.N)] for i in
                range(factory.N)]  # едет или нет ТС с номером К из города I в J
-    local_y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
-    for k in range(factory.KA):
+    local_y = [[0 for k in range(sizeK)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(sizeK):
         local_y[0][k] = 1
-    local_s = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
-    local_a = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+    local_s = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    local_a = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
 
     file = open('output/Relocate.txt', 'r')
     # прочитали весь файл, получился список из строк файла
@@ -174,6 +171,7 @@ def ReadRelocateOfFile(local_x, local_y, local_s, local_a):
             local_a[i][k] = float(local_a[i][k])
         index += 1
     file.close()
+    return local_x, local_y, local_s, local_a
 
 
 # Сохраняем популяцию, добавляя новое решение в конец
@@ -396,15 +394,13 @@ def CopyingSolution(local_x, local_y, local_s, local_a):
 
 
 # подсчет значения целевой функции
-def CalculationOfObjectiveFunction(x, y, pinalty_function=0):
+def CalculationOfObjectiveFunction(x, pinalty_function=0):
     target_function = 0
-    for k in range(len(y[0])):
+    for k in range(len(x[0][0])):
         for i in range(factory.N):
             for j in range(factory.N):
                 target_function += factory.d[i][j] * x[i][j][k]
-    # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
-    if AmountCarUsed(y) > factory.K:
-        target_function += (AmountCarUsed(y) - factory.K) * factory.car_cost
+
     target_function += pinalty_function
     return target_function
 
@@ -432,11 +428,13 @@ def OneCarOneLocation():
                     s[j][k] = factory.S[j] / factory.wells[j]
                 else:
                     s[j][k] = factory.S[j]
-                    # TODO время в депо надо поставить
+
                 if factory.e[j] > factory.t[0][j]:
                     a[j][k] = factory.e[j]
+                    a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
                 else:
                     a[j][k] = factory.t[0][j]
+                    a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
                 # print(a[j][k], end=' ')
                 k += 1
             # print("\n")
@@ -542,7 +540,7 @@ def SearchTheBestSoseda(client):
 
 # номер машины которая обслуживает клиента
 def NumberCarClienta(y, client):
-    for k in range(factory.KA):
+    for k in range(len(y[0])):
         if y[client][k] == 1:
             return k
 
@@ -673,9 +671,9 @@ def DeleteClientaFromPath(x, y, s, a, client):
 
 
 # вклиниваем между
-def OperatorJoin(x, y, s, a, client, sosed, sizeK):
-    Xl, Yl, Sl, Al = ReadStartSolutionOfFile(sizeK)
-    XR, YR, SR, AR = ReadStartSolutionOfFile(sizeK)
+def OperatorJoin(x, y, s, a, sizeK, client, sosed):
+    Xl, Yl, Sl, Al = ReadRelocateOfFile(sizeK)
+    XR, YR, SR, AR = ReadRelocateOfFile(sizeK)
 
     sosedK = NumberCarClienta(Yl, sosed)
     clientK = NumberCarClienta(Yl, client)
@@ -697,7 +695,6 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
         print("Вставляем клиента к соседу справа")
         # машина соседа будет работать у клиента столько же
         SR[client][sosedK] = SR[client][clientK]
-
 
         # Чтобы все корректно работало, сначала надо написать
         # новое время приезда и новое время работы, потом
@@ -752,7 +749,7 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
     if window_time_up(Al, Sl, Yl) == 0:
         if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true") == 1:
             print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
-            targetL = CalculationOfObjectiveFunction(Xl, Yl, PenaltyFunction(Sl, Al))
+            targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Sl, Al))
             print("Подсчет целевой функции для левого вставления ", targetL)
         else:
             targetL = -1
@@ -760,7 +757,7 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
                 "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
     elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al) == 1:
         print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
-        targetL = CalculationOfObjectiveFunction(Xl, Yl, PenaltyFunction(Sl, Al))
+        targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Sl, Al))
         print("Подсчет целевой функции для левого вставления ", targetL)
     else:
         targetL = -1
@@ -770,7 +767,7 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
     if window_time_up(AR, SR, YR) == 0:
         if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true") == 1:
             print("NOTIFICATION from Relocate: вставили с нарушением временного окна")
-            targetR = CalculationOfObjectiveFunction(XR, YR, PenaltyFunction(SR, AR))
+            targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(SR, AR))
             print("Подсчет целевой функции для правого вставления ", targetR)
         else:
             targetR = -1
@@ -778,7 +775,7 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
                 "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено")
     elif VerificationOfBoundaryConditions(XR, YR, SR, AR) == 1:
         print("NOTIFICATION from Relocate: вставили без нарушений ограничений")
-        targetR = CalculationOfObjectiveFunction(XR, YR, PenaltyFunction(SR, AR))
+        targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(SR, AR))
         print("Подсчет целевой функции для правого вставления ", targetR)
     else:
         targetR = -1
@@ -788,39 +785,44 @@ def OperatorJoin(x, y, s, a, client, sosed, sizeK):
     minimum = min(targetL, targetR)
     if minimum == targetL and minimum != -1:
         print("Выбрали левого у него целевая меньше")
-        return Xl, Yl, Sl, Al, targetL
+        return Xl, Yl, Sl, Al, targetL, sizeK
 
     elif minimum == targetR and minimum != -1:
         print("Выбрали правого у него целевая меньше")
-        return XR, YR, SR, AR, targetR
+        return XR, YR, SR, AR, targetR, sizeK
 
     else:
         print("Все пошло по пизде ничего не сохранили")
-        return x, y, s, a, CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
+        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(s, a)), sizeK
 
 
 # штрафнвя функция
-def PenaltyFunction(s, a):
+def PenaltyFunction(y, s, a):
     penalty_sum = 0
     for i in range(factory.N):
         for k in range(len(a[i])):
             if a[i][k] + s[i][k] > factory.l[i]:
                 # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
                 penalty_sum += max(0, ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty)
+
+    # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
+    if AmountCarUsed(y) > factory.K:
+        fine = (AmountCarUsed(y) - factory.K) * factory.car_cost
+
     return penalty_sum
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(target_function_start, sizeK):
-    # копируем чтобы не испортить решение
-    X, Y, Sresh, A = ReadStartSolutionOfFile(sizeK)
-    SaveRelocate(X, Y, Sresh, A, sizeK)
+def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start):
+
+    SaveRelocate(X, Y, Sresh, A, sizeK_start)
     TargetFunction = target_function_start
+    SizeK = sizeK_start
     buf_targ = 0
 
     while TargetFunction != buf_targ:
         buf_targ = TargetFunction
-        ReadRelocateOfFile(X, Y, Sresh, A)
+        X, Y, Sresh, A = ReadRelocateOfFile(SizeK)
 
         # Bыбираем клиента
         client = random.randint(1, (
@@ -831,65 +833,71 @@ def Relocate(target_function_start, sizeK):
 
         for sosed in range(1, factory.N):
 
-            sosedK = NumberCarClienta(Y, sosed)
+            if client != sosed:
+                sosedK = NumberCarClienta(Y, sosed)
 
-            print("К соседу ", sosed)
-            print("На машине ", sosedK)
-            print("Время перемещение от 0 до всех ", factory.t[0])
-            print("Время перемещение от ", client, " до ", sosed, " = ", factory.t[client][sosed])
-            print("Время перемещение от соседа до 0 ", factory.t[sosed][0])
+                print("К соседу ", sosed)
+                print("На машине ", sosedK)
+                print("Время перемещение от 0 до всех ", factory.t[0])
+                print("Время перемещение от ", client, " до ", sosed, " = ", factory.t[client][sosed])
+                print("Время перемещение от соседа до 0 ", factory.t[sosed][0])
 
-            x, y, s, a, target_function = OperatorJoin(X, Y, Sresh, A, client, sosed, sizeK)
+                x, y, s, a, target_function, sizeK = OperatorJoin(X, Y, Sresh, A, SizeK, client, sosed)
+                print("Число используемых машин ", AmountCarUsed(y))
 
-            print("Выбираем минимальное решение")
-            minimum = min(TargetFunction, target_function)
-            if minimum == target_function:
-                print("Новое перемещение, лучше чем то что было, сохраняем это решение")
-                SaveRelocate(x, y, s, a, sizeK)
-                TargetFunction = target_function
-            elif minimum == TargetFunction:
-                print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение")
-                # ReadRelocateOfFile(X, Y, Sresh, A)
+                print("Выбираем минимальное решение")
+                minimum = min(TargetFunction, target_function)
+                if minimum == target_function:
+                    print("Новое перемещение, лучше чем то что было, сохраняем это решение")
+                    SaveRelocate(x, y, s, a, sizeK)
+                    TargetFunction = target_function
+                    SizeK = sizeK
+                elif minimum == TargetFunction:
+                    print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение")
 
-    ReadRelocateOfFile(X, Y, Sresh, A)
+    X, Y, Sresh, A = ReadRelocateOfFile(SizeK)
 
-    return TargetFunction, X, Y, Sresh, A
+    return X, Y, Sresh, A, TargetFunction, SizeK
 
 
 # Создаем хранилище решений, для большего числа рещений
-def SolutionStore():
+def SolutionStore(target_start, sizeK):
     # Хранилище решений, первый индекс это номер решения, со второго начинается само решение
     X = [0 for n in range(factory.param_population)]  # едет или нет ТС с номером К из города I в J
     for n in range(factory.param_population):
-        X[n] = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in range(factory.N)]
+        X[n] = [[[0 for k in range(sizeK)] for j in range(factory.N)] for i in range(factory.N)]
 
     Y = [0 for n in range(factory.param_population)]  # посещает или нет ТС с номером К объект i
     for n in range(factory.param_population):
-        Y[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+        Y[n] = [[0 for k in range(sizeK)] for i in range(factory.N)]
 
     Sresh = [0 for n in range(factory.param_population)]  # время работы ТС c номером К на объекте i
     for n in range(factory.param_population):
-        Sresh[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+        Sresh[n] = [[0 for k in range(sizeK)] for i in range(factory.N)]
 
     A = [0 for n in range(factory.param_population)]  # время прибытия ТС с номером К на объект i
     for n in range(factory.param_population):
-        A[n] = [[0 for k in range(factory.KA)] for i in range(factory.N)]
+        A[n] = [[0 for k in range(sizeK)] for i in range(factory.N)]
 
-    Target_Function = [0 for n in
+    Target_Function = [target_start for n in
                        range(factory.param_population)]  # здесь сохраняем результат целевой функции для каждого решения
 
-    return X, Y, Sresh, A, Target_Function
+    SizeSolution = [sizeK for n in
+                       range(factory.param_population)]  # здесь сохраняем размер каждого решения в популяции
+
+    return X, Y, Sresh, A, Target_Function, SizeSolution
 
 
 # Cоздаем популяцию решений
-def PopulationOfSolutions(Target_Function, x, y, s, a):
+def PopulationOfSolutions(Target_Function, SizeSolution):
     for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
         # Берем стартовое решение из файла, потому что какой-то пиздюк его испортил
-        ReadStartSolutionOfFile(x, y, s, a)
+        # x, y, s, a = ReadStartSolutionOfFile(SizeSolution)
+        X, Y, Sresh, A = ReadStartSolutionOfFile(SizeSolution[n])
 
-        for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
-            print("\nПереставление № ", local_s)
-            Target_Function[n], x, y, s, a = Relocate(Target_Function[n])
+        # for local_s in range(factory.param_start_solution):  # производим param_start_solution кол-во перестановок
+        #     print("\nПереставление № ", local_s)
+        x, y, s, a, Target_Function[n], SizeSolution[n] = Relocate(X, Y, Sresh, A, Target_Function[n], SizeSolution[n])
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
