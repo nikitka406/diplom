@@ -39,12 +39,12 @@ def CountUsedMachines(sequence):
 # Выставляем сколько работает каждая машина на локации after
 def WorkTimeCounting(sequence, y, s, after):
     local_count = sum(y[after])
-    print("На локации ", after, " работает ", local_count, " машин")
+    # print("На локации ", after, " работает ", local_count, " машин")
 
     # Считаем сколько хватит каждому скважин
     div = factory.wells[after] // local_count
     if div > 0:
-        print("Присваиваем каждой машине, которая работает на локации ", after, " ", div, "кол-во скважин")
+        # print("Присваиваем каждой машине, которая работает на локации ", after, " ", div, "кол-во скважин")
         for k in range(len(s[0])):
             if y[after][k] == 1:
                 s[after][k] = div * (factory.S[after] / factory.wells[after])
@@ -54,8 +54,8 @@ def WorkTimeCounting(sequence, y, s, after):
             print("Свободных скважин не осталось, мы все распределили")
 
         else:
-            print("Но у нас еще осталось ", div, " свободных скважин")
-            print("Создадим массив, в котором будут номера машин которые обслуживают этот город. Он равен ")
+            # print("Но у нас еще осталось ", div, " свободных скважин")
+            # print("Создадим массив, в котором будут номера машин которые обслуживают этот город. Он равен ")
 
             k = 0
             car_for_after = []
@@ -67,14 +67,14 @@ def WorkTimeCounting(sequence, y, s, after):
 
             print(car_for_after)
 
-            print("Распределяем рандомным клиентам оставшиеся скважины")
+            # print("Распределяем рандомным клиентам оставшиеся скважины")
             while div > 0:
                 car = random.choice(car_for_after)
-                print("Назначаем машине с номером ", car, " еще одну скважину")
+                # print("Назначаем машине с номером ", car, " еще одну скважину")
                 s[after][car] += factory.S[after] / factory.wells[after]
                 car_for_after.remove(car)
-                print("Осталось распределить ", div, " скважин по ")
-                print(car_for_after, " клиентам")
+                # print("Осталось распределить ", div, " скважин по ")
+                # print(car_for_after, " клиентам")
                 div -= 1
 
     else:
@@ -83,17 +83,17 @@ def WorkTimeCounting(sequence, y, s, after):
 
 # Находим время прибытия к after
 def ArrivalTime(a, s, before, after, k):
-    print("Считаем время прибытия на локацию")
+    # print("Считаем время прибытия на локацию")
     time = a[before][k] + s[before][k] + factory.t[before][after]
 
-    print("Дерективный срок = ", factory.e[after])
-    print("Фактическое время прибытия = ", time)
+    # print("Дерективный срок = ", factory.e[after])
+    # print("Фактическое время прибытия = ", time)
     if factory.e[after] >= time:
-        print("Приехали слишком рано ждем начало временного окна")
+        # print("Приехали слишком рано ждем начало временного окна")
         return factory.e[after]
 
     elif factory.e[after] < time:
-        print("Опоздали на начало работ")
+        # print("Опоздали на начало работ")
         return time
 
 
@@ -113,40 +113,40 @@ def SequenceDisplayInTheXYSA(sequence):
     a = [[0 for k in range(count_car)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
 
     k = 0
-    print("Теперь перейдем к заполнению матрицы Х У")
+    # print("Теперь перейдем к заполнению матрицы Х У")
     for i in range(1, len(sequence)):
         before = sequence[i - 1][0]
         after = sequence[i][0]
-        print("Предыдущий посещенный ", before)
-        print("Которого вставляем ", after)
+        # print("Предыдущий посещенный ", before)
+        # print("Которого вставляем ", after)
 
         if sequence[i][0] == 0:
             x[before][after][k] = 1
             y[after][k] = 1
 
             k += 1
-            print("Увидели 0, значит переходим к следующей машине с номером ", k)
+            # print("Увидели 0, значит переходим к следующей машине с номером ", k)
             if k == count_car:
-                print("Кол-во используемых авто ", count_car)
+                # print("Кол-во используемых авто ", count_car)
                 break
         else:
             x[before][after][k] = 1
             y[after][k] = 1
 
     k = 0
-    print("Теперь заполним А и S")
+    # print("Теперь заполним А и S")
     for i in range(1, len(sequence)):
         before = sequence[i - 1][0]
         after = sequence[i][0]
-        print("Предыдущий посещенный ", before)
-        print("Которого вставляем ", after)
+        # print("Предыдущий посещенный ", before)
+        # print("Которого вставляем ", after)
 
         if after == 0:
             a[after][k] = a[before][k] + factory.t[before][after]
             k += 1
-            print("Увидели 0, значит переходим к следующей машине с номером ", k)
+            # print("Увидели 0, значит переходим к следующей машине с номером ", k)
             if k == count_car:
-                print("Кол-во используемых авто ", count_car)
+                # print("Кол-во используемых авто ", count_car)
                 break
 
         if after != 0:
@@ -155,7 +155,7 @@ def SequenceDisplayInTheXYSA(sequence):
                     print("Уже считали для этого ", after, " города")
 
             except ValueError:
-                print("До этого еще не встречали город ", after)
+                # print("До этого еще не встречали город ", after)
                 WorkTimeCounting(sequence, y, s, after)
 
             a[after][k] = ArrivalTime(a, s, before, after, k)
@@ -1134,7 +1134,7 @@ def AEX(sequence1, sequence2):
         # Пока кол-во используемых машин не привысило доступного числа  k <= factory.K
         # или остались не посещенные города sum(flagAll) <= factory.N
         counter = 0
-        while sum(flagAll) <= factory.N and counter <= factory.N * 2:
+        while sum(flagAll) < factory.N and counter <= factory.N * 2:
             print("Продолжаем построение с помощью функции SearchForAnUnvisitedZero")
             print("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
                   "клиента которого еще не посетили в этом решении")
@@ -1213,7 +1213,7 @@ def AEX(sequence1, sequence2):
         # или остались не посещенные города sum(flagAll) <= factory.N
         counter = 0
         # TODO разобраться, когда всех посетили, но на одной машине
-        while sum(flagAll) <= factory.N and counter <= factory.N * 2:
+        while sum(flagAll) < factory.N and counter <= factory.N * 2:
             print("Продолжаем построение с помощью функции SearchForAnUnvisitedZero")
             print("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
                   "клиента которого еще не посетили в этом решении")
@@ -1351,7 +1351,8 @@ def HProX(sequence1, sequence2):
 def UsedOperators(sequence1, sequence2, operator):
     print("Запускаем оператор ", operator)
     if operator == 'AEX':
-        return AEX(sequence1, sequence2)
+        children = AEX(sequence1, sequence2)
+        return children
 
     elif operator == 'HGreX':
         return HGreX(sequence1, sequence2)
@@ -1367,7 +1368,7 @@ def UsedOperators(sequence1, sequence2, operator):
 
 
 # Локальный поиск (локально меняем решение)
-def LocalSearch(x, y, s, a, target_function, sizeK):
+def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
@@ -1377,8 +1378,9 @@ def LocalSearch(x, y, s, a, target_function, sizeK):
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
-        x, y, s, a, target_function,  sizeK = Relocate(x, y, s, a, target_function, sizeK)
-        return x, y, s, a, target_function,  sizeK
+        x, y, s, a, target_function,  sizeK, iteration = Relocate(x, y, s, a, target_function, sizeK, iteration)
+        # iteration += 1
+        return x, y, s, a, target_function,  sizeK, iteration
 
     elif oper == '2Opt':
         print("")
@@ -1396,36 +1398,36 @@ def Mutation(sequence):
 
     buf_random = []
     k = 0
-    print("Последовательность до мутации ")
-    print(sequence)
+    # print("Последовательность до мутации ")
+    # print(sequence)
     for i in  range(1, len(sequence)):
         if sequence[i][0] != 0:
-            print("Составляем массив какие клиенты обслуживаются этим маршрутом, сейчас добавляем ", sequence[i][0])
+            # print("Составляем массив какие клиенты обслуживаются этим маршрутом, сейчас добавляем ", sequence[i][0])
             buf_random.append(sequence[i][0])
         elif sequence[i][0] == 0 and len(buf_random) > 1:
 
-            print("Полученный массив ", buf_random)
+            # print("Полученный массив ", buf_random)
             obj1 = int(random.choice(buf_random))
-            print("Берем рандомного клиента ", obj1)
+            # print("Берем рандомного клиента ", obj1)
             buf_random.remove(obj1)
             obj2 = int(random.choice(buf_random))
-            print("Берем рандомного клиента ", obj2)
+            # print("Берем рандомного клиента ", obj2)
 
             index1 = sequence.index([obj1, 0], k)
-            print("Их места в последовательности ", index1)
+            # print("Их места в последовательности ", index1)
             index2 = sequence.index([obj2, 0], k)
-            print("Их места в последовательности ", index2)
+            # print("Их места в последовательности ", index2)
 
             sequence[index1][0] = obj2
             sequence[index2][0] = obj1
-            print("Получившаяся последовательность")
-            print(sequence)
+            # print("Получившаяся последовательность")
+            # print(sequence)
 
             buf_random = []
             k = i
 
         elif sequence[i][0] == 0 and len(buf_random) == 1:
-            print("Машина обслуживает только одного клиента, никого никуда не переставляем")
+            # print("Машина обслуживает только одного клиента, никого никуда не переставляем")
             buf_random = []
             k = i
 
@@ -1437,9 +1439,12 @@ def Mutation(sequence):
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
-def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
+def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
     print("Начинаем процесс порождения нового решения")
-
+    minimumCros = Target_Function[0]
+    maximumCros = Target_Function[0]
+    minimumLocal = Target_Function[0]
+    maximumLocal = Target_Function[0]
     for crossing in range(factory.param_crossing):
         print("Запускаем ", crossing, "-ый раз")
 
@@ -1451,6 +1456,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
         # Выбираю как буду сохранять полученное решение
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
         scenario_add = random.choice(scenario_add_new_solution)
+        scenario_add = 'deleteTheBad'
         print("Выбрали сценарий по сохранению нового решения", scenario_add)
 
         # TODO Задаю список с названиями операторов
@@ -1544,10 +1550,12 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
+        # iteration += 1
+
         # У ребенка в конце может не быть нуля
         if children[-1] != [0, 0]:
             children.append([0, 0])
-
+        print("children", children)
         # Применяем мутацию
         Mutation(children)
 
@@ -1556,15 +1564,19 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
 
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
+        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
         print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
+        minimumCros = min(minimumCros, target_function)
+        maximumCros = max(maximumCros, target_function)
 
         # Применяем локальный поиск
-        x, y, s, a, target_function, sizek = LocalSearch(x, y, s, a, target_function, sizek)
+        x, y, s, a, target_function, sizek, iteration = LocalSearch(x, y, s, a, target_function, sizek, iteration)
 
         # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, y, PenaltyFunction(s, a))
+        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
         print("Целевая функция нового решения после локального поиска равна ", target_function)
+        minimumLocal = min(minimumLocal, target_function)
+        maximumLocal = max(maximumLocal, target_function)
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции
@@ -1615,6 +1627,23 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK):
             Target_Function.append(target_function)
             Sequence.append(children)
             SizeK.append(sizek)
+
+        print("Число итераций = ", iteration)
+    SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
+    SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
+    SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
+    SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
+    SaveDateResult("Число итераций = " + str(iteration))
+    min_result = min(Target_Function)
+    number_solution = Target_Function.count(min(Target_Function))
+    print("Минимальная целевая функция ", min_result, " номер решения ", number_solution)
+
+    SaveDateResult("Итоговая минимальная целевая функция = " + str(min_result))
+    SaveDateResult("Число используемых машин = " + str(AmountCarUsed(Y[number_solution])))
+    SaveDateResult("Решение " + str(Sequence[number_solution]))
+
+    for n in range(factory.param_population):
+        print(Sequence[n])
 
 
 def CheckSequence(Sequence):

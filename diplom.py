@@ -6,27 +6,36 @@ import time
 start = time.time()
 
 ClearAllFile()
-target_function = 0  # значение целевой функции
-iterations = 0
+iteration = 1
 
 # заполняем стартовое решение, одна машина на одну локацию
 x, y, s, a = OneCarOneLocation()
-start_target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(s, a))
-print(target_function)
+start_target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+
+print("Целевая функция при стартовом решении ", start_target_function)
+SaveDateResult("Целевая функция при стартовом решении " + str(start_target_function))
+SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
+
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 print("Проверка стартового решения пройдена")
 
+# Сохраняем стартовое решение в файл
+SaveStartSolution(x, y, s, a)
+
 # Освобождаем машины если позволяют гран усл
-# TODO проверить делит
-DeleteCarNonNarushOgr(x, y, s, a)
+DeleteCarNonNarushOgr(len(y[0]))
+x, y, s, a = ReadStartSolutionOfFile(len(y[0]))
 
 # Удаляем не используемые ТС
 # x, y, s, a = DeleteNotUsedCar(x, y, s, a)
 
 # Проверяем что ничего не сломалось
-target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(s, a))
+target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
-print(target_function)
+
+print("Целевая функция при стартовом решении, но меньшем числе машин ", target_function)
+SaveDateResult("Целевая функция при стартовом решении, но меньшем числе машин " + str(target_function))
+SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
 
 # Сохраняем стартовое решение в файл
 SaveStartSolution(x, y, s, a)
@@ -35,22 +44,29 @@ SaveStartSolution(x, y, s, a)
 X, Y, Sresh, A, Target_Function, Size_Solution = SolutionStore(target_function, len(y[0]))
 
 # Cоздаем популяцию решений
-PopulationOfSolutions(Target_Function, Size_Solution)
+PopulationOfSolutions(Target_Function, Size_Solution, iteration)
 
 # Считываем популяцию из файла
 ReadSolutionPopulationOnFile(X, Y, Sresh, A)
 
+print("Минимальная целевая функция в популяции = ", min(Target_Function))
+print("Максимальная целевая функция в популяции = ", max(Target_Function))
+SaveDateResult("Минимальная целевая функция в популяции = " + str(min(Target_Function)))
+SaveDateResult("Максимальная целевая функция в популяции = " + str(max(Target_Function)))
+
 # Создаем последовательность решения
 Sequence = CreateSequence(X)
 
-# Создаем новые решения
-GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution)
+file = open('output/population.txt', 'w')
+for i in  range(factory.param_population):
+    file.write(str(Sequence[i]) + '\n')
+    file.write("____________________\n")
+file.close()
 
-min_result = min(Target_Function)
-number_solution = Target_Function.count(min(Target_Function))
-print("Минимальная целевая функция ", min_result, " номер решения ", number_solution)
+# Создаем новые решения
+GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, iteration)
+
 Time = time.time() - start
 print(Time, "seconds")
-
-SaveDateResult(start_target_function, min_result, Time, Sequence[number_solution])
-
+SaveDateResult("Время работы программы = " + str(Time) + 'seconds')
+SaveDateResult("______________________________________________________________________________________________________")
