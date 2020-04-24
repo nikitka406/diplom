@@ -1,6 +1,7 @@
 from function import *
 import factory
 from crossover import *
+from operators import *
 import time
 
 start = time.time()
@@ -18,6 +19,7 @@ SaveDateResult("Число используемых машин = " + str(AmountC
 
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 print("Проверка стартового решения пройдена")
+SaveDateResult("Проверка стартового решения пройдена\n")
 
 # Сохраняем стартовое решение в файл
 SaveStartSolution(x, y, s, a)
