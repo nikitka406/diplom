@@ -299,15 +299,6 @@ def NumberCarClienta(y, client):
             return k
 
 
-# узнаем про клиента, лист он или не лист
-def ListOrNotList(y, a, client):
-    k = NumberCarClienta(y, client)  # получаем номер машины, которая обслуживает этого клиента
-    for i in range(1, factory.N):
-        if a[client][k] < a[i][k]:  # Если у машины, котораяя посещает clienta есть город,
-            return 1  # который она посещает позже, значит он НЕ ЛЕСИТ
-    return 0  # значит клиент лист
-
-
 # ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight):
     k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
@@ -341,41 +332,25 @@ def CarIsWork(y, k):
 def RecursiaForTime(x, s, a, i, k, recurs):
     for j in range(factory.N):
         if x[i][j][k] != 0 and j != 0 and recurs < factory.N:
-            # print("Нашли соседа для ", i, " справа ", j)
-            # print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
             # если время прибытия меньше начала работ, то ждем
             if factory.e[j] > a[i][k] + s[i][k] + factory.t[i][j]:
-                # print("Приехали слишком рано ждем")
                 a[j][k] = factory.e[j]
-                # print("a[j][k] = ", a[j][k])
             # иначе ставим время прибытия
             else:
-                # print("Опоздали")
                 a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
-                # print("a[j][k] = ", a[j][k])
 
             recurs += 1
             RecursiaForTime(x, s, a, j, k, recurs)
+
         elif x[i][j][k] != 0 and j == 0 and recurs < factory.N:
-            # print("Встретили ноль, пора заканчивать рекурсию")
-            # print("Время прибытия в ", i, " = ", a[i][k])
-            # print("Время работы в ", i, " = ", s[i][k])
-            # print("Время переиещения из ", i, " в ", j, " = ", factory.t[i][j])
-
             a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
-
-            # print("Время прибытия в депо = ", a[j][k])
-            # for i in range(factory.N):
-            #     print(a[i][k], end=' ')
-            # print('\n')
-
             return True
 
         elif recurs > factory.N:
-            return -1
+            return False
 
 
-# определяем время приезда на конкретную локацию
+# определяем время приезда для всех локаций
 def TimeOfArrival(x, y, s):
     recurs = 0
     print("Начнем заполнять время прибытия")
@@ -384,15 +359,17 @@ def TimeOfArrival(x, y, s):
         if CarIsWork(y, k) == 1:
             # print("ЗАходим в рекурсию")
             flag = RecursiaForTime(x, s, a, 0, k, recurs)
-    if flag != -1:
+    if flag:
         return a
-    elif flag == -1:
+    elif not flag:
         return flag
 
 
 # удаляем клиента из выбранного  маршрут
-def DeleteClientaFromPath(x, y, s, a, client):
-    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+def DeleteClientaFromPath(x, y, s, a, client, k = -1):
+    # TODO надо изменить поиск машины
+    if k == -1:
+        k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     clientLeft = SearchSosedLeftOrRight(x, y, client, "left")  # ищем город перед клиентом
     clientRight = SearchSosedLeftOrRight(x, y, client, "right")  # ищем город после клиента
     # если у клиента есть сосед справо и слево
