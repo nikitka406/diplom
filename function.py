@@ -32,17 +32,11 @@ def BeautifulPrint(X, Y, Sresh, A):
         print("a = ", end=' ')
         for i in range(factory.N):
             print(A[i][k], end=' ')
-            # for k in range(factory.KA):
-            #     print(A[i][k], end=' ')
-            # print("\n")
         print("\n")
 
         print("s = ", end=' ')
         for i in range(factory.N):
             print(Sresh[i][k], end=' ')
-            # for k in range(factory.KA):
-            #     print(Sresh[i][k], end=' ')
-            # print("\n")
         print("\n")
     #
     # for i in range(factory.N):
@@ -316,6 +310,7 @@ def SearchSosedLeftOrRight(x, y, client, leftOrRight):
         print("ERROR from SearchSosedLeftOrRight: неверное значение переменной leftOrRight")
 
 
+# Работает ли машина
 def CarIsWork(y, k):
     suma = 0
     for i in range(factory.N):
@@ -323,9 +318,9 @@ def CarIsWork(y, k):
             suma += 1
 
     if suma != 0:
-        return 1
+        return True
     else:
-        return -1
+        return False
 
 
 # Рекурсия чтобы заполнить время прибытия
@@ -356,7 +351,7 @@ def TimeOfArrival(x, y, s):
     print("Начнем заполнять время прибытия")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
-        if CarIsWork(y, k) == 1:
+        if CarIsWork(y, k):
             # print("ЗАходим в рекурсию")
             flag = RecursiaForTime(x, s, a, 0, k, recurs)
     if flag:
@@ -449,9 +444,8 @@ def SolutionStore(target_start, sizeK):
 # Проверка на содержание скважин тех же объектов car у soseda
 def IsContainWells(y, car, sosed):
     for i in range(factory.N):
-        for j in range(factory.N):
-            if y[i][car] == y[j][sosed] == 1:
-                return True
+        if y[i][car] == y[i][sosed] == 1:
+            return True
     return False
 
 
@@ -537,7 +531,7 @@ def window_time_down(a, y):
 def window_time_up(a, s, y):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, factory.N):
-        for k in range(len(a[i])):
+        for k in range(len(y[i])):
             if a[i][k] + s[i][k] > factory.l[i] and y[i][k] == 1:
                 print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект", i,
                       "больше чем конец работ")

@@ -318,3 +318,5 @@ def ClearAllFile():
     file.close()
     file = open('log/Two_Opt.txt', 'w')
     file.close()
+    file = open('log/helog.txt', 'w')
+    file.close()
