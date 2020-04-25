@@ -446,6 +446,24 @@ def SolutionStore(target_start, sizeK):
     return X, Y, Sresh, A, Target_Function, SizeSolution
 
 
+# Проверка на содержание скважин тех же объектов car у soseda
+def IsContainWells(y, car, sosed):
+    for i in range(factory.N):
+        for j in range(factory.N):
+            if y[i][car] == y[j][sosed] == 1:
+                return True
+    return False
+
+
+# Возвращает номер объекта который обслуживает конкретная машина
+def GetObjForCar(y, car):
+    result = []
+    for i in range(1, factory.N):
+        if y[i][car] == 1:
+            result.append(i)
+    return result
+
+
 # Граничные условия
 def X_join_Y(x, y):
     bufer1 = 0

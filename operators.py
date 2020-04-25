@@ -124,7 +124,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration):
         #         print("\n")
         return Xl, Yl, Sl, Al, targetL, sizeK, iteration
 
-    elif minimum == targetR and minimum != -1:
+    elif minimum == targetR and minimum != -1 and targetR != targetL:
         print("Выбрали правого у него целевая меньше")
         # for k in range(len(XR[0][0])):
         #     print('Номер машины ', k)
@@ -429,7 +429,7 @@ def Help(X, Y, Sresh, A, target_function_start, sizeK_start):
                         file.write("И переставляю его к машине " + str(sosed) + '\n')
 
                         x, y, s, a, target_function, sizeK = OperatorJoinFromHelp(X, Y, Sresh, A, SizeK, car,
-                                                                                  sosed)
+                                                                                  sosed, TargetFunction)
                         file.write("Число используемых машин теперь " + str(AmountCarUsed(y)) + '\n')
 
                         file.write("Выбираем минимальное решение" + '\n')
@@ -481,43 +481,30 @@ def Help(X, Y, Sresh, A, target_function_start, sizeK_start):
     return X, Y, Sresh, A, target_function_start, sizeK_start
 
 
-# Проверка на содержание скважин тех же объектов car у soseda
-def IsContainWells(y, car, sosed):
-    for i in range(factory.N):
-        for j in range(factory.N):
-            if y[i][car] == y[j][sosed] == 1:
-                return True
-    return False
+def OperatorJoinFromHelp(x, y, s, a, sizeK_start, car, sosedCar, target_function_start):
+    target_function = target_function_start
+    sizeK = sizeK_start
 
-
-# Возвращает номер объекта который обслуживает конкретная машина
-def GetObjForCar(y, car):
-    for i in range(1, factory.N):
-        if y[i][car] == 1:
-            return i
-
-
-def OperatorJoinFromHelp(x, y, s, a, sizeK, car, sosedCar):
     print("Узнаем сколько скважин обслуживает машина ", sosedCar)
     if CountObjInCar(y, sosedCar) == 1:
         print("Соседская машина обслуживает один объект")
 
         client = GetObjForCar(y, car)
-        print("Машина ", car, " обслуживает объект ", client)
+        print("Машина ", car, " обслуживает объект ", client[0])
         sosed = GetObjForCar(y, sosedCar)
-        print("Машина ", sosedCar, " обслуживает объект ", sosed)
+        print("Машина ", sosedCar, " обслуживает объект ", sosed[0])
 
         Xl, Yl, Sl, Al = ReadStartSolutionOfFile(sizeK)
         XR, YR, SR, AR = ReadStartSolutionOfFile(sizeK)
 
-        sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left")  # левый сосед соседа
-        sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right")  # правый сосед соседа
+        sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed[0], "left")  # левый сосед соседа
+        sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed[0], "right")  # правый сосед соседа
 
         print("sosed_left = ", sosedLeft)
         print("sosed_right = ", sosedRight)
 
-        print("Время окончание client = ", factory.l[client])
-        print("Время окончание sosed = ", factory.l[sosed])
+        print("Время окончание client = ", factory.l[client[0]])
+        print("Время окончание sosed = ", factory.l[sosed[0]])
         print("Время окончание sosedLeft = ", factory.l[sosedLeft])
         print("Время окончание sosedRight = ", factory.l[sosedRight])
 
@@ -526,26 +513,26 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK, car, sosedCar):
         try:
             print("Вставляем клиента к соседу справа")
             # машина соседа будет работать у клиента столько же
-            SR[client][sosedCar] = SR[client][car]
+            SR[client[0]][sosedCar] = SR[client[0]][car]
 
             # Чтобы все корректно работало, сначала надо написать
             # новое время приезда и новое время работы, потом
             # удалить старое решение, и только потом заполнять Х и У
-            XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client)
-            XR[sosed][sosedRight][sosedCar] = 0
-            XR[sosed][client][sosedCar] = 1
-            XR[client][sosedRight][sosedCar] = 1
-            YR[client][sosedCar] = 1  # тепреь машина соседа обслуживает клиента
+            XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client[0])
+            XR[sosed[0]][sosedRight][sosedCar] = 0
+            XR[sosed[0]][client[0]][sosedCar] = 1
+            XR[client[0]][sosedRight][sosedCar] = 1
+            YR[client[0]][sosedCar] = 1  # тепреь машина соседа обслуживает клиента
 
             # Подсчет времени приезда к клиенту от соседа
             AR = TimeOfArrival(XR, YR, SR)
 
         except IOError:
             print("Объект не удален")
-            XR[sosed][sosedRight][sosedCar] = 1
-            XR[sosed][client][sosedCar] = 0
-            XR[client][sosedRight][sosedCar] = 0
-            YR[client][sosedCar] = 0  # тепреь машина соседа обслуживает клиента
+            XR[sosed[0]][sosedRight][sosedCar] = 1
+            XR[sosed[0]][client[0]][sosedCar] = 0
+            XR[client[0]][sosedRight][sosedCar] = 0
+            YR[client[0]][sosedCar] = 0  # тепреь машина соседа обслуживает клиента
 
             # Подсчет времени приезда к клиенту от соседа
             AR = TimeOfArrival(XR, YR, SR)
@@ -553,26 +540,26 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK, car, sosedCar):
         try:
             print("Вставляем клиента к соседу слева")
             # машина соседа будет работать у клиента столько же
-            Sl[client][sosedCar] = Sl[client][car]
+            Sl[client[0]][sosedCar] = Sl[client[0]][car]
 
             # Чтобы все корректно работало, сначала надонаписать
             # новое время приезда и новое время работы, потом
             # удалить старое решение, и только потом заполнять Х и У
-            Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client)
-            Xl[sosedLeft][sosed][sosedCar] = 0
+            Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client[0])
+            Xl[sosedLeft][sosed[0]][sosedCar] = 0
             Xl[sosedLeft][client][sosedCar] = 1
-            Xl[client][sosed][sosedCar] = 1
-            Yl[client][sosedCar] = 1  # теперь машина соседа обслуживает клиента
+            Xl[client[0]][sosed[0]][sosedCar] = 1
+            Yl[client[0]][sosedCar] = 1  # теперь машина соседа обслуживает клиента
 
             # Подсчет времени приезда к клиенту от соседа
             Al = TimeOfArrival(Xl, Yl, Sl)
 
         except IOError:
             print("Объект не удален")
-            Xl[sosedLeft][sosed][sosedCar] = 1
-            Xl[sosedLeft][client][sosedCar] = 0
-            Xl[client][sosed][sosedCar] = 0
-            Yl[client][sosedCar] = 0  # теперь машина соседа обслуживает клиента
+            Xl[sosedLeft][sosed[0]][sosedCar] = 1
+            Xl[sosedLeft][client[0]][sosedCar] = 0
+            Xl[client[0]][sosed[0]][sosedCar] = 0
+            Yl[client[0]][sosedCar] = 0  # теперь машина соседа обслуживает клиента
 
             # Подсчет времени приезда к клиенту от соседа
             Al = TimeOfArrival(Xl, Yl, Sl)
@@ -628,21 +615,69 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK, car, sosedCar):
             return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, 1)), sizeK
 
     elif CountObjInCar(y, sosedCar) > 1:
+        X, Y, Sresh, A = ReadStartSolutionOfFile(sizeK)
+
         print("Соседская машина обслуживает несколько объектов")
-        if IsContainWells(y, car, sosedCar):
+        if IsContainWells(Y, car, sosedCar):
+            print("У машины ", car, " есть такой же объект как у машины ", sosedCar)
             for i in range(1, factory.N):
                 # Ищем какую скважину обслуживает машина car
-                if y[i][car] == 1 and y[i][sosedCar] == 1:
-                    s[i][sosedCar] += s[i][car]
-                    flag = RecursiaForTime(x, s, a, 0, sosedCar, 0)
+                if Y[i][car] == 1 and Y[i][sosedCar] == 1:
+                    Sresh[i][sosedCar] += Sresh[i][car]
+                    flag = RecursiaForTime(X, Sresh, A, 0, sosedCar, 0)
                     if not flag:
-                        print("ERROR from OperatorJoinFromHelp: Рекурсия по подсчету времени прибытия превысила счетчик")
-                    DeleteClientaFromPath(x, y, s, a, i, car)
-                    return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, 1)), sizeK
+                        print(
+                            "ERROR from OperatorJoinFromHelp: Рекурсия по подсчету времени прибытия превысила счетчик")
+                        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, 1)), sizeK
 
-        elif not IsContainWells(y, car, sosedCar):
-            # TODO Надо разсмотреть случай когда нет такого объекта у соседа, и у соседа больше одной скважины
+                    DeleteClientaFromPath(X, Y, Sresh, A, i, car)
+                    return X, Y, Sresh, A, CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, 1)), sizeK
 
+        elif not IsContainWells(Y, car, sosedCar):
+            flag = 0
+            print("У машины ", car, " нет такого же объекта как у машины ", sosedCar)
+
+            client = GetObjForCar(Y, car)
+            sosed = GetObjForCar(Y, sosedCar)
+            print("Машина ", car, " обслуживает объект ", client[0])
+            print("Машина ", sosedCar, " обслуживает объекты ", sosed)
+
+            for i in range(len(sosed)):
+                print("Переставляем скважину с объекта " + str(client[0]) + " на машине " + str(car))
+                print("К объекту " + str(sosed[i]) + '\n')
+                print("На машине " + str(sosedCar) + '\n')
+
+                X, Y, Sresh, A, TargetFunction, SizeK, iteration = OperatorJoinFromReloc(x, y, s, a, sizeK, client[0],
+                                                                                         sosed[i], 1)
+                print("Число используемых машин " + str(SizeK) + '\n')
+
+                print("Выбираем минимальное решение" + '\n')
+                minimum = min(TargetFunction, target_function)
+                if minimum == TargetFunction:
+                    print("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                    print("Новая целевая функция равна " + str(target_function) + '\n')
+
+                    SaveRelocate(X, Y, Sresh, A, SizeK)
+                    target_function = TargetFunction
+                    sizeK = SizeK
+                    flag = 1
+                else:
+                    print("Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                    print("Старая целевая функция равна " + str(target_function) + '\n')
+
+            if flag == 1:
+                print("Локальный оптимум найден сохраняем в популяцию решение" + '\n')
+                X, Y, Sresh, A = ReadRelocateOfFile(sizeK)
+                for k in range(sizeK):
+                    for i in range(factory.N):
+                        for j in range(factory.N):
+                            print(str(X[i][j][k]) + ' ')
+                        print("\n")
+                    print("\n")
+
+                return X, Y, Sresh, A, target_function, sizeK
+            else:
+                return x, y, s, a, target_function_start, sizeK_start
 
 
 # Cоздаем популяцию решений
@@ -672,4 +707,3 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration):
     # iteration += 1
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
-
