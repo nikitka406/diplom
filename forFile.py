@@ -168,23 +168,23 @@ def SaveHelp(local_x, local_y, local_s, local_a, sizeK):
     # Печатаем в файл Х
     for i in range(factory.N):
         for j in range(factory.N):
-            for k in range(sizeK):
+            for k in range(len(local_y[0])):
                 file.write(str(local_x[i][j][k]) + ' ')
             file.write("\n")
         # file.write("\n")
     # Печатаем в файл Y
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_y[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл S
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_s[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл A
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_a[i][k]) + ' ')
         file.write("\n")
 
@@ -213,6 +213,7 @@ def ReadHelpOfFile(sizeK):
             for k in range(len(local_x[i][j])):
                 local_x[i][j][k] = int(local_x[i][j][k])
             index += 1
+            print(index)
 
     # Печатаем в файл Y
     for i in range(factory.N):
@@ -243,23 +244,23 @@ def SaveStartHelp(local_x, local_y, local_s, local_a, sizeK):
     # Печатаем в файл Х
     for i in range(factory.N):
         for j in range(factory.N):
-            for k in range(sizeK):
+            for k in range(len(local_y[0])):
                 file.write(str(local_x[i][j][k]) + ' ')
             file.write("\n")
         # file.write("\n")
     # Печатаем в файл Y
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_y[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл S
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_s[i][k]) + ' ')
         file.write("\n")
     # Печатаем в файл A
     for i in range(factory.N):
-        for k in range(sizeK):
+        for k in range(len(local_y[0])):
             file.write(str(local_a[i][k]) + ' ')
         file.write("\n")
 

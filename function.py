@@ -289,6 +289,7 @@ def SearchTheBestSoseda(client):
 
 # номер машины которая обслуживает клиента
 def NumberCarClienta(y, client):
+    # TODO Берет первую попавшуюся машину которая обслуживает, это не правильно!!
     for k in range(len(y[0])):
         if y[client][k] == 1:
             return k
@@ -296,6 +297,7 @@ def NumberCarClienta(y, client):
 
 # ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight, k=-1):
+    # TODO надо разобраться с поиском машины
     if k == -1:
         k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     if leftOrRight == "left":
@@ -362,8 +364,8 @@ def RecursiaForTime(x, s, a, i, k, recurs):
 
 
 # определяем время приезда для всех локаций
-def TimeOfArrival(x, y, s):
-    print("Начнем заполнять время прибытия")
+def TimeOfArrival(x, y, s, file):
+    file.write("Начнем заполнять время прибытия\n")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k):
@@ -396,7 +398,7 @@ def DeleteClientaFromPath(x, y, s, a, client, k=-1):
         s[client][k] = 0  # время работы машины К у клиента = 0
         a[client][k] = 0  # машина не прибывает к клиенту
         a[0][k] = 0
-        # a = TimeOfArrival(x, y, s)
+        # a = TimeOfArrival(x, y, s, file)
         # если удаляем клиента и остается только депо, ставим там 0
         summa = 0
         for i in range(1, factory.N):
@@ -479,6 +481,15 @@ def CountWellsWithFane(s, a, i, k):
         return ceil((a[i][k] + s[i][k] - factory.l[i]) / 2)
     else:
         return int(s[i][k] / (factory.S[i] / factory.wells[i]))
+
+
+# Подсчет сколько объектов обслуживает машина
+def CountObjInCar(y, car):
+    count = 0
+    for i in range(1, factory.N):
+        if y[i][car] == 1:
+            count += 1
+    return count
 
 
 # Граничные условия
