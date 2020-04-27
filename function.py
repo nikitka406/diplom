@@ -2,6 +2,7 @@ import random
 import sys
 import factory
 from forFile import *
+from math import *
 import csv
 
 
@@ -381,6 +382,7 @@ def DeleteClientaFromPath(x, y, s, a, client, k = -1):
         y[client][k] = 0  # машина К больше не обслуживает клиента
         s[client][k] = 0  # время работы машины К у клиента = 0
         a[client][k] = 0  # машина не прибывает к клиенту
+        a[0][k] = 0
         # a = TimeOfArrival(x, y, s)
         # если удаляем клиента и остается только депо, ставим там 0
         summa = 0
@@ -443,8 +445,8 @@ def SolutionStore(target_start, sizeK):
 
 # Проверка на содержание скважин тех же объектов car у soseda
 def IsContainWells(y, car, sosed):
-    for i in range(factory.N):
-        if y[i][car] == y[i][sosed] == 1:
+    for i in range(1, factory.N):
+        if y[i][sosed] == car:
             return True
     return False
 
@@ -456,6 +458,11 @@ def GetObjForCar(y, car):
         if y[i][car] == 1:
             result.append(i)
     return result
+
+
+# Возвращает число скважин которые не уложились во временное окно
+def CountWellsWithFane(s, a, i, k):
+    return ceil((a[i][k] + s[i][k] - factory.l[i])/2)
 
 
 # Граничные условия
