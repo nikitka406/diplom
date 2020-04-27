@@ -295,8 +295,9 @@ def NumberCarClienta(y, client):
 
 
 # ищем соседа слева либо справа
-def SearchSosedLeftOrRight(x, y, client, leftOrRight):
-    k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+def SearchSosedLeftOrRight(x, y, client, leftOrRight, k=-1):
+    if k == -1:
+        k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     if leftOrRight == "left":
         for i in range(factory.N):  # ищем по столбцу
             if x[i][client][k] == 1:
@@ -327,19 +328,33 @@ def CarIsWork(y, k):
 # Рекурсия чтобы заполнить время прибытия
 def RecursiaForTime(x, s, a, i, k, recurs):
     for j in range(factory.N):
-        if x[i][j][k] != 0 and j != 0 and recurs < factory.N:
+        if x[i][j][k] == 1 and j != 0 and recurs < factory.N:
+            # print("Нашли соседа для ", i, " справа ", j)
+            # print("Время перемещения из ", i, " в ", j, " = ", factory.t[i][j])
+            # print("Время начало работ на объкекте " + str(j) + " = " + str(factory.e[j]))
             # если время прибытия меньше начала работ, то ждем
             if factory.e[j] > a[i][k] + s[i][k] + factory.t[i][j]:
+                # print("Приехали слишком рано ждем")
                 a[j][k] = factory.e[j]
+                # print("a[j][k] = ", a[j][k], '\n')
             # иначе ставим время прибытия
             else:
+                # print("Опоздали")
                 a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
+                # print("a[j][k] = ", a[j][k], '\n')
 
             recurs += 1
             RecursiaForTime(x, s, a, j, k, recurs)
 
-        elif x[i][j][k] != 0 and j == 0 and recurs < factory.N:
+        elif x[i][j][k] == 1 and j == 0 and recurs < factory.N:
+            # print("Встретили ноль, пора заканчивать рекурсию")
+            # print("Время прибытия в ", i, " = ", a[i][k])
+            # print("Время работы в ", i, " = ", s[i][k])
+            # print("Время переиещения из ", i, " в ", j, " = ", factory.t[i][j])
+
             a[j][k] = a[i][k] + s[i][k] + factory.t[i][j]
+
+            # print("Время прибытия в депо = ", a[j][k], '\n')
             return True
 
         elif recurs > factory.N:
@@ -348,21 +363,19 @@ def RecursiaForTime(x, s, a, i, k, recurs):
 
 # определяем время приезда для всех локаций
 def TimeOfArrival(x, y, s):
-    recurs = 0
     print("Начнем заполнять время прибытия")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k):
             # print("ЗАходим в рекурсию")
-            flag = RecursiaForTime(x, s, a, 0, k, recurs)
-    if flag:
-        return a
-    elif not flag:
-        return flag
+            RecursiaForTime(x, s, a, 0, k, 0)
+    if not a:
+        return -1
+    return a
 
 
 # удаляем клиента из выбранного  маршрут
-def DeleteClientaFromPath(x, y, s, a, client, k = -1):
+def DeleteClientaFromPath(x, y, s, a, client, k=-1):
     # TODO надо изменить поиск машины
     if k == -1:
         k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
@@ -444,9 +457,9 @@ def SolutionStore(target_start, sizeK):
 
 
 # Проверка на содержание скважин тех же объектов car у soseda
-def IsContainWells(y, car, sosed):
+def IsContainWells(y, client, sosedCar):
     for i in range(1, factory.N):
-        if y[i][sosed] == car:
+        if y[i][sosedCar] == 1 and i == client:
             return True
     return False
 
@@ -462,11 +475,14 @@ def GetObjForCar(y, car):
 
 # Возвращает число скважин которые не уложились во временное окно
 def CountWellsWithFane(s, a, i, k):
-    return ceil((a[i][k] + s[i][k] - factory.l[i])/2)
+    if factory.e[i] <= a[i][k] <= factory.l[i]:
+        return ceil((a[i][k] + s[i][k] - factory.l[i]) / 2)
+    else:
+        return int(s[i][k] / (factory.S[i] / factory.wells[i]))
 
 
 # Граничные условия
-def X_join_Y(x, y):
+def X_join_Y(x, y, file='def'):
     bufer1 = 0
     bufer2 = 0
     # Add constraint:
@@ -476,29 +492,36 @@ def X_join_Y(x, y):
                 bufer1 += x[i][j][k]
                 bufer2 += x[j][i][k]
             if bufer1 != bufer2 or bufer2 != y[j][k] or bufer1 != y[j][k]:
-                print("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у")
+                if file != 'def':
+                    file.write("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у" + '\n')
+                else:
+                    print("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у")
                 return 0
             bufer1 = 0
             bufer2 = 0
     return 1
 
 
-def V_jobs(s):
+def V_jobs(s, file='def'):
     bufer1 = 0
     # Add constraint: sum (s[i][k])==S[i]
     for i in range(1, factory.N):
         if i != 0:
             for k in range(len(s[i])):
                 bufer1 += s[i][k]
-            if bufer1 != factory.S[i]:
-                print("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте", i,
-                      "не совпадает с регламентом")
+            if int(bufer1) != factory.S[i]:
+                if file != 'def':
+                    file.write("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте " + str(i) +
+                          " не совпадает с регламентом" + '\n')
+                else:
+                    print("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте" + str(i) +
+                          "не совпадает с регламентом")
                 return 0
             bufer1 = 0
     return 1
 
 
-def TC_equal_KA(y):
+def TC_equal_KA(y, file='def'):
     bufer1 = 0
     # Add constraint: sum (y[i][k])<=ka[i]
     for i in range(1, factory.N):
@@ -506,87 +529,117 @@ def TC_equal_KA(y):
             for k in range(len(y[i])):
                 bufer1 += y[i][k]
             if bufer1 > factory.wells[i]:
-                print("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте", i,
-                      "больше чем число скважин")
+                if file != 'def':
+                    file.write("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте" +
+                               str(i) + "больше чем число скважин" + '\n')
+                else:
+                    print("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте" + str(i) +
+                          "больше чем число скважин")
                 return 0
             bufer1 = 0
     return 1
 
 
-def ban_driling(s, y):
+def ban_driling(s, y, file='def'):
     # Add constraint: s[i][k] <=S[i]*y[i][k]
     for i in range(1, factory.N):
         for k in range(len(y[i])):
             if s[i][k] > factory.S[i] * y[i][k]:
-                print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект", i,
-                      ", но начало бурение")
+
+                if file != 'def':
+                    file.write("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
+                          ", но начало бурение" + '\n')
+                else:
+                    print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
+                          ", но начало бурение")
                 return 0
     return 1
 
 
-def window_time_down(a, y):
+def window_time_down(a, y, file='def'):
     # Add constraint: e[i]<=a[i][k]
     for i in range(1, factory.N):
         for k in range(len(y[i])):
             if factory.e[i] > a[i][k] and y[i][k] == 1:
-                print("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект", i,
-                      "меньше чем начало работ")  # не работает ээто ограничение
+                if file != 'def':
+                    file.write("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект" +
+                               str(i) + "меньше чем начало работ" + '\n')
+                else:
+                    print("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект", i,
+                          "меньше чем начало работ")
                 return 0
     return 1
 
 
-def window_time_up(a, s, y):
+def window_time_up(a, s, y, file='def'):
     # Add constraint: a[i][k] + s[i][k] <= l[i]
     for i in range(1, factory.N):
         for k in range(len(y[i])):
             if a[i][k] + s[i][k] > factory.l[i] and y[i][k] == 1:
-                print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект", i,
-                      "больше чем конец работ")
+                if file != 'def':
+                    file.write("ERROR from window_time_up: сломалось шестое ограничение, "
+                               "время окончание работ на объкект" + str(i) + "больше чем конец работ" + '\n')
+                else:
+                    print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект",
+                          i,
+                          "больше чем конец работ")
                 return 0
     return 1
 
 
-def ban_cycle(a, x, s, y):
+def ban_cycle(a, x, s, y, file='def'):
     # Add constraint: a[i][k] - a[j][k] +x[i][j][k]*t[i][j] + s[i][k] <= l[i](1.txt-x[i][j][k])
     for i in range(1, factory.N):
         for j in range(1, factory.N):
             for k in range(len(a[0])):
                 if a[i][k] - a[j][k] + x[i][j][k] * factory.t[i][j] + s[i][k] > factory.l[i] * (1 - x[i][j][k]) and \
                         y[i][k] == 1:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,
-                          "не посещает депо согласно временным рамкам")
+                    if file != 'def':
+                        file.write("ERROR from ban_cycle: сломалось седьмое ограничение, машина" + str(k) +
+                                   "не посещает депо согласно временным рамкам" + '\n')
+                    else:
+                        print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,
+                              "не посещает депо согласно временным рамкам")
                     return 0
     return 1
 
 
-def positive_a_and_s(x, y, a, s):
+def positive_a_and_s(x, y, a, s, file='def'):
     # Add constraint: s[i][k] >= 0 and a[i][k] >= 0
     for i in range(factory.N):
         for j in range(factory.N):
             for k in range(len(y[i])):
                 if s[i][k] < 0 or a[i][k] < 0:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, неправельные значение переменных a, s")
+                    if file != 'def':
+                        file.write("ERROR from positive_a_and_s: сломалось седьмое ограничение, "
+                                   "неправельные значение переменных a, s" + '\n')
+                    else:
+                        print(
+                            "ERROR from positive_a_and_s: сломалось седьмое ограничение, "
+                            "неправельные значение переменных a, s")
                     return 0
                 if x[i][j][k] != 0 and x[i][j][k] != 1:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, неправельное значение переменной x")
+                    print("ERROR from positive_a_and_s: сломалось седьмое ограничение, "
+                          "неправельное значение переменной x")
                     return 0
                 if y[i][k] != 0 and y[i][k] != 1:
-                    print("ERROR from ban_cycle: сломалось седьмое ограничение, неправельное значение переменной y")
+                    print("ERROR from positive_a_and_s: сломалось седьмое ограничение, "
+                          "неправельное значение переменной y")
                     return 0
     return 1
 
 
 # проверка выполнения граничных условий
-def VerificationOfBoundaryConditions(x, y, s, a, pinalty="false"):
+def VerificationOfBoundaryConditions(x, y, s, a, pinalty="false", file='def'):
     # по дефолту смотрим все огр, но если тру то не рассматриваем огр на своевременный конец работ
     if pinalty == "false":
-        result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * \
-                 window_time_down(a, y) * window_time_up(a, s, y) * \
-                 ban_cycle(a, x, s, y) * positive_a_and_s(x, y, a, s)
+        result = X_join_Y(x, y, file) * V_jobs(s, file) * TC_equal_KA(y, file) * ban_driling(s, y, file) * \
+                 window_time_down(a, y, file) * window_time_up(a, s, y, file) * \
+                 ban_cycle(a, x, s, y, file) * positive_a_and_s(x, y, a, s, file)
     elif pinalty == "true":
-        result = X_join_Y(x, y) * V_jobs(s) * TC_equal_KA(y) * ban_driling(s, y) * \
-                 window_time_down(a, y) * \
-                 positive_a_and_s(x, y, a, s)
+        result = X_join_Y(x, y, file) * V_jobs(s, file) * TC_equal_KA(y, file) * ban_driling(s, y, file) * \
+                 window_time_down(a, y, file) * \
+                 positive_a_and_s(x, y, a, s, file)
     else:
         print("ERROR from VerificationOfBoundaryConditions: неверное значение, переменной pinalty")
         return -1

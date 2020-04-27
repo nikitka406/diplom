@@ -1,5 +1,6 @@
 import factory
 from function import *
+from operators import *
 import random
 
 
@@ -1379,7 +1380,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
     print("Используем оператор ", oper)
     if oper == 'relocate':
         x, y, s, a, target_function,  sizeK, iteration = Relocate(x, y, s, a, target_function, sizeK, iteration)
-        # iteration += 1
+        iteration += 1
         return x, y, s, a, target_function,  sizeK, iteration
 
     elif oper == '2Opt':
@@ -1445,6 +1446,9 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
     maximumCros = Target_Function[0]
     minimumLocal = Target_Function[0]
     maximumLocal = Target_Function[0]
+    minimumHelp = Target_Function[0]
+    maximumHelp = Target_Function[0]
+
     for crossing in range(factory.param_crossing):
         print("Запускаем ", crossing, "-ый раз")
 
@@ -1568,15 +1572,19 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
         print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
-
+        BeautifulPrint(x, y, s, a)
         # Применяем локальный поиск
+        print("LocalSearch start")
         x, y, s, a, target_function, sizek, iteration = LocalSearch(x, y, s, a, target_function, sizek, iteration)
-
-        # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
         print("Целевая функция нового решения после локального поиска равна ", target_function)
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
+
+        print("Help start")
+        x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration)
+        print("Целевая функция нового решения после оператора хелп ", target_function)
+        minimumHelp = min(minimumHelp, target_function)
+        maximumHelp = max(maximumHelp, target_function)
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции
@@ -1633,7 +1641,10 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
     SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
     SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
+    SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
+    SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Число итераций = " + str(iteration))
+
     min_result = min(Target_Function)
     number_solution = Target_Function.count(min(Target_Function))
     print("Минимальная целевая функция ", min_result, " номер решения ", number_solution)

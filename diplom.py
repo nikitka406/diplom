@@ -28,9 +28,6 @@ SaveStartSolution(x, y, s, a)
 DeleteCarNonNarushOgr(len(y[0]))
 x, y, s, a = ReadStartSolutionOfFile(len(y[0]))
 
-# Удаляем не используемые ТС
-# x, y, s, a = DeleteNotUsedCar(x, y, s, a)
-
 # Проверяем что ничего не сломалось
 target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
