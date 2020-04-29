@@ -163,32 +163,32 @@ def ReadRelocateOfFile(sizeK):
 
 # Cохраняем промежуточное решение в хелпе
 def SaveHelp(local_x, local_y, local_s, local_a, sizeK):
-    file = open('output/Help.txt', 'w')
+    file1 = open('output/Help.txt', 'w')
 
     # Печатаем в файл Х
     for i in range(factory.N):
         for j in range(factory.N):
-            for k in range(len(local_y[0])):
-                file.write(str(local_x[i][j][k]) + ' ')
-            file.write("\n")
+            for k in range(sizeK):
+                file1.write(str(local_x[i][j][k]) + ' ')
+            file1.write("\n")
         # file.write("\n")
     # Печатаем в файл Y
     for i in range(factory.N):
-        for k in range(len(local_y[0])):
-            file.write(str(local_y[i][k]) + ' ')
-        file.write("\n")
+        for k in range(sizeK):
+            file1.write(str(local_y[i][k]) + ' ')
+        file1.write("\n")
     # Печатаем в файл S
     for i in range(factory.N):
-        for k in range(len(local_y[0])):
-            file.write(str(local_s[i][k]) + ' ')
-        file.write("\n")
+        for k in range(sizeK):
+            file1.write(str(local_s[i][k]) + ' ')
+        file1.write("\n")
     # Печатаем в файл A
     for i in range(factory.N):
-        for k in range(len(local_y[0])):
-            file.write(str(local_a[i][k]) + ' ')
-        file.write("\n")
+        for k in range(sizeK):
+            file1.write(str(local_a[i][k]) + ' ')
+        file1.write("\n")
 
-    file.close()
+    file1.close()
 
 
 def ReadHelpOfFile(sizeK):
@@ -203,6 +203,7 @@ def ReadHelpOfFile(sizeK):
     file = open('output/Help.txt', 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
+    print(line)
 
     index = 0
     # Печатаем в файл Х
@@ -210,7 +211,7 @@ def ReadHelpOfFile(sizeK):
         for j in range(factory.N):
             # for k in range(factory.KA):
             local_x[i][j] = line[index].split()
-            for k in range(len(local_x[i][j])):
+            for k in range(sizeK):
                 local_x[i][j][k] = int(local_x[i][j][k])
             index += 1
             print(index)
@@ -218,19 +219,19 @@ def ReadHelpOfFile(sizeK):
     # Печатаем в файл Y
     for i in range(factory.N):
         local_y[i] = line[index].split()
-        for k in range(len(local_y[i])):
+        for k in range(sizeK):
             local_y[i][k] = int(local_y[i][k])
         index += 1
     # Печатаем в файл S
     for i in range(factory.N):
         local_s[i] = line[index].split()
-        for k in range(len(local_s[i])):
+        for k in range(sizeK):
             local_s[i][k] = float(local_s[i][k])
         index += 1
     # Печатаем в файл A
     for i in range(factory.N):
         local_a[i] = line[index].split()
-        for k in range(len(local_a[i])):
+        for k in range(sizeK):
             local_a[i][k] = float(local_a[i][k])
         index += 1
     file.close()
@@ -384,15 +385,23 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
 
 # Отчищаем файл
 def ClearAllFile():
-    file = open('output/SolutionPopulation.txt', 'w')
-    file.close()
-    file = open('output/population.txt', 'w')
-    file.close()
-    file = open('output/StartSolution.txt', 'w')
+    file = open('log/helog.txt', 'w')
     file.close()
     file = open('log/relog.txt', 'w')
     file.close()
     file = open('log/Two_Opt.txt', 'w')
     file.close()
-    file = open('log/helog.txt', 'w')
+    file = open('log/twooptlog.txt', 'w')
+    file.close()
+    file = open('output/Help.txt', 'w')
+    file.close()
+    file = open('output/population.txt', 'w')
+    file.close()
+    file = open('output/Relocate.txt', 'w')
+    file.close()
+    file = open('output/SolutionPopulation.txt', 'w')
+    file.close()
+    file = open('output/StartHelp.txt', 'w')
+    file.close()
+    file = open('output/StartSolution.txt', 'w')
     file.close()
