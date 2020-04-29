@@ -287,6 +287,20 @@ def SearchTheBestSoseda(client):
     return neighbor
 
 
+# Возвращает рандомного клиента и машину
+def ChooseRandomObjAndCar(y, sizeK):
+    # Выбираем рандомную машину
+    car = random.randint(1, (sizeK - 1))
+    # ЗАпоминаем всех кого она обслуживает
+    buf = []
+    for i in range(factory.N):
+        if y[i][car] == 1:
+            buf.append(i)
+    # Выбираем случайного среди них
+    client = random.choice(buf)
+    return client, car
+
+
 # номер машины которая обслуживает клиента
 def NumberCarClienta(y, client):
     # TODO Берет первую попавшуюся машину которая обслуживает, это не правильно!!
@@ -504,7 +518,8 @@ def X_join_Y(x, y, file='def'):
                 bufer2 += x[j][i][k]
             if bufer1 != bufer2 or bufer2 != y[j][k] or bufer1 != y[j][k]:
                 if file != 'def':
-                    file.write("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у" + '\n')
+                    file.write(
+                        "ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у" + '\n')
                 else:
                     print("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у")
                 return 0
@@ -522,8 +537,9 @@ def V_jobs(s, file='def'):
                 bufer1 += s[i][k]
             if int(bufer1) != factory.S[i]:
                 if file != 'def':
-                    file.write("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте " + str(i) +
-                          " не совпадает с регламентом" + '\n')
+                    file.write(
+                        "ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте " + str(i) +
+                        " не совпадает с регламентом" + '\n')
                 else:
                     print("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте" + str(i) +
                           "не совпадает с регламентом")
@@ -558,8 +574,9 @@ def ban_driling(s, y, file='def'):
             if s[i][k] > factory.S[i] * y[i][k]:
 
                 if file != 'def':
-                    file.write("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
-                          ", но начало бурение" + '\n')
+                    file.write(
+                        "ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
+                        ", но начало бурение" + '\n')
                 else:
                     print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
                           ", но начало бурение")

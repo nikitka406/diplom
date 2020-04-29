@@ -87,8 +87,8 @@ def ReadStartSolutionOfFile(sizeK):
 
 
 # Cохраняем промежуточное решение в релоке
-def SaveRelocate(local_x, local_y, local_s, local_a, sizeK):
-    file = open('output/Relocate.txt', 'w')
+def SaveLocalSearch(local_x, local_y, local_s, local_a, sizeK):
+    file = open('output/LocalSearch.txt', 'w')
 
     # Печатаем в файл Х
     for i in range(factory.N):
@@ -116,7 +116,7 @@ def SaveRelocate(local_x, local_y, local_s, local_a, sizeK):
     file.close()
 
 
-def ReadRelocateOfFile(sizeK):
+def ReadLocalSearchOfFile(sizeK):
     local_x = [[[0 for k in range(sizeK)] for j in range(factory.N)] for i in
                range(factory.N)]  # едет или нет ТС с номером К из города I в J
     local_y = [[0 for k in range(sizeK)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
@@ -125,7 +125,7 @@ def ReadRelocateOfFile(sizeK):
     local_s = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
     local_a = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
 
-    file = open('output/Relocate.txt', 'r')
+    file = open('output/LocalSearch.txt', 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
 
