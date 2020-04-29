@@ -268,18 +268,19 @@ def RandNotVisitClient(countOfRaces, flag):
 # flag флаг для машины
 # flagAll флаг для всего решения
 # countOfRaces - сколько машин мжно отправить на локацию
-def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar):
+def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flagAll, countOfRaces, numberInCar, file):
+    file.write("RecursiveSearchSosedFromAex start: ->\n")
     # номер позиции клиента bufer_out[i_out][0] в bufer_in
     i_in = NumberClientaInSequence(bufer_in, bufer_out[i_out][0])
 
-    print("Ищем ", bufer_out[i_out][0])
-    print("Из", bufer_out)
-    print("В", bufer_in)
-    print("Нашли на индексе ", i_in)
-    print("Флаг машины ", flag)
-    print("Флаг решения ", flagAll)
-    print("Сколько раз к каждому клиенту можно приехать", countOfRaces)
-    print("Число клиентов на одной машине (между нулями)", numberInCar)
+    file.write("Ищем " + str(bufer_out[i_out][0]) + '\n')
+    file.write("Из" + str(bufer_out) + '\n')
+    file.write("В" + str(bufer_in) + '\n')
+    file.write("Нашли на индексе " + str(i_in) + '\n')
+    file.write("Флаг машины " + str(flag) + '\n')
+    file.write("Флаг решения " + str(flagAll) + '\n')
+    file.write("Сколько раз к каждому клиенту можно приехать " + str(countOfRaces) + '\n')
+    file.write("Число клиентов на одной машине (между нулями) " + str(numberInCar) + '\n')
 
     # смотрим что этот город еще можно вставлять, в этот маршрут
     # и что у него есть свободные скважины
@@ -289,11 +290,10 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
     if flag[bufer_in[i_in + 1][0]] == 0 and countOfRaces[bufer_in[i_in + 1][0]] \
             > 0 and bufer_in[i_in][1] == 0:
 
-        print("-------------------Этот блок проверен программой!!-------------------")
-        print("Вставляем в ребенка город ", bufer_in[i_in + 1][0],
-              ", у которого есть свободные скважины, через ребро которое из решения")
-        print(bufer_in)
-        print("еще не использовали и которого на этой машине еще не посещали")
+        file.write("Вставляем в ребенка город " + str(bufer_in[i_in + 1][0]) +
+              ", у которого есть свободные скважины, через ребро которое из решения " + '\n')
+        file.write(str(bufer_in) + '\n')
+        file.write(" еще не использовали и которого на этой машине еще не посещали" + '\n')
 
         # добавляем в ребенка bufer_in[i_in + 1.txt]
         children.append([bufer_in[i_in + 1][0], 0])
@@ -311,26 +311,26 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
         # плюс один клиент в машине
         numberInCar += 1
 
-        print("Ребенок выглядит пока вот так ")
-        print(children)
-        print("______________________________")
+        file.write("Ребенок выглядит пока вот так " + '\n')
+        file.write(str(children) + '\n')
+        file.write("______________________________" + '\n')
 
-        RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in + 1, flag, flagAll, countOfRaces, numberInCar, file)
 
     # если конкретно это ребро уже использовали, то
     elif bufer_in[i_in][1] != 0:
 
-        print("Конкрентно это ребро уже использовали")
+        file.write("Конкрентно это ребро уже использовали" + '\n')
 
-        print("Выбираю другое ребро но из такого же начала",
-              bufer_in[i_in][0], ", но которое не посещали в этом маршруте, у которого еще есть свободные скважины")
+        file.write("Выбираю другое ребро но из такого же начала" +
+              str(bufer_in[i_in][0]) + ", но которое не посещали в этом маршруте, у которого еще есть свободные скважины" + '\n')
 
         i_in_buf = AnotherEdgeWithTheSameBeginning(bufer_in, bufer_in[i_in][0], flag, countOfRaces)
         # Если нашли такой индекс
         if i_in_buf != -1:
-            print("Нашли такое же начало", bufer_in[i_in_buf][0], ", его индекс в последовательности ")
-            print(bufer_in)
-            print("равен", i_in_buf)
+            file.write("Нашли такое же начало" + str(bufer_in[i_in_buf][0]) + ", его индекс в последовательности " + '\n')
+            file.write(str(bufer_in) + '\n')
+            file.write(" равен" + str(i_in_buf) + '\n')
 
             # добавляем в ребенка bufer_in[i_in + 1.txt]
             children.append([bufer_in[i_in_buf + 1][0], 0])
@@ -348,27 +348,27 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             # плюс один клиент в машине
             numberInCar += 1
 
-            print("Ребенок выглядит пока вот так ")
-            print(children)
-            print("______________________________")
+            file.write("Ребенок выглядит пока вот так " + '\n')
+            file.write(str(children) + '\n')
+            file.write("______________________________" + '\n')
 
-            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in_buf + 1, flag, flagAll, countOfRaces,
+                                        numberInCar, file)
 
         # если не нашли такой индекс
         else:
-            print("-------------------Этот блок проверен программой!!-------------------")
-            print("Не нашли такое же начало", bufer_in[i_in][0],
+            file.write("Не нашли такое же начало" + str(bufer_in[i_in][0]) +
                   " . Поэтому ищем такое же начало в другом решении в ")
-            print(bufer_out)
+            file.write(str(bufer_out) + '\n')
             # выбираю другое ребро но из такого же начала в другом решении,
             # но которое не посещали в этом маршруте,
             # у которого еще есть свободные скважины
             i_in_buf = AnotherEdgeWithTheSameBeginning(bufer_out, bufer_in[i_in][0], flag, countOfRaces)
             # Если нашли такой индекс
             if i_in_buf != -1:
-                print("Нашли такое же начало", bufer_out[i_in_buf][0], ", его индекс в последовательности ")
-                print(bufer_out)
-                print("равен", i_in_buf)
+                file.write("Нашли такое же начало" + str(bufer_out[i_in_buf][0]) + ", его индекс в последовательности ")
+                file.write(str(bufer_out))
+                file.write(" равен" + str(i_in_buf) + '\n')
 
                 # добавляем в ребенка bufer_in[i_in + 1.txt]
                 children.append([bufer_out[i_in_buf + 1][0], 0])
@@ -387,16 +387,15 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                 # плюс один клиент в машине
                 numberInCar += 1
 
-                print("Ребенок выглядит пока вот так ")
-                print(children)
-                print("______________________________")
+                file.write("Ребенок выглядит пока вот так " + '\n')
+                file.write(str(children) + '\n')
+                file.write("______________________________" + '\n')
 
                 RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_in_buf + 1, flag, flagAll, countOfRaces,
-                                     numberInCar)
+                                            numberInCar, file)
 
             else:
-                print("-------------------Этот блок проверен программой!!-------------------")
-                print("Не нашли такое же начало ни в одном из решений. Поэтому берем рандомного")
+                file.write("Не нашли такое же начало ни в одном из решений. Поэтому берем рандомного" + '\n')
                 if numberInCar >= factory.param_min_num_cl_in_car:
 
                     next_client = random.randint(0, factory.N - 1)
@@ -410,13 +409,13 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                     i_in = NumberClientaInSequence(bufer_in, next_client)
 
                 else:
-                    print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
+                    file.write("ERROR from in random client: Кол-во клиентов в маршруте сломалось" + '\n')
 
-                print("Берем рандомного клиента ", next_client)
+                file.write("Берем рандомного клиента " + str(next_client) + '\n')
 
-                print("Номер позиции рандомного клиента в ")
-                print(bufer_in)
-                print("равен ", i_in)
+                file.write("Номер позиции рандомного клиента в " + '\n')
+                file.write(str(bufer_in) + '\n')
+                file.write("равен " + str(i_in) + '\n')
 
                 # ищем нового клиента, пока не найдем не посещенного (flag[next_client] == 0) и у которого
                 # остались свободные скважины (countOfRaces[next_client] > 0)
@@ -426,8 +425,8 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                         <= 0) or (flag[next_client] == 0 and countOfRaces[next_client]
                                   <= 0) or (flag[next_client] == 1 and countOfRaces[next_client]
                                             > 0)) and count <= factory.N:
-                    print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
-                                                    "этой машине либо нет свободных скважин")
+                    file.write("Рандомный" + str(next_client) + "не подошел, так как мы его либо посещали на "
+                                                    "этой машине либо нет свободных скважин" + '\n')
 
                     # счетчик, чтобы вайл не был бесконечным
                     count += 1
@@ -445,18 +444,18 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                         i_in = NumberClientaInSequence(bufer_in, next_client)
 
                     else:
-                        print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
+                        file.write("ERROR from in random client: Кол-во клиентов в маршруте сломалось" + '\n')
 
                 # Означает что нашли рандомного
                 if count <= factory.N:
-                    print("Итоговый рандомный клиент ", next_client)
-                    print("И его позиция в ")
-                    print(bufer_in)
-                    print("равна", i_in)
+                    file.write("Итоговый рандомный клиент " + str(next_client) + '\n')
+                    file.write("И его позиция в " + '\n')
+                    file.write(str(bufer_in) + '\n')
+                    file.write("равна" + str(i_in) + '\n')
 
                     # это значит что встретили ноль, цикл должен завершится
                     if flag[next_client] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
-                        print("Рандомный оказался 0, поэтому цикл должен завершится")
+                        file.write("Рандомный оказался 0, поэтому цикл должен завершится" + '\n')
 
                         # добавляем в ребенка bufer_in[i_in + 1.txt]
                         children.append([next_client, 0])
@@ -469,19 +468,18 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                         # зануляем сяетчик, так как следом будет уже другая машина
                         numberInCar = 0
 
-                        print("Ребенок выглядит пока вот так ")
-                        print(children)
-                        print("Переходим к следующей машине")
-                        print("_______________________________________"
-                              "________________________________________________________")
+                        file.write("Ребенок выглядит пока вот так " + '\n')
+                        file.write(str(children) + '\n')
+                        file.write("Переходим к следующей машине" + '\n')
+                        file.write("_______________________________________"
+                              "________________________________________________________" + '\n')
 
                         return True
 
                     # смотрим что этот город еще можно вставлять
                     # Здесь все заебись, проверенно программой!!!!!!!!!!
                     elif flag[next_client] == 0:
-                        print("-------------------Этот блок проверен программой!!-------------------")
-                        print("Вставляем ", next_client, "в ребенка")
+                        file.write("Вставляем " + str(next_client) + "в ребенка" + '\n')
 
                         # добавляем в ребенка bufer_in[i_in + 1.txt]
                         children.append([next_client, 0])
@@ -499,21 +497,20 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                         # плюс один клиент в машине
                         numberInCar += 1
 
-                        print("Ребенок выглядит пока вот так ")
-                        print(children)
-                        print("______________________________")
+                        file.write("Ребенок выглядит пока вот так " + '\n')
+                        file.write(str(children) + '\n')
+                        file.write("______________________________" + '\n')
 
                         RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces,
-                                             numberInCar)
+                                                    numberInCar, file)
 
                     else:
-                        print("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента")
+                        file.write("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента" + '\n')
 
                 # Означает что вывалились из вайла,
                 # потому что долго ждали, поэтому возвращаем машину в депо
                 else:
-                    print("-------------------Этот блок проверен программой!!-------------------")
-                    print("Слишком долго искали рандомного, while закончился по времени. Поэтому возвращаемся в депо.")
+                    file.write("Слишком долго искали рандомного, while закончился по времени. Поэтому возвращаемся в депо." + '\n')
                     # добавляем в ребенка bufer_in[i_in + 1.txt]
                     children.append([0, 0])
                     # children[i][0] = 0
@@ -528,11 +525,11 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                     # зануляем сяетчик, так как следом будет уже другая машина
                     numberInCar = 0
 
-                    print("Ребенок выглядит пока вот так ")
-                    print(children)
-                    print("Переходим к следующей машине")
-                    print(
-                        "_______________________________________________________________________________________________")
+                    file.write("Ребенок выглядит пока вот так " + '\n')
+                    file.write(str(children) + '\n')
+                    file.write("Переходим к следующей машине" + '\n')
+                    file.write(
+                        "_______________________________________________________________________________________________" + '\n')
 
                     return True
 
@@ -540,8 +537,7 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
     # или у него больше не хватает скважин но по этому ребру еще не ехали
     # и главное чтобы он не был нулем
     elif (flag[bufer_in[i_in + 1][0]] == 1 or countOfRaces[bufer_in[i_in + 1][0]] <= 0) and bufer_in[i_in + 1][0] != 0:
-        print("-------------------Этот блок проверен программой!!-------------------")
-        print("Клиента ", bufer_in[i_in + 1][0], "на этом ТС уже посещали или у него нет свободных скважин")
+        file.write("Клиента " + str(bufer_in[i_in + 1][0]) + "на этом ТС уже посещали или у него нет свободных скважин" + '\n')
 
         # Ставим флаг в последовательности в которой искали ребро в доп ячееки
         bufer_in[i_in][1] = 1
@@ -559,13 +555,13 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             i_in = NumberClientaInSequence(bufer_in, next_client)
 
         else:
-            print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
+            file.write("ERROR from in random client: Кол-во клиентов в маршруте сломалось" + '\n')
 
-        print("Берем рандомного клиента ", next_client)
+        file.write("Берем рандомного клиента " + str(next_client) + '\n')
 
-        print("Номер позиции рандомного клиента в ")
-        print(bufer_in)
-        print("равен ", i_in)
+        file.write("Номер позиции рандомного клиента в " + '\n')
+        file.write(str(bufer_in) + '\n')
+        file.write("равен " + str(i_in) + '\n')
 
         # ищем нового клиента, пока не найдем не посещенного и у которого
         # остались свободные скважины
@@ -575,8 +571,8 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                 <= 0) or (flag[next_client] == 0 and countOfRaces[next_client]
                           <= 0) or (flag[next_client] == 1 and countOfRaces[next_client]
                                     > 0)) and count <= factory.N:
-            print("Рандомный", next_client, "не подошел, так как мы его либо посещали на "
-                                            "этой машине либо нет свободных скважин")
+            file.write("Рандомный" + str(next_client) + "не подошел, так как мы его либо посещали на "
+                                            "этой машине либо нет свободных скважин" + '\n')
 
             # счетчик, чтобы вайл не был бесконечным
             count += 1
@@ -594,18 +590,18 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                 i_in = NumberClientaInSequence(bufer_in, next_client)
 
             else:
-                print("ERROR from in random client: Кол-во клиентов в маршруте сломалось")
+                file.write("ERROR from in random client: Кол-во клиентов в маршруте сломалось" + '\n')
 
         # Означает что нашли рандомного
         if count <= factory.N:
-            print("Итоговый рандомный клиент ", next_client)
-            print("И его позиция в ")
-            print(bufer_in)
-            print("равна", i_in)
+            file.write("Итоговый рандомный клиент " + str(next_client) + '\n')
+            file.write("И его позиция в " + '\n')
+            file.write(str(bufer_in) + '\n')
+            file.write("равна" + str(i_in) + '\n')
 
             # это значит что встретили ноль, цикл должен завершится
             if flag[next_client] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
-                print("Рандомный оказался 0, поэтому цикл должен завершится")
+                file.write("Рандомный оказался 0, поэтому цикл должен завершится" + '\n')
 
                 # добавляем в ребенка bufer_in[i_in + 1.txt]
                 children.append([next_client, 0])
@@ -618,17 +614,17 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                 # зануляем сяетчик, так как следом будет уже другая машина
                 numberInCar = 0
 
-                print("Ребенок выглядит пока вот так ")
-                print(children)
-                print("Переходим к следующей машине")
-                print("_______________________________________________________________________________________________")
+                file.write("Ребенок выглядит пока вот так " + '\n')
+                file.write(str(children) + '\n')
+                file.write("Переходим к следующей машине" + '\n')
+                file.write("_______________________________________________________________________________________________" + '\n')
 
                 return True
 
             # смотрим что этот город еще можно вставлять
             # Здесь все заебись, проверенно программой!!!!!!!!!!
             elif flag[next_client] == 0:
-                print("Вставляем ", next_client, "в ребенка")
+                file.write("Вставляем " + str(next_client) + "в ребенка" + '\n')
 
                 # добавляем в ребенка bufer_in[i_in + 1.txt]
                 children.append([next_client, 0])
@@ -646,20 +642,20 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
                 # плюс один клиент в машине
                 numberInCar += 1
 
-                print("Ребенок выглядит пока вот так ")
-                print(children)
-                print("______________________________")
+                file.write("Ребенок выглядит пока вот так " + '\n')
+                file.write(str(children) + '\n')
+                file.write("______________________________" + '\n')
 
-                RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+                RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces,
+                                            numberInCar, file)
 
             else:
-                print("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента")
+                file.write("ERROR from RecursiveSearchSosedFromAex inside: ошибка в поске рандомного нового клиента" + '\n')
 
         # Означает что вывалились из вайла,
         # потому что долго ждали, поэтому возвращаем машину в депо
         else:
-            print("-------------------Этот блок проверен программой!!-------------------")
-            print("Слишком долго искали рандомного, while закончился по времени. Поэтому возвращаемся в депо.")
+            file.write("Слишком долго искали рандомного, while закончился по времени. Поэтому возвращаемся в депо." + '\n')
             # добавляем в ребенка bufer_in[i_in + 1.txt]
             children.append([0, 0])
             # children[i][0] = 0
@@ -674,31 +670,30 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             # зануляем сяетчик, так как следом будет уже другая машина
             numberInCar = 0
 
-            print("Ребенок выглядит пока вот так ")
-            print(children)
-            print("Переходим к следующей машине")
-            print("_______________________________________________________________________________________________")
+            file.write("Ребенок выглядит пока вот так " + '\n')
+            file.write(str(children) + '\n')
+            file.write("Переходим к следующей машине" + '\n')
+            file.write("_______________________________________________________________________________________________" + '\n')
 
             return True
 
     # Если уже встретили ноль, но в последовательности слишком мало клиентов
     elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar < factory.param_min_num_cl_in_car:
-        print("-------------------Этот блок проверен программой!!-------------------")
-        print("Слишком рано встретили ноль, в последовательности только", numberInCar, " клиент")
+        file.write("Слишком рано встретили ноль, в последовательности только" + str(numberInCar) + " клиент" + '\n')
 
         # Ставим флаг в последовательности в которой искали ребро в доп ячееки
         bufer_in[i_in][1] = 1
 
         # берем рандомного клиента у кторого есть не посещенные скважины
-        print("Берем рандомного клиента у кторого есть не посещенные скважины с помощью функции RandNotVisitClient")
+        file.write("Берем рандомного клиента у кторого есть не посещенные скважины с помощью функции RandNotVisitClient" + '\n')
         rand_client = RandNotVisitClient(countOfRaces, flag)
 
         # Нашли рандомного клиента
         if rand_client != -1:
             # номер позиции клиента bufer_out[i_out][0] в bufer_in
             i_in = NumberClientaInSequence(bufer_in, rand_client)
-            print("Новый рандомный клиент ", rand_client, "находится под номером ", i_in, "в последовательности ")
-            print(bufer_in)
+            file.write("Новый рандомный клиент " + str(rand_client) + "находится под номером " + str(i_in) + "в последовательности " + '\n')
+            file.write(str(bufer_in) + '\n')
 
             # добавляем в ребенка bufer_in[i_in + 1]
             children.append([rand_client, 0])
@@ -713,14 +708,14 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             # плюс один клиент в машине
             numberInCar += 1
 
-            print("Ребенок выглядит пока вот так ")
-            print(children)
-            print("______________________________")
+            file.write("Ребенок выглядит пока вот так " + '\n')
+            file.write(str(children) + '\n')
+            file.write("______________________________" + '\n')
 
-            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer_out, bufer_in, i_in, flag, flagAll, countOfRaces, numberInCar, file)
 
         elif rand_client == -1:
-            print("Возвращаемся в депо")
+            file.write("Возвращаемся в депо" + '\n')
             # добавляем в ребенка bufer_in[k_in][i_in + 1.txt]
             children.append([0, 0])
 
@@ -734,18 +729,17 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             # зануляем сяетчик, так как следом будет уже другая машина
             numberInCar = 0
 
-            print("Ребенок выглядит пока вот так ")
-            print(children)
-            print("Переходим к следующей машине")
-            print(
-                "_______________________________________________________________________________________________________")
+            file.write("Ребенок выглядит пока вот так " + '\n')
+            file.write(str(children) + '\n')
+            file.write("Переходим к следующей машине" + '\n')
+            file.write(
+                "_______________________________________________________________________________________________________" + '\n')
             return True
 
     # это значит что встретили ноль, цикл должен завершится
     # Здесь все заебись, проверенно программой!!!!!!!!!!
     elif flag[bufer_in[i_in + 1][0]] == -1 and numberInCar >= factory.param_min_num_cl_in_car:
-        print("-------------------Этот блок проверен программой!!-------------------")
-        print("Встретили 0 пора возвращаться в депо")
+        file.write("Встретили 0 пора возвращаться в депо" + '\n')
         # добавляем в ребенка bufer_in[k_in][i_in + 1.txt]
         children.append([bufer_in[i_in + 1][0], 0])
 
@@ -759,20 +753,21 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
         # зануляем сяетчик, так как следом будет уже другая машина
         numberInCar = 0
 
-        print("Ребенок выглядит пока вот так ")
-        print(children)
-        print("Переходим к следующей машине")
-        print("_______________________________________________________________________________________________________")
+        file.write("Ребенок выглядит пока вот так " + '\n')
+        file.write(str(children) + '\n')
+        file.write("Переходим к следующей машине" + '\n')
+        file.write("_______________________________________________________________________________________________________" + '\n')
         return True
 
     else:
-        print("ERROR from RecursiveSearchSosedFromAex outside: проблема с флагами, не нашли не ноль, не еще не посещенный")
+        file.write(
+            "ERROR from RecursiveSearchSosedFromAex outside: проблема с флагами, не нашли не ноль, не еще не посещенный" + '\n')
 
 
 # Добавляем клиента в последовательность, со всеми флагами
 # ЗАебись!!!
 def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in):
-    print("Добавляем ", bufer[i_in][0], "в ребенка с помощью функции AddClientaInSequence")
+    print("Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence")
     children.append([bufer[i_in][0], 0])
 
     # из первого нуля больше никуда не едем
@@ -803,7 +798,7 @@ def RandomClientWithWells(countOfRaces):
 # Поиск депо из которого не выезжали
 # jndex - индекс у ребенка
 # ЗАебись!!!
-def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces, children, flag, numberInCar):
+def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces, children, flag, numberInCar, file):
     # #Сначала проверим есть ли те которых мне не посетили ни разу
     # if sum(flagAll) <= factory.N:
     #
@@ -816,11 +811,11 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         if bufer1[i] == [0, 0] and countOfRaces[bufer1[i + 1][0]] > 0:
             print("Нашли 0 в решении")
             print(bufer1)
-            print("из которого еще не выезжали и первый после него со скважинами ", bufer1[i + 1][0])
+            print("из которого еще не выезжали и первый после него со скважинами " + str(bufer1[i + 1][0]))
 
             bufer1[i][1] = 1
             AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, i + 1)
-            RecursiveSearchSosedFromAex(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar, file)
             return
             # return i+1.txt
 
@@ -834,11 +829,11 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
             print(bufer1)
             print("но, нашли 0 в решении")
             print(bufer2)
-            print("из которого еще не выезжали и первый после него со скважинами ", bufer2[i + 1][0])
+            print("из которого еще не выезжали и первый после него со скважинами " + str(bufer2[i + 1][0]))
 
             bufer2[i][1] = 1
             AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, i + 1)
-            RecursiveSearchSosedFromAex(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar)
+            RecursiveSearchSosedFromAex(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar, file)
             return
             # return i+1.txt
 
@@ -849,7 +844,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         if flagAll[i] == 0 and countOfRaces[i] > 0:
             print("Не нашли 0 из которого еще не выезжали ни в одном из решений")
             print("Значит ищем у кого вообще остались скважины")
-            print("Нашли ", i, " город у которого еще есть скважины и в этом решении его не посещали")
+            print("Нашли " + str(i) + " город у которого еще есть скважины и в этом решении его не посещали")
 
             # Если нашли такого, то ищем этот город в большем решении
             # и из него мы еще не выезжали
@@ -860,7 +855,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                     print("Нашли этот город в решении")
                     print(bufer1)
                     AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, j)
-                    RecursiveSearchSosedFromAex(children, bufer2, bufer1, j, flag, flagAll, countOfRaces, numberInCar)
+                    RecursiveSearchSosedFromAex(children, bufer2, bufer1, j, flag, flagAll, countOfRaces, numberInCar, file)
                     return
                     # return j
             # если не нашли в большем, ищем в меньшем
@@ -871,7 +866,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                     print("Нашли этот город в решении")
                     print(bufer1)
                     AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, j)
-                    RecursiveSearchSosedFromAex(children, bufer1, bufer2, j, flag, flagAll, countOfRaces, numberInCar)
+                    RecursiveSearchSosedFromAex(children, bufer1, bufer2, j, flag, flagAll, countOfRaces, numberInCar, file)
                     return
                     # return j
 
@@ -882,7 +877,7 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 def RecursiveSearchSosedFromHGreX(children, inserted, sequence1, sequence2, flagAll, flag, numberInCar):
     if inserted == 0:
         return
-# TODO для начала надо разсмотреть ситуацию если ноль
+    # TODO для начала надо разсмотреть ситуацию если ноль
     print("Добавили в ребенка ", inserted)
     children.append([inserted, 0])
     flag[inserted] = 1
@@ -1056,7 +1051,9 @@ def SelectFirstObj(flagAll):
 
 # кроссовер AEX
 def AEX(sequence1, sequence2):
-    print("Скрещивание решений усуществляется с помощью оператора АЕХ")
+    file = open("log/aexlog.txt", 'a')
+    file.write("AEX start: ->" + '\n')
+    print("Скрещивание решений усуществляется с помощью оператора АЕХ" + '\n')
     # первый индекс это номер машины, второй это последовательность
     # Здесь все заебись!!!!!!!!!!
 
@@ -1072,9 +1069,9 @@ def AEX(sequence1, sequence2):
 
     # кол-во используемых машин в каждом решение
     size1 = len(sequence1)
-    print("size1 = ", size1)
+    file.write("size1 = " + str(size1) + '\n')
     size2 = len(sequence2)
-    print("size2 = ", size2)
+    file.write("size2 = " + str(size2) + '\n')
 
     # флаг, для посещенных городов в заключительном решении
     flagAll = [0 for j in range(factory.N)]
@@ -1082,11 +1079,11 @@ def AEX(sequence1, sequence2):
     # сколько раз можно заехать к каждому
     countOfRaces = factory.wells.copy()
 
-    print("Сколько раз к каждому клиенту можно приехать до оператора AEX ", countOfRaces)
+    file.write("Сколько раз к каждому клиенту можно приехать до оператора AEX " + str(countOfRaces) + '\n')
 
     # определяем по кому будем делать цикл
     if size1 >= size2:
-        print("Первая последовательность больше")
+        file.write("Первая последовательность больше" + '\n')
 
         # флаг, для посещенных городов в одном маршруте(одной машиной)
         flag = [0 for j in range(factory.N)]
@@ -1115,12 +1112,12 @@ def AEX(sequence1, sequence2):
         # один клиент в машине
         numberInCar += 1
 
-        print("Ребенок выглядит пока вот так ")
-        print(children)
-        print("______________________________")
+        file.write("Ребенок выглядит пока вот так " + '\n')
+        file.write(str(children) + '\n')
+        file.write("______________________________" + '\n')
 
         # Для первого добавления запустим без цикла
-        RecursiveSearchSosedFromAex(children, sequence2, sequence1, 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, sequence2, sequence1, 1, flag, flagAll, countOfRaces, numberInCar, file)
 
         # Обнуляем флаг для следующей машины
         for i in range(factory.N):
@@ -1130,27 +1127,28 @@ def AEX(sequence1, sequence2):
         # Добавляем еще одну машину + сдвигаем индекс последовательности
         k += 1
 
-        print("Построили для первой машины")
-        print("_______________________________________________________________________________________________________")
+        file.write("Построили для первой машины" + '\n')
+        file.write(
+            "_______________________________________________________________________________________________________" + '\n')
         # Пока кол-во используемых машин не привысило доступного числа  k <= factory.K
         # или остались не посещенные города sum(flagAll) <= factory.N
         counter = 0
         while sum(flagAll) < factory.N and counter <= factory.N * 2:
-            print("Продолжаем построение с помощью функции SearchForAnUnvisitedZero")
-            print("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
-                  "клиента которого еще не посетили в этом решении")
+            file.write("Продолжаем построение с помощью функции SearchForAnUnvisitedZero" + '\n')
+            file.write("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
+                       "клиента которого еще не посетили в этом решении" + '\n')
 
             # Поиск номер в последовательности не посещенного нуля
             # или просто не посещенного
             # и его добавление в ребенка с расставлением всех флагов
             # и запуском рекурсии
             SearchForAnUnvisitedZero(sequence1, size1, sequence2, size2, flagAll, countOfRaces, children, flag,
-                                     numberInCar)
+                                     numberInCar, file)
 
-            print("Построили для следующей машины")
-            print(
+            file.write("Построили для следующей машины" + '\n')
+            file.write(
                 "_____________________________________"
-                "__________________________________________________________________")
+                "__________________________________________________________________" + '\n')
 
             # Обнуляем флаг для следующей машины
             for i in range(factory.N):
@@ -1162,7 +1160,7 @@ def AEX(sequence1, sequence2):
             counter += 1
 
     elif size1 < size2:
-        print("Вторая последовательность больше")
+        file.write("Вторая последовательность больше" + '\n')
 
         # флаг, для посещенных городов в одном маршруте(одной машиной)
         flag = [0 for j in range(factory.N)]
@@ -1192,12 +1190,12 @@ def AEX(sequence1, sequence2):
         # один клиент в машине
         numberInCar += 1
 
-        print("Ребенок выглядит пока вот так ")
-        print(children)
-        print("______________________________")
+        file.write("Ребенок выглядит пока вот так " + '\n')
+        file.write(str(children) + '\n')
+        file.write("______________________________" + '\n')
 
         # Для первого добавления запустим без цикла
-        RecursiveSearchSosedFromAex(children, sequence1, sequence2, 1, flag, flagAll, countOfRaces, numberInCar)
+        RecursiveSearchSosedFromAex(children, sequence1, sequence2, 1, flag, flagAll, countOfRaces, numberInCar, file)
 
         # Обнуляем флаг для следующей машины
         for i in range(factory.N):
@@ -1207,29 +1205,30 @@ def AEX(sequence1, sequence2):
         # Добавляем еще одну машину + сдвигаем индекс последовательности
         k += 1
 
-        print("Построили для первой машины")
-        print("_______________________________________________________________________________________________________")
+        file.write("Построили для первой машины" + '\n')
+        file.write(
+            "_______________________________________________________________________________________________________" + '\n')
 
         # Пока кол-во используемых машин не привысило доступного числа  k <= factory.K
         # или остались не посещенные города sum(flagAll) <= factory.N
         counter = 0
         # TODO разобраться, когда всех посетили, но на одной машине
         while sum(flagAll) < factory.N and counter <= factory.N * 2:
-            print("Продолжаем построение с помощью функции SearchForAnUnvisitedZero")
-            print("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
-                  "клиента которого еще не посетили в этом решении")
+            file.write("Продолжаем построение с помощью функции SearchForAnUnvisitedZero" + '\n')
+            file.write("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
+                       "клиента которого еще не посетили в этом решении" + '\n')
             # Поиск номер в последовательности не посещенного нуля
             # или просто не посещенного
             # и его добавление в ребенка с расставлением всех флагов
             # и запуском рекурсии
 
             SearchForAnUnvisitedZero(sequence2, size2, sequence1, size1, flagAll, countOfRaces, children, flag,
-                                     numberInCar)
+                                     numberInCar, file)
 
-            print("Построили для следующей машиины машины")
-            print(
+            file.write("Построили для следующей машиины машины" + '\n')
+            file.write(
                 "___________________________________________________"
-                "____________________________________________________")
+                "____________________________________________________" + '\n')
 
             # Обнуляем флаг для следующей машины
             for i in range(factory.N):
@@ -1241,7 +1240,7 @@ def AEX(sequence1, sequence2):
             counter += 1
 
     else:
-        print("ERROR from AEX: исключение, произошло невозможное!!!!")
+        file.write("ERROR from AEX: исключение, произошло невозможное!!!!" + '\n')
 
     for i in range(len(children)):
         children[i][1] = 0
@@ -1249,12 +1248,21 @@ def AEX(sequence1, sequence2):
         sequence1[i][1] = 0
     for i in range(len(sequence2)):
         sequence2[i][1] = 0
-    print("Оператор AEX закончил своб работу с решениями")
-    print("sequence1 = ", sequence1)
-    print("sequence2 = ", sequence2)
-    print("И получился ребенок ")
-    print("children = ", children)
-    print("__________________________________________________________________________________________________________")
+
+    file.write("Оператор AEX закончил своб работу с решениями" + '\n')
+    file.write("sequence1 = " + str(sequence1) + '\n')
+    file.write("sequence2 = " + str(sequence2) + '\n')
+    file.write("И получился ребенок " + '\n')
+    file.write("children = " + str(children) + '\n')
+    file.write("______________________________________________________________________________________________________" + '\n')
+    print("Оператор AEX закончил своб работу с решениями" + '\n')
+    print("sequence1 = " + str(sequence1) + '\n')
+    print("sequence2 = " + str(sequence2) + '\n')
+    print("И получился ребенок " + '\n')
+    print("children = " + str(children) + '\n')
+    print(
+        "______________________________________________________________________________________________________" + '\n')
+    file.close()
     return children
 
 
@@ -1379,9 +1387,9 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
-        x, y, s, a, target_function,  sizeK, iteration = Relocate(x, y, s, a, target_function, sizeK, iteration)
+        x, y, s, a, target_function, sizeK, iteration = Relocate(x, y, s, a, target_function, sizeK, iteration)
         iteration += 1
-        return x, y, s, a, target_function,  sizeK, iteration
+        return x, y, s, a, target_function, sizeK, iteration
 
     elif oper == '2Opt':
         print("")
@@ -1401,7 +1409,7 @@ def Mutation(sequence):
     k = 0
     # print("Последовательность до мутации ")
     # print(sequence)
-    for i in  range(1, len(sequence)):
+    for i in range(1, len(sequence)):
         if sequence[i][0] != 0:
             # print("Составляем массив какие клиенты обслуживаются этим маршрутом, сейчас добавляем ", sequence[i][0])
             buf_random.append(sequence[i][0])
@@ -1660,8 +1668,8 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
 def CheckSequence(Sequence):
     if Sequence.count([0, 0]) != 0 and Sequence.count([1, 0]) != 0 and Sequence.count([2, 0]) != 0 and Sequence.count(
             [3, 0]) != 0 and Sequence.count([4, 0]) != 0 and Sequence.count([5, 0]) != 0 and Sequence.count(
-            [6, 0]) != 0 and Sequence.count([7, 0]) != 0 and Sequence.count([8, 0]) != 0 and Sequence.count(
-            [9, 0]) != 0:
+        [6, 0]) != 0 and Sequence.count([7, 0]) != 0 and Sequence.count([8, 0]) != 0 and Sequence.count(
+        [9, 0]) != 0:
         return 1
     else:
         return 0
