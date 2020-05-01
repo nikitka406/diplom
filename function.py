@@ -307,19 +307,8 @@ def ChooseRandomObjAndCar(y, sizeK):
     return client, car
 
 
-# номер машины которая обслуживает клиента
-def NumberCarClienta(y, client):
-    # TODO Берет первую попавшуюся машину которая обслуживает, это не правильно!!
-    for k in range(len(y[0])):
-        if y[client][k] == 1:
-            return k
-
-
 # ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight, k=-1):
-    # TODO надо разобраться с поиском машины
-    if k == -1:
-        k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
     if leftOrRight == "left":
         for i in range(factory.N):  # ищем по столбцу
             if x[i][client][k] == 1:
@@ -398,8 +387,8 @@ def TimeOfArrival(x, y, s, file):
 
 # удаляем клиента из выбранного  маршрут
 def DeleteClientaFromPath(x, y, s, a, client, k):
-    clientLeft = SearchSosedLeftOrRight(x, y, client, "left")  # ищем город перед клиентом
-    clientRight = SearchSosedLeftOrRight(x, y, client, "right")  # ищем город после клиента
+    clientLeft = SearchSosedLeftOrRight(x, y, client, "left", k)  # ищем город перед клиентом
+    clientRight = SearchSosedLeftOrRight(x, y, client, "right", k)  # ищем город после клиента
     # если у клиента есть сосед справо и слево
     if clientLeft != -1 and clientRight != -1:
         if clientLeft != clientRight:

@@ -958,7 +958,6 @@ def AEX(sequence1, sequence2):
         # Пока кол-во используемых машин не привысило доступного числа  k <= factory.K
         # или остались не посещенные города sum(flagAll) <= factory.N
         counter = 0
-        # TODO разобраться, когда всех посетили, но на одной машине
         while sum(flagAll) < factory.N and counter <= factory.N * 2:
             file.write("Продолжаем построение с помощью функции SearchForAnUnvisitedZero" + '\n')
             file.write("Хотим найти 0 в каком-нибудь решении из которого еще не выезжали или "
