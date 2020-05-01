@@ -87,6 +87,81 @@ def ReadStartSolutionOfFile(sizeK):
 
 
 # Cохраняем промежуточное решение в релоке
+def SaveStartLocalSearch(local_x, local_y, local_s, local_a, sizeK):
+    file = open('output/StartLocalSearch.txt', 'w')
+
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            for k in range(sizeK):
+                file.write(str(local_x[i][j][k]) + ' ')
+            file.write("\n")
+        # file.write("\n")
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_y[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл S
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_s[i][k]) + ' ')
+        file.write("\n")
+    # Печатаем в файл A
+    for i in range(factory.N):
+        for k in range(sizeK):
+            file.write(str(local_a[i][k]) + ' ')
+        file.write("\n")
+
+    file.close()
+
+
+def ReadStartLocalSearchOfFile(sizeK):
+    local_x = [[[0 for k in range(sizeK)] for j in range(factory.N)] for i in
+               range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    local_y = [[0 for k in range(sizeK)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(sizeK):
+        local_y[0][k] = 1
+    local_s = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    local_a = [[0 for k in range(sizeK)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
+    file = open('output/StartLocalSearch.txt', 'r')
+    # прочитали весь файл, получился список из строк файла
+    line = file.readlines()
+
+    index = 0
+    # Печатаем в файл Х
+    for i in range(factory.N):
+        for j in range(factory.N):
+            # for k in range(factory.KA):
+            local_x[i][j] = line[index].split()
+            for k in range(len(local_x[i][j])):
+                local_x[i][j][k] = int(local_x[i][j][k])
+            index += 1
+
+    # Печатаем в файл Y
+    for i in range(factory.N):
+        local_y[i] = line[index].split()
+        for k in range(len(local_y[i])):
+            local_y[i][k] = int(local_y[i][k])
+        index += 1
+    # Печатаем в файл S
+    for i in range(factory.N):
+        local_s[i] = line[index].split()
+        for k in range(len(local_s[i])):
+            local_s[i][k] = float(local_s[i][k])
+        index += 1
+    # Печатаем в файл A
+    for i in range(factory.N):
+        local_a[i] = line[index].split()
+        for k in range(len(local_a[i])):
+            local_a[i][k] = float(local_a[i][k])
+        index += 1
+    file.close()
+    return local_x, local_y, local_s, local_a
+
+
+# Cохраняем промежуточное решение в релоке
 def SaveLocalSearch(local_x, local_y, local_s, local_a, sizeK):
     file = open('output/LocalSearch.txt', 'w')
 
@@ -393,7 +468,11 @@ def ClearAllFile():
     file.close()
     file = open('log/twooptlog.txt', 'w')
     file.close()
+    file = open("log/genalog.txt", 'w')
+    file.close()
     file = open('output/Help.txt', 'w')
+    file.close()
+    file = open('output/LocalSearch.txt', 'w')
     file.close()
     file = open('output/population.txt', 'w')
     file.close()
@@ -402,6 +481,8 @@ def ClearAllFile():
     file = open('output/SolutionPopulation.txt', 'w')
     file.close()
     file = open('output/StartHelp.txt', 'w')
+    file.close()
+    file = open('output/StartLocalSearch.txt', 'w')
     file.close()
     file = open('output/StartSolution.txt', 'w')
     file.close()

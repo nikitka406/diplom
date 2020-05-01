@@ -291,9 +291,12 @@ def SearchTheBestSoseda(client):
 def ChooseRandomObjAndCar(y, sizeK):
     # Выбираем рандомную машину
     car = random.randint(1, (sizeK - 1))
+    while not CarIsWork(y, car):
+        car = random.randint(1, (sizeK - 1))
+
     # ЗАпоминаем всех кого она обслуживает
     buf = []
-    for i in range(factory.N):
+    for i in range(1, factory.N):
         if y[i][car] == 1:
             buf.append(i)
     # Выбираем случайного среди них
@@ -379,7 +382,7 @@ def RecursiaForTime(x, s, a, i, k, recurs):
 
 # определяем время приезда для всех локаций
 def TimeOfArrival(x, y, s, file):
-    file.write("Начнем заполнять время прибытия\n")
+    file.write("    Начнем заполнять время прибытия\n")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k):
@@ -511,7 +514,7 @@ def SearchTail(x, client, clientCar, file):
     file.write("    SearchTail start: ->\n")
     sequence = GettingTheSequence(x)
     file.write("        Ищем хвост для маршрута\n")
-    file.write("        " + str(sequence[clientCar]) + "\n начиная с объекта " + str(client) + '\n')
+    file.write("        " + str(sequence[clientCar]) + "\n      начиная с объекта " + str(client) + '\n')
     tail = []
     start = sequence[clientCar].index(client)
     for i in range(start, len(sequence[clientCar])):
@@ -519,6 +522,7 @@ def SearchTail(x, client, clientCar, file):
             tail.append(sequence[clientCar][i])
         else:
             break
+    tail.append(0)
     file.write("        Хвост = " + str(tail) + '\n')
     file.write("    SearchTail stop: <-\n")
     return tail
@@ -526,7 +530,7 @@ def SearchTail(x, client, clientCar, file):
 
 # Сохраняем время работы
 def SaveTime(s, tail, car, file):
-    file.write("    SaveTime start: ->")
+    file.write("    SaveTime start: ->" + '\n')
     time = []
     for i in range(len(tail)):
         index = tail[i]
@@ -539,7 +543,7 @@ def SaveTime(s, tail, car, file):
 
 # Удаление хвоста
 def DeleteTail(x, y, s, a, sosed, tail, car, file):
-    file.write("    DeleteTail start: ->")
+    file.write("    DeleteTail start: ->\n")
     sos = sosed
     for i in range(len(tail)):
         x[sos][tail[i]][car] = 0
@@ -547,7 +551,7 @@ def DeleteTail(x, y, s, a, sosed, tail, car, file):
         y[tail[i]][car] = 0
         s[tail[i]][car] = 0
         a[tail[i]][car] = 0
-    file.write("    DeleteTail stop: <-")
+    file.write("    DeleteTail stop: <-\n")
     return x, y, s, a
 
 ''' Функции для кроссоверов'''
@@ -649,10 +653,10 @@ def ArrivalTime(a, s, before, after, k):
 
 # Преобразуем последовательность в матрицы решений
 def SequenceDisplayInTheXYSA(sequence):
-    print("Переделываем последовательность в матрицы решений")
+    # print("Переделываем последовательность в матрицы решений")
 
     count_car = CountUsedMachines(sequence)
-    print("Количество машин используемых ребенком = ", count_car)
+    # print("Количество машин используемых ребенком = ", count_car)
 
     x = [[[0 for k in range(count_car)] for j in range(factory.N)] for i in
          range(factory.N)]  # едет или нет ТС с номером К из города I в J
@@ -785,7 +789,8 @@ def AnotherEdgeWithTheSameBeginning(bufer_in, new_start, flag, countOfRaces):
 
 
 # Создаем массив у каких локаций остались свободные скважины
-def RandNotVisitClient(countOfRaces, flag):
+def RandNotVisitClient(countOfRaces, flag, file):
+    file.write("RandNotVisitClient start: ->\n")
     # массив для не посещенных городов
     count_not_visit = []
 
@@ -795,17 +800,19 @@ def RandNotVisitClient(countOfRaces, flag):
             # то сохраняем номер этого клиента
             count_not_visit.append(i)
 
-    print("Of RandNotVisitClient: создали массив, у каких клиентов остались свободные скважины")
-    print(count_not_visit)
+    file.write("    Of RandNotVisitClient: создали массив, у каких клиентов остались свободные скважины" + '\n')
+    file.write("    " + str(count_not_visit) + '\n')
 
     try:
         # берем рандомного из списка не посещенных
         i = random.choice(count_not_visit)
-        print("Взяли рандомного из этого списка равного ", i)
+        file.write("    Взяли рандомного из этого списка равного " + str(i) + '\n')
+        file.write("RandNotVisitClient stop: <-\n")
         return i
 
     except IndexError:
-        print("Больше нет клиентов с свободными скважинами")
+        file.write("    Больше нет клиентов с свободными скважинами" + '\n')
+        file.write("RandNotVisitClient stop: <-\n")
         return -1
 
 
@@ -822,7 +829,7 @@ def X_join_Y(x, y, file='def'):
             if bufer1 != bufer2 or bufer2 != y[j][k] or bufer1 != y[j][k]:
                 if file != 'def':
                     file.write(
-                        "ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у" + '\n')
+                        "   ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у" + '\n')
                 else:
                     print("ERROR from X_join_Y: сломалось первое ограничение, несовместность переменных х, у")
                 return 0
@@ -841,7 +848,7 @@ def V_jobs(s, file='def'):
             if int(bufer1) != factory.S[i]:
                 if file != 'def':
                     file.write(
-                        "ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте " + str(i) +
+                        "   ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте " + str(i) +
                         " не совпадает с регламентом" + '\n')
                 else:
                     print("ERROR from V_jobs: сломалось второе ограничение, общий объем работ на объекте" + str(i) +
@@ -860,7 +867,7 @@ def TC_equal_KA(y, file='def'):
                 bufer1 += y[i][k]
             if bufer1 > factory.wells[i]:
                 if file != 'def':
-                    file.write("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте" +
+                    file.write("    ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте" +
                                str(i) + "больше чем число скважин" + '\n')
                 else:
                     print("ERROR from TC_equal_KA: сломалось третье ограничение, кол-во ТС на одном объекте" + str(i) +
@@ -878,7 +885,7 @@ def ban_driling(s, y, file='def'):
 
                 if file != 'def':
                     file.write(
-                        "ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
+                        "   ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
                         ", но начало бурение" + '\n')
                 else:
                     print("ERROR from ban_driling: сломалось четвертое ограничение, ТС не приехало на объект" + str(i) +
@@ -893,7 +900,7 @@ def window_time_down(a, y, file='def'):
         for k in range(len(y[i])):
             if factory.e[i] > a[i][k] and y[i][k] == 1:
                 if file != 'def':
-                    file.write("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект" +
+                    file.write("    ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект" +
                                str(i) + "меньше чем начало работ" + '\n')
                 else:
                     print("ERROR from window_time_down: сломалось пятое ограничение, время приезда на объкект", i,
@@ -908,10 +915,10 @@ def window_time_up(a, s, y, file='def'):
         for k in range(len(y[i])):
             if a[i][k] + s[i][k] > factory.l[i] and y[i][k] == 1:
                 if file != 'def':
-                    file.write("ERROR from window_time_up: сломалось шестое ограничение, "
+                    file.write("    ERROR from window_time_up: сломалось шестое ограничение, "
                                "время окончание работ на объкект" + str(i) + "больше чем конец работ" + '\n')
                 else:
-                    print("ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект",
+                    print(" ERROR from window_time_up: сломалось шестое ограничение, время окончание работ на объкект",
                           i,
                           "больше чем конец работ")
                 return 0
@@ -926,7 +933,7 @@ def ban_cycle(a, x, s, y, file='def'):
                 if a[i][k] - a[j][k] + x[i][j][k] * factory.t[i][j] + s[i][k] > factory.l[i] * (1 - x[i][j][k]) and \
                         y[i][k] == 1:
                     if file != 'def':
-                        file.write("ERROR from ban_cycle: сломалось седьмое ограничение, машина" + str(k) +
+                        file.write("    ERROR from ban_cycle: сломалось седьмое ограничение, машина" + str(k) +
                                    "не посещает депо согласно временным рамкам" + '\n')
                     else:
                         print("ERROR from ban_cycle: сломалось седьмое ограничение, машина", k,
@@ -942,7 +949,7 @@ def positive_a_and_s(x, y, a, s, file='def'):
             for k in range(len(y[i])):
                 if s[i][k] < 0 or a[i][k] < 0:
                     if file != 'def':
-                        file.write("ERROR from positive_a_and_s: сломалось седьмое ограничение, "
+                        file.write("    ERROR from positive_a_and_s: сломалось седьмое ограничение, "
                                    "неправельные значение переменных a, s" + '\n')
                     else:
                         print(

@@ -3,6 +3,8 @@ from function import *
 
 # вклиниваем между
 def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
+    # Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
+    # XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
     Xl, Yl, Sl, Al = ReadLocalSearchOfFile(sizeK)
     XR, YR, SR, AR = ReadLocalSearchOfFile(sizeK)
 
@@ -116,29 +118,33 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
     minimum = min(targetL, targetR)
     if minimum == targetL and minimum != -1:
         file.write("Выбрали левого у него целевая меньше" + '\n')
-        return Xl, Yl, Sl, Al, targetL, sizeK, iteration
+        return Xl, Yl, Sl, Al, targetL, sizeK
 
     elif minimum == targetR and minimum != -1 and targetR != targetL:
         file.write("Выбрали правого у него целевая меньше" + '\n')
-        return XR, YR, SR, AR, targetR, sizeK, iteration
+        return XR, YR, SR, AR, targetR, sizeK
 
     else:
         file.write("Все пошло по пизде ничего не сохранили" + '\n')
-        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK, iteration
+        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
 
 # переставляем клиента к новому соседу, локальный поиск
+# def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
 def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start, iteration):
     file = open("log/relog.txt", 'w')
     file.write("->Relocate start" + '\n')
 
+    # SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
     SaveLocalSearch(X, Y, Sresh, A, sizeK_start)
     TargetFunction = target_function_start
     SizeK = sizeK_start
     buf_targ = 0
 
+    # fileflag = 0
     while TargetFunction != buf_targ:
         buf_targ = TargetFunction
+        # X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
         X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
 
         # Bыбираем клиента
@@ -156,7 +162,7 @@ def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start, iteration):
                 file.write("К соседу " + str(sosed) + '\n')
                 file.write("На машине " + str(sosedK) + '\n')
 
-                x, y, s, a, target_function, sizeK, iteration = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK, client,
+                x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK, client,
                                                                                       sosed, iteration, file)
                 file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
 
@@ -169,24 +175,56 @@ def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start, iteration):
                     SaveLocalSearch(x, y, s, a, sizeK)
                     TargetFunction = target_function
                     SizeK = sizeK
+                    # fileflag = 1
                 else:
                     file.write("Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
                     file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+    #
+    #     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+    #     target_function_start = CalculationOfObjectiveFunction(x_start, PenaltyFunction(y_start, s_start,
+    #                                                                                     a_start, iteration))
+    #     file.write(
+    #         "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+    #
+    #     if fileflag == 1:
+    #         x, y, s, a = ReadLocalSearchOfFile(SizeK)
+    #         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+    #         file.write(
+    #             "Целевая функция последнего минимального переставления = " + str(
+    #                 target_function) + '\n')
+    #         fileflag = 0
+    #     else:
+    #         target_function = -1
+    #
+    #     minimum2 = min(target_function_start, target_function)
+    #     if minimum2 == target_function and target_function != -1:
+    #         file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+    #         file.write("Новая целевая функция равна " + str(target_function) + '\n')
+    #
+    #         SaveStartLocalSearch(x, y, s, a, SizeK)
+    #         target_function_start = target_function
+    #         TargetFunction = target_function
+    #         sizeK_start = SizeK
+    #     else:
+    #         file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+    #         file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+    # file.write("While stop\n")
 
-    file.write("Локальный оптимум найден сохраняем в популяцию решение" + '\n')
-    for k in range(sizeK):
-        for i in range(factory.N):
-            for j in range(factory.N):
-                file.write(str(X[i][j][k]) + ' ')
-            file.write("\n")
-        file.write("\n")
-
+    # x_start, y_start, s_start, a_start = ReadLocalSearchOfFile(SizeK)
+    # file.write("Локальный оптимум найден сохраняем в популяцию решение" + '\n')
+    # for k in range(SizeK):
+    #     for i in range(factory.N):
+    #         for j in range(factory.N):
+    #             file.write(str(X[i][j][k]) + ' ')
+    #         file.write("\n")
+    #     file.write("\n")
     X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
 
     file.write("<-Relocate stop" + '\n')
     file.close()
 
-    return X, Y, Sresh, A, TargetFunction, SizeK, iteration
+    # return x_start, y_start, s_start, a_start, TargetFunction, sizeK_start
+    return X, Y, Sresh, A, TargetFunction, SizeK# , iteration
 
 
 def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1Car, client2, client2Car, iteration,
@@ -194,7 +232,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
     file.write("OperatorJoinFromTwoOpt start: ->" + '\n')
     SizeK = sizeK
     Target_Function = target_function
-    X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
+    X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
 
     tail1 = SearchTail(X, client1, client1Car, file)
     time1 = SaveTime(Sresh, tail1, client1Car, file)
@@ -217,7 +255,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
         if sosed1 == tail2[0] and sosed2 != tail1[0]:
             file.write("    Сосед один = началу хвоста два (" + str(sosed1) + "=" + str(tail2[0]) + ")\n")
 
-            file.write("    Присоединяем второй хвост")
+            file.write("    Присоединяем второй хвост" + '\n')
             Sresh[sosed1][client1Car] += time2[0]
             for i in range(1, len(tail2)):
                 X[sosed1][tail2[i]][client1Car] = 1
@@ -225,7 +263,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
                 Sresh[tail2[i]][client1Car] = time2[i]
                 sosed1 = tail2[i]
 
-            file.write("    Присоединяем первый хвост")
+            file.write("    Присоединяем первый хвост" + '\n')
             for i in range(len(tail1)):
                 X[sosed2][tail1[i]][client2Car] = 1
                 Y[tail1[i]][client2Car] = 1
@@ -237,7 +275,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
         elif sosed2 == tail1[0] and sosed1 != tail2[0]:
             file.write("    Сосед два = началу хвоста один (" + str(sosed2) + "=" + str(tail1[0]) + ")\n")
 
-            file.write("    Присоединяем первый хвост")
+            file.write("    Присоединяем первый хвост" + '\n')
             Sresh[sosed2][client2Car] += time1[0]
             for i in range(1, len(tail1)):
                 X[sosed2][tail1[i]][client2Car] = 1
@@ -245,7 +283,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
                 Sresh[tail1[i]][client2Car] = time1[i]
                 sosed2 = tail1[i]
 
-            file.write("    Присоединяем второй хвост")
+            file.write("    Присоединяем второй хвост" + '\n')
             for i in range(len(tail2)):
                 X[sosed1][tail2[i]][client1Car] = 1
                 Y[tail2[i]][client1Car] = 1
@@ -258,7 +296,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
             file.write("    Сосед один = началу хвоста два (" + str(sosed1) + "=" + str(tail2[0]) + ")\n")
             file.write("    Сосед два = началу хвоста один (" + str(sosed2) + "=" + str(tail1[0]) + ")\n")
 
-            file.write("    Присоединяем второй хвост")
+            file.write("    Присоединяем второй хвост" + '\n')
             Sresh[sosed1][client1Car] += time2[0]
             for i in range(1, len(tail2)):
                 X[sosed1][tail2[i]][client1Car] = 1
@@ -266,7 +304,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
                 Sresh[tail2[i]][client1Car] = time2[i]
                 sosed1 = tail2[i]
 
-            file.write("    Присоединяем первый хвост")
+            file.write("    Присоединяем первый хвост" + '\n')
             Sresh[sosed2][client2Car] += time1[0]
             for i in range(1, len(tail1)):
                 X[sosed2][tail1[i]][client2Car] = 1
@@ -279,14 +317,14 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
     else:
         file.write("    Начало хвоста не равно соседу слева\n")
 
-        file.write("    Присоединяем первый хвост")
+        file.write("    Присоединяем первый хвост" + '\n')
         for i in range(len(tail1)):
             X[sosed2][tail1[i]][client2Car] = 1
             Y[tail1[i]][client2Car] = 1
             Sresh[tail1[i]][client2Car] = time1[i]
             sosed2 = tail1[i]
 
-        file.write("    Присоединяем второй хвост")
+        file.write("    Присоединяем второй хвост" + '\n')
         for i in range(len(tail2)):
             X[sosed1][tail2[i]][client1Car] = 1
             Y[tail2[i]][client1Car] = 1
@@ -327,32 +365,33 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
     file = open("log/twooptlog.txt", 'a')
     file.write("Two_Opt start: ->" + '\n')
 
-    SaveLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
+    SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
     TargetFunction = target_function_start
     SizeK = sizeK_start
     buf_targ = 0
 
+    fileflag = 0
     while TargetFunction != buf_targ:
+        file.write("While start\n")
         buf_targ = TargetFunction
-        X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
+        X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
 
         # Bыбираем клиента
         client1, client1Car = ChooseRandomObjAndCar(Y, SizeK)
-
-        file.write("Меняем продолжение клиентa " + str(client1) + '\n')
-        file.write("на машине " + str(client1Car) + '\n')
 
         for client2Car in range(SizeK):
             if client2Car != client1Car:
                 for client2 in range(1, factory.N):
                     if Y[client2][client2Car] == 1:
-                        file.write("У маршрутов " + str(client1Car) + str(client2Car) + " меняем хвосты\n Начиная с "
-                                                                                        "объектов " + str(
-                            client1) + " и " + str(client2) + " соответствено\n")
+                        file.write(
+                            "У маршрутов " + str(client1Car) + " " + str(client2Car) + " меняем хвосты\nНачиная с "
+                                                                                       "объектов " + str(
+                                client1) + " и " + str(client2) + " соответствено\n")
 
                         x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A, SizeK,
                                                                                     TargetFunction, client1, client1Car,
-                                                                                    client2, client2Car, iteration, file)
+                                                                                    client2, client2Car, iteration,
+                                                                                    file)
                         file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
 
                         file.write("Выбираем минимальное решение" + '\n')
@@ -365,11 +404,40 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                             SaveLocalSearch(x, y, s, a, sizeK)
                             TargetFunction = target_function
                             SizeK = sizeK
+                            fileflag = 1
                         else:
                             file.write("Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
                             file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
 
-    X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
+        x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+        target_function_start = CalculationOfObjectiveFunction(x_start, PenaltyFunction(y_start, s_start,
+                                                                                        a_start, iteration))
+        file.write(
+            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+        if fileflag == 1:
+            x, y, s, a = ReadLocalSearchOfFile(SizeK)
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            file.write(
+                "Целевая функция последнего минимального переставления = " + str(
+                    target_function) + '\n')
+            fileflag = 0
+        else:
+            target_function = -1
+
+        minimum2 = min(target_function_start, target_function)
+        if minimum2 == target_function and target_function != -1:
+            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+            SaveStartLocalSearch(x, y, s, a, SizeK)
+            target_function_start = target_function
+            TargetFunction = target_function
+            sizeK_start = SizeK
+        else:
+            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+    file.write("While stop\n")
 
     file.write("Локальный оптимум найден сохраняем в популяцию решение\n")
     for i in range(factory.N):
@@ -381,7 +449,7 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
     file.write("Two_Opt stop: <-" + '\n')
     file.close()
 
-    return X, Y, Sresh, A, TargetFunction, SizeK, iteration
+    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start
 
 
 # Возможность приезжать нескольким машинам на одну локацию
@@ -463,13 +531,14 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                         Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
                         target_function_start = CalculationOfObjectiveFunction(Xstart, PenaltyFunction(Ystart, Sstart,
-                                                                                                       Astart, 1))
+                                                                                                       Astart,
+                                                                                                       iteration))
                         file.write(
                             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
                         if fileflag == 1:
                             x, y, s, a = ReadHelpOfFile(SizeK)
-                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, 1))
+                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
                             file.write(
                                 "Целевая функция последнего минимального переставления = " + str(
                                     target_function) + '\n')
@@ -708,13 +777,11 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration):
         X, Y, Sresh, A = ReadStartSolutionOfFile(SizeSolution[n])
 
         if oper == 'reloc':
-            x, y, s, a, Target_Function[n], SizeSolution[n], iteration = Relocate(X, Y, Sresh, A, Target_Function[n],
-                                                                                  SizeSolution[n],
-                                                                                  iteration)
-        # elif oper == '2-Opt':
-        #     x, y, s, a, Target_Function[n], SizeSolution[n], iteration = Two_Opt(X, Y, Sresh, A, Target_Function[n],
-        #                                                                          SizeSolution[n],
-        #                                                                          iteration)
+            x, y, s, a, Target_Function[n], SizeSolution[n] = Relocate(X, Y, Sresh, A, Target_Function[n],
+                                                                       SizeSolution[n], iteration)
+        elif oper == '2-Opt':
+            x, y, s, a, Target_Function[n], SizeSolution[n] = Two_Opt(X, Y, Sresh, A, Target_Function[n],
+                                                                      SizeSolution[n], iteration)
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")

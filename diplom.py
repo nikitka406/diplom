@@ -57,13 +57,13 @@ SaveDateResult("Максимальная целевая функция в поп
 Sequence = CreateSequence(X)
 
 file = open('output/population.txt', 'w')
-for i in  range(factory.param_population):
+for i in range(factory.param_population):
     file.write(str(Sequence[i]) + '\n')
     file.write("____________________\n")
 file.close()
 
 # Создаем новые решения
-GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, iteration)
+GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, iteration)
 
 Time = time.time() - start
 print(Time, "seconds")

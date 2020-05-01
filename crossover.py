@@ -428,7 +428,7 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
 
         # берем рандомного клиента у кторого есть не посещенные скважины
         file.write("Берем рандомного клиента у кторого есть не посещенные скважины с помощью функции RandNotVisitClient" + '\n')
-        rand_client = RandNotVisitClient(countOfRaces, flag)
+        rand_client = RandNotVisitClient(countOfRaces, flag, file)
 
         # Нашли рандомного клиента
         if rand_client != -1:
@@ -508,8 +508,9 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
 
 # Добавляем клиента в последовательность, со всеми флагами
 # ЗАебись!!!
-def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in):
-    print("Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence")
+def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, file):
+    file.write("AddClientaInSequence start: ->\n")
+    file.write("    Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence" + '\n')
     children.append([bufer[i_in][0], 0])
 
     # из первого нуля больше никуда не едем
@@ -522,9 +523,10 @@ def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in):
     # на одну мащину к нему (bufer1[1.txt]) теперь может приехать меньше
     countOfRaces[bufer[i_in][0]] -= 1
 
-    print("Ребенок выглядит пока вот так ")
-    print(children)
-    print("______________________________")
+    file.write("    Ребенок выглядит пока вот так " + '\n')
+    file.write("    " + str(children) + '\n')
+    file.write("    AddClientaInSequence stop: <-\n")
+    file.write("______________________________" + '\n')
 
 
 # Выбор рандомного города из тех у который остались свободные скважины
@@ -541,6 +543,7 @@ def RandomClientWithWells(countOfRaces):
 # jndex - индекс у ребенка
 # ЗАебись!!!
 def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces, children, flag, numberInCar, file):
+    file.write("SearchForAnUnvisitedZero start: ->\n")
     # #Сначала проверим есть ли те которых мне не посетили ни разу
     # if sum(flagAll) <= factory.N:
     #
@@ -551,12 +554,12 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         # bufer1[i][1.txt] == 0 из которого еще не выезжали
         # bufer1[i+1.txt][0] > 0 у которого еще есть свободные скважины
         if bufer1[i] == [0, 0] and countOfRaces[bufer1[i + 1][0]] > 0:
-            print("Нашли 0 в решении")
-            print(bufer1)
-            print("из которого еще не выезжали и первый после него со скважинами " + str(bufer1[i + 1][0]))
+            file.write("Нашли 0 в решении" + '\n')
+            file.write("    " + str(bufer1) + '\n')
+            file.write("из которого еще не выезжали и первый после него со скважинами " + str(bufer1[i + 1][0]) + '\n')
 
             bufer1[i][1] = 1
-            AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, i + 1)
+            AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, i + 1, file)
             RecursiveSearchSosedFromAex(children, bufer2, bufer1, i + 1, flag, flagAll, countOfRaces, numberInCar, file)
             return
             # return i+1.txt
@@ -567,14 +570,14 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         # bufer2[i][1.txt] == 0 из которого еще не выезжали
         # countOfRaces[bufer2[i + 1.txt][0]] > 0 у которого еще есть свободные скважины
         if bufer2[i] == [0, 0] and countOfRaces[bufer2[i + 1][0]] > 0:
-            print("Не нашли 0 в решении")
-            print(bufer1)
-            print("но, нашли 0 в решении")
-            print(bufer2)
-            print("из которого еще не выезжали и первый после него со скважинами " + str(bufer2[i + 1][0]))
+            file.write("Не нашли 0 в решении" + '\n')
+            file.write("    " + str(bufer1) + '\n')
+            file.write("но, нашли 0 в решении" + '\n')
+            file.write("    " + str(bufer2) + '\n')
+            file.write("из которого еще не выезжали и первый после него со скважинами " + str(bufer2[i + 1][0]) + '\n')
 
             bufer2[i][1] = 1
-            AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, i + 1)
+            AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, i + 1, file)
             RecursiveSearchSosedFromAex(children, bufer1, bufer2, i + 1, flag, flagAll, countOfRaces, numberInCar, file)
             return
             # return i+1.txt
@@ -584,9 +587,9 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
         # Если в первом и вотором не нашли то ищем просто не посещенный
         # впринципе и у которого есть свободные скважины!!
         if flagAll[i] == 0 and countOfRaces[i] > 0:
-            print("Не нашли 0 из которого еще не выезжали ни в одном из решений")
-            print("Значит ищем у кого вообще остались скважины")
-            print("Нашли " + str(i) + " город у которого еще есть скважины и в этом решении его не посещали")
+            file.write("Не нашли 0 из которого еще не выезжали ни в одном из решений" + '\n')
+            file.write("Значит ищем у кого вообще остались скважины" + '\n')
+            file.write("Нашли " + str(i) + " город у которого еще есть скважины и в этом решении его не посещали" + '\n')
 
             # Если нашли такого, то ищем этот город в большем решении
             # и из него мы еще не выезжали
@@ -594,9 +597,9 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                 # bufer1[i][0] == 0 ищем этот итый город,
                 # bufer1[i][1.txt] == 0 из которого еще не выезжали
                 if bufer1[j][0] == i and bufer1[j][1] == 0:
-                    print("Нашли этот город в решении")
-                    print(bufer1)
-                    AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, j)
+                    file.write("Нашли этот город в решении" + '\n')
+                    file.write("    " + str(bufer1) + '\n')
+                    AddClientaInSequence(children, bufer1, flag, flagAll, countOfRaces, j, file)
                     RecursiveSearchSosedFromAex(children, bufer2, bufer1, j, flag, flagAll, countOfRaces, numberInCar, file)
                     return
                     # return j
@@ -605,14 +608,15 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
                 # bufer2[i][0] == 0 ищем ноль,
                 # bufer2[i][1.txt] == 0 из которого еще не выезжали
                 if bufer2[j][0] == 0 and bufer2[j][1] == 0:
-                    print("Нашли этот город в решении")
-                    print(bufer1)
-                    AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, j)
+                    file.write("Нашли этот город в решении" + '\n')
+                    file.write("    " + str(bufer1) + '\n')
+                    AddClientaInSequence(children, bufer2, flag, flagAll, countOfRaces, j, file)
                     RecursiveSearchSosedFromAex(children, bufer1, bufer2, j, flag, flagAll, countOfRaces, numberInCar, file)
                     return
                     # return j
 
-    print("Notification from SearchForAnUnvisitedZero: не нашли куда ехать")
+    file.write("Notification from SearchForAnUnvisitedZero: не нашли куда ехать" + '\n')
+    file.write("SearchForAnUnvisitedZero stop: <-\n")
 
 
 # Рекурсия для HGreX
@@ -1123,29 +1127,31 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
-    local_search_oper = ['relocate', '2Opt', 'Exchange']
+    local_search_oper = ['relocate', '2Opt']#, 'Exchange']
     oper = random.choice(local_search_oper)
     oper = 'relocate'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
-        x, y, s, a, target_function, sizeK, iteration = Relocate(x, y, s, a, target_function, sizeK, iteration)
+        x, y, s, a, target_function, sizeK = Relocate(x, y, s, a, target_function, sizeK, iteration)
         iteration += 1
         return x, y, s, a, target_function, sizeK, iteration
 
     elif oper == '2Opt':
-        print("")
+        x, y, s, a, target_function, sizeK = Two_Opt(x, y, s, a, target_function, sizeK, iteration)
+        iteration += 1
+        return x, y, s, a, target_function, sizeK, iteration
 
     elif oper == 'Exchange':
         print("")
 
 
 # Мутация
-def Mutation(sequence):
-    print("___________________________________________________________________________________________________________")
-    print("Начилась мутация")
+def Mutation(sequence, file):
+    file.write("____________________________________________________________________________________________________\n")
+    file.write("Начилась мутация\n")
     count_car = CountUsedMachines(sequence)
-    print("Число используемых машин = ", count_car)
+    file.write("Число используемых машин = " + str(count_car) + "\n")
 
     buf_random = []
     k = 0
@@ -1182,16 +1188,18 @@ def Mutation(sequence):
             buf_random = []
             k = i
 
-    print("Итоговая, измененая последовательность = ")
-    print(sequence)
+    file.write("Итоговая, измененая последовательность = \n")
+    file.write(str(sequence) + '\n')
 
 
 # Функция которая позволяет родить ребенка (скрестить два решения)
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
-def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
-    print("Начинаем процесс порождения нового решения")
+def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
+    file = open("log/genalog.txt", 'a')
+    file.write("GeneticAlgorithm start: ->\n")
+    file.write("Начинаем процесс порождения нового решения" + '\n')
     minimumCros = Target_Function[0]
     maximumCros = Target_Function[0]
     minimumLocal = Target_Function[0]
@@ -1200,107 +1208,107 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
     maximumHelp = Target_Function[0]
 
     for crossing in range(factory.param_crossing):
-        print("Запускаем ", crossing, "-ый раз")
+        file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
 
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        print("Выбрали сценарий по выбору родителей", scenario)
+        file.write("Выбрали сценарий по выбору родителей" + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
         scenario_add = random.choice(scenario_add_new_solution)
         scenario_add = 'deleteTheBad'
-        print("Выбрали сценарий по сохранению нового решения", scenario_add)
+        file.write("Выбрали сценарий по сохранению нового решения" + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
         name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
         crossover = random.choice(name_crossover)
         crossover = 'AEX'
-        print("Выбрали кроссовер для скрещивания", crossover)
+        file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию
         if scenario == 'randomAndRandom':
-            print("Пошли по сценарию, два рандомных решения")
+            file.write("Пошли по сценарию, два рандомных решения" + '\n')
             # Индекс первого родителя
             index = int(random.randint(0, factory.param_population - 1))
-            print("Номер первого решения ", index)
+            file.write("Номер первого решения " + str(index) + '\n')
 
             # Индекс второго родителя
             jndex = int(random.randint(0, factory.param_population - 1))
-            print("Номер второго решения ", jndex)
+            file.write("Номер второго решения " + str(jndex) + '\n')
 
             # Если вдруг индекс второго родителя равен первому
             while jndex == index:
                 jndex = random.randint(0, factory.param_population - 1)
 
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе рандомное решение")
-            print(Sequence[jndex])
+            file.write(str(Sequence) + '\n')
+            file.write("Первое рандомное решение" + '\n')
+            file.write(str(Sequence[index]) + '\n')
+            file.write("Второе рандомное решение" + '\n')
+            file.write(str(Sequence[jndex]) + '\n')
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'randomAndBad':
-            print("Пошли по сценарию, один рандомный второй самый худший")
+            file.write("Пошли по сценарию, один рандомный второй самый худший" + '\n')
             # Индекс первого родителя
             index = random.randint(0, factory.param_population - 1)
-            print("Номер первого решения ", index)
+            file.write("Номер первого решения " + str(index) + '\n')
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(maximum)
-            print("Номер второго решения ", jndex)
+            file.write("Номер второго решения " + str(jndex) + '\n')
 
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе решение, худшие из всех")
-            print(Sequence[jndex])
+            file.write(str(Sequence) + '\n')
+            file.write("Первое рандомное решение" + '\n')
+            file.write(str(Sequence[index]) + '\n')
+            file.write("Второе решение, худшие из всех" + '\n')
+            file.write(str(Sequence[jndex]) + '\n')
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndRand':
-            print("Пошли по сценарию, один рандомный второй самый лудший")
+            file.write("Пошли по сценарию, один рандомный второй самый лудший" + '\n')
             # Индекс первого родителя
             index = random.randint(0, factory.param_population - 1)
-            print("Номер первого решения ", index)
+            file.write("Номер первого решения " + str(index) + '\n')
 
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(minimum)
-            print("Номер второго решения ", jndex)
+            file.write("Номер второго решения " + str(jndex) + '\n')
 
-            print(Sequence)
-            print("Первое рандомное решение")
-            print(Sequence[index])
-            print("Второе решение, лудшие из всех")
-            print(Sequence[jndex])
+            file.write(str(Sequence) + '\n')
+            file.write("Первое рандомное решение" + '\n')
+            file.write(str(Sequence[index]) + '\n')
+            file.write("Второе решение, лудшие из всех" + '\n')
+            file.write(str(Sequence[jndex]) + '\n')
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndBad':
-            print("Пошли по сценарию, один самый лудший второй самый худший")
+            file.write("Пошли по сценарию, один самый лудший второй самый худший" + '\n')
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет первым родителем
             index = Target_Function.count(minimum)
-            print("Номер первого решения ", index)
+            file.write("Номер первого решения " + str(index) + '\n')
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
             jndex = Target_Function.count(maximum)
-            print("Номер второго решения ", jndex)
+            file.write("Номер второго решения " + str(jndex) + '\n')
 
-            print(Sequence)
-            print("Первое решение, лудшие из всех")
-            print(Sequence[index])
-            print("Второе решение, худшие из всех")
-            print(Sequence[jndex])
+            file.write(str(Sequence) + '\n')
+            file.write("Первое решение, лудшие из всех" + '\n')
+            file.write(str(Sequence[index]) + '\n')
+            file.write("Второе решение, худшие из всех" + '\n')
+            file.write(str(Sequence[jndex]) + '\n')
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
@@ -1309,9 +1317,9 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
         # У ребенка в конце может не быть нуля
         if children[-1] != [0, 0]:
             children.append([0, 0])
-        print("children", children)
+        file.write("children = " + str(children) + '\n')
         # Применяем мутацию
-        Mutation(children)
+        Mutation(children, file)
 
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
@@ -1319,20 +1327,20 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-        print("Целевая функция нового решения после оператора скрещивания равна ", target_function)
+        file.write("Целевая функция нового решения после оператора скрещивания равна " + str(target_function) + '\n')
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
-        BeautifulPrint(x, y, s, a)
+
         # Применяем локальный поиск
-        print("LocalSearch start")
+        file.write("LocalSearch start")
         x, y, s, a, target_function, sizek, iteration = LocalSearch(x, y, s, a, target_function, sizek, iteration)
-        print("Целевая функция нового решения после локального поиска равна ", target_function)
+        file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
 
-        print("Help start")
+        file.write("Help start" + '\n')
         x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration)
-        print("Целевая функция нового решения после оператора хелп ", target_function)
+        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
         minimumHelp = min(minimumHelp, target_function)
         maximumHelp = max(maximumHelp, target_function)
 
@@ -1340,12 +1348,12 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
         # Ищем самое большое решение по целевой функции
         maximum = max(Target_Function)
         i_max = Target_Function.index(maximum)
-        print("Самое плохое решение в популяции ", maximum)
+        file.write("Самое плохое решение в популяции " + str(maximum) + '\n')
 
         # Удаляем какое-нибудь решение
         if maximum >= target_function:
             if scenario_add == 'deleteTheBad':
-                print("Удаляем самое плохое решение в популяции")
+                file.write("Удаляем самое плохое решение в популяции" + '\n')
                 X.pop(i_max)
                 Y.pop(i_max)
                 Sresh.pop(i_max)
@@ -1355,10 +1363,10 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
                 SizeK.pop(i_max)
 
             elif scenario_add == 'deleteTheBadParents':
-                print("Удаляем самого плохого родителя")
+                file.write("Удаляем самого плохого родителя" + '\n')
 
                 if Target_Function[index] <= Target_Function[jndex]:
-                    print("с целевой функцией ", Target_Function[jndex])
+                    file.write("с целевой функцией " + str(Target_Function[jndex]) + '\n')
                     X.pop(jndex)
                     Y.pop(jndex)
                     Sresh.pop(jndex)
@@ -1368,7 +1376,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
                     SizeK.pop(jndex)
 
                 elif Target_Function[index] > Target_Function[jndex]:
-                    print("с целевой функцией ", Target_Function[index])
+                    file.write("с целевой функцией " + str(Target_Function[index]) + '\n')
                     X.pop(index)
                     Y.pop(index)
                     Sresh.pop(index)
@@ -1377,7 +1385,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
                     Sequence.pop(index)
                     SizeK.pop(index)
 
-            print("Добавляем новое решение в конец")
+            file.write("Добавляем новое решение в конец" + '\n')
             X.append(x)
             Y.append(y)
             Sresh.append(s)
@@ -1386,7 +1394,7 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
             Sequence.append(children)
             SizeK.append(sizek)
 
-        print("Число итераций = ", iteration)
+        file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
     SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
@@ -1397,14 +1405,17 @@ def GetNewSolution(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
 
     min_result = min(Target_Function)
     number_solution = Target_Function.count(min(Target_Function))
-    print("Минимальная целевая функция ", min_result, " номер решения ", number_solution)
+    file.write("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
+    print("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
 
     SaveDateResult("Итоговая минимальная целевая функция = " + str(min_result))
     SaveDateResult("Число используемых машин = " + str(AmountCarUsed(Y[number_solution])))
     SaveDateResult("Решение " + str(Sequence[number_solution]))
 
     for n in range(factory.param_population):
-        print(Sequence[n])
+        file.write(str(Sequence[n]) + '\n')
+
+    file.close()
 
 
 def CheckSequence(Sequence):
