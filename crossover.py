@@ -1128,8 +1128,8 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
 
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', '2Opt']#, 'Exchange']
-    oper = random.choice(local_search_oper)
-    oper = 'relocate'
+    # oper = random.choice(local_search_oper)
+    oper = '2Opt'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
@@ -1211,7 +1211,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
 
         # Выбираем по каком сценарию будем брать родителей
-        scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
+        scenario_cross = ['randomAndRandom', 'randomAndBad' ''', 'BestAndRand', 'BestAndBad''']
         scenario = random.choice(scenario_cross)
         file.write("Выбрали сценарий по выбору родителей" + str(scenario) + '\n')
 
@@ -1219,7 +1219,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
         scenario_add = random.choice(scenario_add_new_solution)
         scenario_add = 'deleteTheBad'
-        file.write("Выбрали сценарий по сохранению нового решения" + str(scenario_add) + '\n')
+        file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
         name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
@@ -1271,7 +1271,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
 
         elif scenario == 'BestAndRand':
-            file.write("Пошли по сценарию, один рандомный второй самый лудший" + '\n')
+            file.write("Пошли по сценарию, один рандомный второй самый лучший" + '\n')
             # Индекс первого родителя
             index = random.randint(0, factory.param_population - 1)
             file.write("Номер первого решения " + str(index) + '\n')
@@ -1285,7 +1285,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             file.write(str(Sequence) + '\n')
             file.write("Первое рандомное решение" + '\n')
             file.write(str(Sequence[index]) + '\n')
-            file.write("Второе решение, лудшие из всех" + '\n')
+            file.write("Второе решение, лучшие из всех" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
             children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
@@ -1327,12 +1327,12 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-        file.write("Целевая функция нового решения после оператора скрещивания равна " + str(target_function) + '\n')
+        file.write("Целевая функция нового решения после оператора скрещивания и мутации равна " + str(target_function) + '\n')
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
 
         # Применяем локальный поиск
-        file.write("LocalSearch start")
+        file.write("LocalSearch start\n")
         x, y, s, a, target_function, sizek, iteration = LocalSearch(x, y, s, a, target_function, sizek, iteration)
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)

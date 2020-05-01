@@ -290,9 +290,12 @@ def SearchTheBestSoseda(client):
 # Возвращает рандомного клиента и машину
 def ChooseRandomObjAndCar(y, sizeK):
     # Выбираем рандомную машину
-    car = random.randint(1, (sizeK - 1))
-    while not CarIsWork(y, car):
-        car = random.randint(1, (sizeK - 1))
+    if sizeK > 1:
+        car = random.randint(0, (sizeK-1))
+        while not CarIsWork(y, car):
+            car = random.randint(0, (sizeK-1))
+    else:
+        car = 0
 
     # ЗАпоминаем всех кого она обслуживает
     buf = []
@@ -334,7 +337,7 @@ def SearchSosedLeftOrRight(x, y, client, leftOrRight, k=-1):
 # Работает ли машина
 def CarIsWork(y, k):
     suma = 0
-    for i in range(factory.N):
+    for i in range(1, factory.N):
         if y[i][k] == 1:
             suma += 1
 
@@ -394,10 +397,7 @@ def TimeOfArrival(x, y, s, file):
 
 
 # удаляем клиента из выбранного  маршрут
-def DeleteClientaFromPath(x, y, s, a, client, k=-1):
-    # TODO надо изменить поиск машины
-    if k == -1:
-        k = NumberCarClienta(y, client)  # номер машины которая обслуживает клиента
+def DeleteClientaFromPath(x, y, s, a, client, k):
     clientLeft = SearchSosedLeftOrRight(x, y, client, "left")  # ищем город перед клиентом
     clientRight = SearchSosedLeftOrRight(x, y, client, "right")  # ищем город после клиента
     # если у клиента есть сосед справо и слево

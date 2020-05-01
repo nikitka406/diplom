@@ -2,17 +2,12 @@ from function import *
 
 
 # вклиниваем между
-def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
-    # Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
-    # XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
-    Xl, Yl, Sl, Al = ReadLocalSearchOfFile(sizeK)
-    XR, YR, SR, AR = ReadLocalSearchOfFile(sizeK)
+def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, file):
+    Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
+    XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
 
-    sosedK = NumberCarClienta(Yl, sosed)
-    clientK = NumberCarClienta(Yl, client)
-
-    sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left")  # левый сосед соседа
-    sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right")  # правый сосед соседа
+    sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedK)  # левый сосед соседа
+    sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)  # правый сосед соседа
 
     file.write("sosed_left = " + str(sosedLeft) + '\n')
     file.write("sosed_right = " + str(sosedRight) + '\n')
@@ -32,7 +27,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
         # Чтобы все корректно работало, сначала надо написать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
-        XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client)
+        XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
         XR[sosed][sosedRight][sosedK] = 0
         XR[sosed][client][sosedK] = 1
         XR[client][sosedRight][sosedK] = 1
@@ -59,7 +54,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
         # Чтобы все корректно работало, сначала надонаписать
         # новое время приезда и новое время работы, потом
         # удалить старое решение, и только потом заполнять Х и У
-        Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client)
+        Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
         Xl[sosedLeft][sosed][sosedK] = 0
         Xl[sosedLeft][client][sosedK] = 1
         Xl[client][sosed][sosedK] = 1
@@ -130,85 +125,79 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, sosed, iteration, file):
 
 
 # переставляем клиента к новому соседу, локальный поиск
-# def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
-def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start, iteration):
-    file = open("log/relog.txt", 'w')
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
+    file = open("log/relog.txt", 'a')
     file.write("->Relocate start" + '\n')
 
-    # SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
-    SaveLocalSearch(X, Y, Sresh, A, sizeK_start)
+    SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
     TargetFunction = target_function_start
     SizeK = sizeK_start
     buf_targ = 0
 
-    # fileflag = 0
+    fileflag = 0
     while TargetFunction != buf_targ:
         buf_targ = TargetFunction
-        # X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
-        X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
+        X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
 
         # Bыбираем клиента
-        client = random.randint(1, (
-                factory.N - 1))  # Берем рандомного клиента -1 потому что иногда может появится 10, а это выход за граници
-        # TODO надо поменять поиск машины
+        client, clientCar = ChooseRandomObjAndCar(Y, SizeK)
         file.write("Переставляем клиентa " + str(client) + '\n')
-        file.write("С машины" + str(NumberCarClienta(Y, client)) + '\n')
+        file.write("С машины " + str(clientCar) + '\n')
 
-        for sosed in range(1, factory.N):
+        for sosedK in range(SizeK):
+            for sosed in range(1, factory.N):
+                if Y[client][sosedK] == 1 and client != sosed:
 
-            if client != sosed:
-                sosedK = NumberCarClienta(Y, sosed)
+                    file.write("К соседу " + str(sosed) + '\n')
+                    file.write("На машине " + str(sosedK) + '\n')
 
-                file.write("К соседу " + str(sosed) + '\n')
-                file.write("На машине " + str(sosedK) + '\n')
+                    x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK, client, clientCar,
+                                                                               sosed, sosedK, iteration, file)
+                    file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
 
-                x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK, client,
-                                                                                      sosed, iteration, file)
-                file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                    file.write("Выбираем минимальное решение" + '\n')
+                    minimum = min(TargetFunction, target_function)
+                    if minimum == target_function:
+                        file.write("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                        file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
-                file.write("Выбираем минимальное решение" + '\n')
-                minimum = min(TargetFunction, target_function)
-                if minimum == target_function:
-                    file.write("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                        SaveLocalSearch(x, y, s, a, sizeK)
+                        TargetFunction = target_function
+                        SizeK = sizeK
+                        fileflag = 1
+                    else:
+                        file.write("Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                        file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
 
-                    SaveLocalSearch(x, y, s, a, sizeK)
-                    TargetFunction = target_function
-                    SizeK = sizeK
-                    # fileflag = 1
-                else:
-                    file.write("Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                    file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
-    #
-    #     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
-    #     target_function_start = CalculationOfObjectiveFunction(x_start, PenaltyFunction(y_start, s_start,
-    #                                                                                     a_start, iteration))
-    #     file.write(
-    #         "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
-    #
-    #     if fileflag == 1:
-    #         x, y, s, a = ReadLocalSearchOfFile(SizeK)
-    #         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-    #         file.write(
-    #             "Целевая функция последнего минимального переставления = " + str(
-    #                 target_function) + '\n')
-    #         fileflag = 0
-    #     else:
-    #         target_function = -1
-    #
-    #     minimum2 = min(target_function_start, target_function)
-    #     if minimum2 == target_function and target_function != -1:
-    #         file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-    #         file.write("Новая целевая функция равна " + str(target_function) + '\n')
-    #
-    #         SaveStartLocalSearch(x, y, s, a, SizeK)
-    #         target_function_start = target_function
-    #         TargetFunction = target_function
-    #         sizeK_start = SizeK
-    #     else:
-    #         file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-    #         file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-    # file.write("While stop\n")
+        x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+        target_function_start = CalculationOfObjectiveFunction(x_start, PenaltyFunction(y_start, s_start,
+                                                                                        a_start, iteration))
+        file.write(
+            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+        if fileflag == 1:
+            x, y, s, a = ReadLocalSearchOfFile(SizeK)
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            file.write(
+                "Целевая функция последнего минимального переставления = " + str(
+                    target_function) + '\n')
+            fileflag = 0
+        else:
+            target_function = -1
+
+        minimum2 = min(target_function_start, target_function)
+        if minimum2 == target_function and target_function != -1:
+            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+            SaveStartLocalSearch(x, y, s, a, SizeK)
+            target_function_start = target_function
+            TargetFunction = target_function
+            sizeK_start = SizeK
+        else:
+            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+    file.write("While stop\n")
 
     # x_start, y_start, s_start, a_start = ReadLocalSearchOfFile(SizeK)
     # file.write("Локальный оптимум найден сохраняем в популяцию решение" + '\n')
@@ -218,13 +207,12 @@ def Relocate(X, Y, Sresh, A, target_function_start, sizeK_start, iteration):
     #             file.write(str(X[i][j][k]) + ' ')
     #         file.write("\n")
     #     file.write("\n")
-    X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
+    # X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
 
     file.write("<-Relocate stop" + '\n')
     file.close()
 
-    # return x_start, y_start, s_start, a_start, TargetFunction, sizeK_start
-    return X, Y, Sresh, A, TargetFunction, SizeK# , iteration
+    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start
 
 
 def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1Car, client2, client2Car, iteration,
@@ -528,7 +516,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                            "старое решение" + '\n')
                                                 file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
                                             file.write('\n')
-
+# TODO надо понять почему если сделал хуже он возвращет
                         Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
                         target_function_start = CalculationOfObjectiveFunction(Xstart, PenaltyFunction(Ystart, Sstart,
                                                                                                        Astart,
@@ -593,7 +581,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
         if flag == 'last':
             file.write("    Забрали с объекта все скважины, и эта оказаласть последняя, "
                        "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
-            X, Y, Sresh, A = DeleteClientaFromPath(X, Y, Sresh, A, client)
+            X, Y, Sresh, A = DeleteClientaFromPath(X, Y, Sresh, A, client, clientCar)
 
         A = TimeOfArrival(X, Y, Sresh, file)
 
@@ -655,7 +643,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             if flag == 'last':
                 file.write("    Забрали с объекта все скважины, и эта оказаласть последняя, "
                            "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
-                XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client)
+                XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientCar)
 
             XR[sosed][client][sosedCar] = 1
             if client != sosedRight:
@@ -686,7 +674,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             if flag == 'last':
                 file.write("    Забрали с объекта все скважины, и эта оказаласть последняя, "
                            "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
-                Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client)
+                Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientCar)
 
             Xl[sosedLeft][sosed][sosedCar] = 0
             if sosedLeft != client:
