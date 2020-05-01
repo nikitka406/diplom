@@ -506,6 +506,309 @@ def CountObjInCar(y, car):
     return count
 
 
+# Поиск хвоста
+def SearchTail(x, client, clientCar, file):
+    file.write("    SearchTail start: ->\n")
+    sequence = GettingTheSequence(x)
+    file.write("        Ищем хвост для маршрута\n")
+    file.write("        " + str(sequence[clientCar]) + "\n начиная с объекта " + str(client) + '\n')
+    tail = []
+    start = sequence[clientCar].index(client)
+    for i in range(start, len(sequence[clientCar])):
+        if sequence[clientCar][i] != 0:
+            tail.append(sequence[clientCar][i])
+        else:
+            break
+    file.write("        Хвост = " + str(tail) + '\n')
+    file.write("    SearchTail stop: <-\n")
+    return tail
+
+
+# Сохраняем время работы
+def SaveTime(s, tail, car, file):
+    file.write("    SaveTime start: ->")
+    time = []
+    for i in range(len(tail)):
+        index = tail[i]
+        time.append(s[index][car])
+    file.write("        Время работы на каждом объекте хвоста = \n")
+    file.write("        " + str(time) + '\n')
+    file.write("    SaveTime stop: <-\n")
+    return time
+
+
+# Удаление хвоста
+def DeleteTail(x, y, s, a, sosed, tail, car, file):
+    file.write("    DeleteTail start: ->")
+    sos = sosed
+    for i in range(len(tail)):
+        x[sos][tail[i]][car] = 0
+        sos = tail[i]
+        y[tail[i]][car] = 0
+        s[tail[i]][car] = 0
+        a[tail[i]][car] = 0
+    file.write("    DeleteTail stop: <-")
+    return x, y, s, a
+
+''' Функции для кроссоверов'''
+
+
+# Создание последовательности для каждого решения
+def CreateSequence(X):
+    # Создаем спсиок, в которой будем хранить последовательности для каждогоо решения
+    sequenceX1 = [0 for n in range(factory.param_population)]
+    sequenceX2 = [0 for n in range(factory.param_population)]
+
+    for m in range(factory.param_population):
+        # Интерпритируем матрицу Х на двумерный массив
+        sequenceX2[m] = GettingTheSequence(X[m])
+        sequenceX1[m] = TransferX2toX1(sequenceX2[m], X[m])
+        # print(sequenceX1[m], "\n")
+    print("Матрица Х из популяция решений преобразованна в последовательность посещений для каждого решения")
+    return sequenceX1
+
+
+# преобразование матрицы Х в последовательность посещения городов,
+# bul - порядок посещения
+# i-откуда мы сейчас будем уезжать
+# k-номер машины
+def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
+    for j in range(factory.N):
+        if x[i][j][k] == 1:
+            bul += 1
+            bufer[k][bul] = j
+            if j != 0:
+                XDisplayInTheSequenceX2(x, bufer, j, k, bul)
+
+
+# Подсчитывает число используемых машин в последовательности
+def CountUsedMachines(sequence):
+    return sequence.count([0, 0]) - 1
+
+
+# Выставляем сколько работает каждая машина на локации after
+def WorkTimeCounting(sequence, y, s, after):
+    local_count = sum(y[after])
+    # print("На локации ", after, " работает ", local_count, " машин")
+
+    # Считаем сколько хватит каждому скважин
+    div = factory.wells[after] // local_count
+    if div > 0:
+        # print("Присваиваем каждой машине, которая работает на локации ", after, " ", div, "кол-во скважин")
+        for k in range(len(s[0])):
+            if y[after][k] == 1:
+                s[after][k] = div * (factory.S[after] / factory.wells[after])
+
+        div = factory.wells[after] % local_count
+        if div == 0:
+            print("Свободных скважин не осталось, мы все распределили")
+
+        else:
+            # print("Но у нас еще осталось ", div, " свободных скважин")
+            # print("Создадим массив, в котором будут номера машин которые обслуживают этот город. Он равен ")
+
+            k = 0
+            car_for_after = []
+            for i in range(1, len(sequence)):
+                if sequence[i][0] == 0 and sequence[i][0] == sequence[-1][0]:
+                    k += 1
+                elif sequence[i][0] != 0 and sequence[i][0] == after:
+                    car_for_after.append(k)
+
+            print(car_for_after)
+
+            # print("Распределяем рандомным клиентам оставшиеся скважины")
+            while div > 0:
+                car = random.choice(car_for_after)
+                # print("Назначаем машине с номером ", car, " еще одну скважину")
+                s[after][car] += factory.S[after] / factory.wells[after]
+                car_for_after.remove(car)
+                # print("Осталось распределить ", div, " скважин по ")
+                # print(car_for_after, " клиентам")
+                div -= 1
+
+    else:
+        print("ERROR from WorkTimeCounting: Почему-то оказалось скважин меньше чем приехавших машин")
+
+
+# Находим время прибытия к after
+def ArrivalTime(a, s, before, after, k):
+    # print("Считаем время прибытия на локацию")
+    time = a[before][k] + s[before][k] + factory.t[before][after]
+
+    # print("Дерективный срок = ", factory.e[after])
+    # print("Фактическое время прибытия = ", time)
+    if factory.e[after] >= time:
+        # print("Приехали слишком рано ждем начало временного окна")
+        return factory.e[after]
+
+    elif factory.e[after] < time:
+        # print("Опоздали на начало работ")
+        return time
+
+
+# Преобразуем последовательность в матрицы решений
+def SequenceDisplayInTheXYSA(sequence):
+    print("Переделываем последовательность в матрицы решений")
+
+    count_car = CountUsedMachines(sequence)
+    print("Количество машин используемых ребенком = ", count_car)
+
+    x = [[[0 for k in range(count_car)] for j in range(factory.N)] for i in
+         range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    y = [[0 for k in range(count_car)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(count_car):
+        y[0][k] = 1
+    s = [[0 for k in range(count_car)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    a = [[0 for k in range(count_car)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
+    k = 0
+    # print("Теперь перейдем к заполнению матрицы Х У")
+    for i in range(1, len(sequence)):
+        before = sequence[i - 1][0]
+        after = sequence[i][0]
+        # print("Предыдущий посещенный ", before)
+        # print("Которого вставляем ", after)
+
+        if sequence[i][0] == 0:
+            x[before][after][k] = 1
+            y[after][k] = 1
+
+            k += 1
+            # print("Увидели 0, значит переходим к следующей машине с номером ", k)
+            if k == count_car:
+                # print("Кол-во используемых авто ", count_car)
+                break
+        else:
+            x[before][after][k] = 1
+            y[after][k] = 1
+
+    k = 0
+    # print("Теперь заполним А и S")
+    for i in range(1, len(sequence)):
+        before = sequence[i - 1][0]
+        after = sequence[i][0]
+        # print("Предыдущий посещенный ", before)
+        # print("Которого вставляем ", after)
+
+        if after == 0:
+            a[after][k] = a[before][k] + factory.t[before][after]
+            k += 1
+            # print("Увидели 0, значит переходим к следующей машине с номером ", k)
+            if k == count_car:
+                # print("Кол-во используемых авто ", count_car)
+                break
+
+        if after != 0:
+            try:
+                if sequence.index([after, 0], 0, i) > 0:
+                    print("Уже считали для этого ", after, " города")
+
+            except ValueError:
+                # print("До этого еще не встречали город ", after)
+                WorkTimeCounting(sequence, y, s, after)
+
+            a[after][k] = ArrivalTime(a, s, before, after, k)
+
+    return x, y, s, a, count_car
+
+
+# Получаем двумерную последовательность вида
+# 0 3 0 0 0 0 0 0 0 0
+#
+# 0 5 0 0 0 0 0 0 0 0
+#
+# 0 7 1 0 0 0 0 0 0 0
+#
+# 0 2 6 4 8 0 0 0 0 0
+#
+# 0 9 0 0 0 0 0 0 0 0
+# Заебись, работает!!!
+def GettingTheSequence(X):
+    # factory.N+1 потому что последовательность может посещать все города и при этом возвращается в 0
+    sequenceX2 = [[0 for i in range(factory.N + 1)] for j in range(len(X[0][0]))]
+    for k in range(len(X[0][0])):
+        XDisplayInTheSequenceX2(X, sequenceX2, 0, k, 0)
+    return sequenceX2
+
+
+# Добавление еще одной ячейки к последовательности
+# Заебись, работает!!!
+def AddOneCell(sequenceX1):
+    bufer = [[0 for j in range(2)] for i in range(len(sequenceX1))]
+    # ячейка означает, что из этого конкретного города на этой машине нельзя ехать в следующий
+    for i in range(len(sequenceX1)):
+        bufer[i][0] = sequenceX1[i]
+    return bufer
+
+
+# Переделываем двумерную в одномерную, вида 014856047852098704850
+# Заебись, работает!!!
+def TransferX2toX1(sequenceX2, X):
+    sequenceX1 = [0]
+    for k in range(len(X[0][0])):
+        for i in range(1, factory.N - 1):
+            # случай когда находишься на цифре и следующая цифра
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
+                sequenceX1.append(sequenceX2[k][i])
+            # случай когда находишься на цифре и следующий ноль
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] == 0:
+                sequenceX1.append(sequenceX2[k][i])
+            # случай когда находишься на нуле и предыдущая цифра
+            if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
+                sequenceX1.append(sequenceX2[k][i])
+    # ДОбавляем еще одну ячейку к каждому элементу последовательности
+    sequenceX1 = AddOneCell(sequenceX1)
+    return sequenceX1
+
+
+# номер посещения клиента
+def NumberClientaInSequence(bufer, client):
+    for i in range(len(bufer)):
+        if bufer[i][0] == client:
+            return i
+    print("ERROR for NumberClientaInSequence: Не нашел номер посещения клиента в последовательности")
+
+
+# выбираю другое ребро но из начала c таким же номером
+# вроде тоже все заебись!!!!
+def AnotherEdgeWithTheSameBeginning(bufer_in, new_start, flag, countOfRaces):
+    for i in range(len(bufer_in)):
+        # bufer_in[i][0] == new_start нашли кокой-то выезд из такого же города
+        # bufer_in[i][1.txt] == 0 мы из него еще не выезжали
+        # flag[ bufer_in[i][0] ] == 0 в этом маршруте еще не посещали
+        # countOfRaces[bufer_in[i][0]] > 0 есть свободные скважины
+        if bufer_in[i][0] == new_start and bufer_in[i][1] == 0 and flag[
+            bufer_in[i + 1][0]] == 0 and countOfRaces[bufer_in[i + 1][0]] > 0:
+            return i
+    return -1
+
+
+# Создаем массив у каких локаций остались свободные скважины
+def RandNotVisitClient(countOfRaces, flag):
+    # массив для не посещенных городов
+    count_not_visit = []
+
+    for i in range(len(countOfRaces)):
+        # если у кого-то клиента есть свободные скважины,
+        if countOfRaces[i] != 0 and flag[i] == 0:
+            # то сохраняем номер этого клиента
+            count_not_visit.append(i)
+
+    print("Of RandNotVisitClient: создали массив, у каких клиентов остались свободные скважины")
+    print(count_not_visit)
+
+    try:
+        # берем рандомного из списка не посещенных
+        i = random.choice(count_not_visit)
+        print("Взяли рандомного из этого списка равного ", i)
+        return i
+
+    except IndexError:
+        print("Больше нет клиентов с свободными скважинами")
+        return -1
+
+
 # Граничные условия
 def X_join_Y(x, y, file='def'):
     bufer1 = 0
