@@ -1128,7 +1128,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', '2Opt']#, 'Exchange']
     # oper = random.choice(local_search_oper)
-    oper = '2Opt'
+    oper = 'relocate'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
@@ -1210,9 +1210,10 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
 
         # Выбираем по каком сценарию будем брать родителей
-        scenario_cross = ['randomAndRandom', 'randomAndBad' ''', 'BestAndRand', 'BestAndBad''']
+        scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        file.write("Выбрали сценарий по выбору родителей" + str(scenario) + '\n')
+        scenario = 'randomAndRandom'
+        file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
@@ -1338,7 +1339,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         maximumLocal = max(maximumLocal, target_function)
 
         file.write("Help start" + '\n')
-        x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration)
+        x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration-1)
         file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
         minimumHelp = min(minimumHelp, target_function)
         maximumHelp = max(maximumHelp, target_function)

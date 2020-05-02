@@ -187,6 +187,14 @@ def OneCarOneLocation():
     return x, y, s, a
 
 
+# номер машины которая обслуживает клиента
+def NumberCarClienta(y, client):
+    # TODO Берет первую попавшуюся машину которая обслуживает, это не правильно!!
+    for k in range(len(y[0])):
+        if y[client][k] == 1:
+            return k
+
+
 # удаляем машину с локации если позволяют огр
 def DeleteCarNonNarushOgr(sizeK):
     # Убираем одну машину
@@ -608,7 +616,7 @@ def WorkTimeCounting(sequence, y, s, after):
                 elif sequence[i][0] != 0 and sequence[i][0] == after:
                     car_for_after.append(k)
 
-            print(car_for_after)
+            # print(car_for_after)
 
             # print("Распределяем рандомным клиентам оставшиеся скважины")
             while div > 0:

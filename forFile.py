@@ -3,7 +3,7 @@ import factory
 
 # Сохраняем решение в файл
 def SaveDateResult(date1):
-    file = open('output/Result.txt', 'a')
+    file = open('log/Result.txt', 'a')
     file.write(date1 + '\n')
     file.close()
 
@@ -278,7 +278,7 @@ def ReadHelpOfFile(sizeK):
     file = open('output/Help.txt', 'r')
     # прочитали весь файл, получился список из строк файла
     line = file.readlines()
-    print(line)
+    # print(line)
 
     index = 0
     # Печатаем в файл Х
@@ -289,7 +289,7 @@ def ReadHelpOfFile(sizeK):
             for k in range(sizeK):
                 local_x[i][j][k] = int(local_x[i][j][k])
             index += 1
-            print(index)
+            # print(index)
 
     # Печатаем в файл Y
     for i in range(factory.N):

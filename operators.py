@@ -19,115 +19,121 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
 
     # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
     # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-    try:
-        file.write("Вставляем клиента к соседу справа" + '\n')
-        # машина соседа будет работать у клиента столько же
-        SR[client][sosedK] += SR[client][clientK]
+    if sosedRight != -1:
+        try:
+            file.write("Вставляем клиента к соседу справа" + '\n')
+            # машина соседа будет работать у клиента столько же
+            SR[client][sosedK] += SR[client][clientK]
 
-        # Чтобы все корректно работало, сначала надо написать
-        # новое время приезда и новое время работы, потом
-        # удалить старое решение, и только потом заполнять Х и У
-        XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
-        XR[sosed][sosedRight][sosedK] = 0
-        XR[sosed][client][sosedK] = 1
-        XR[client][sosedRight][sosedK] = 1
-        YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
+            # Чтобы все корректно работало, сначала надо написать
+            # новое время приезда и новое время работы, потом
+            # удалить старое решение, и только потом заполнять Х и У
+            XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
+            XR[sosed][sosedRight][sosedK] = 0
+            XR[sosed][client][sosedK] = 1
+            XR[client][sosedRight][sosedK] = 1
+            YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
-        # Подсчет времени приезда к клиенту от соседа
-        AR = TimeOfArrival(XR, YR, SR, file)
+            # Подсчет времени приезда к клиенту от соседа
+            AR = TimeOfArrival(XR, YR, SR, file)
 
-    except IOError:
-        file.write("Объект не удален" + '\n')
-        XR[sosed][sosedRight][sosedK] = 1
-        XR[sosed][client][sosedK] = 0
-        XR[client][sosedRight][sosedK] = 0
-        YR[client][sosedK] = 0  # тепреь машина соседа обслуживает клиента
+        except IOError:
+            file.write("Объект не удален" + '\n')
+            XR[sosed][sosedRight][sosedK] = 1
+            XR[sosed][client][sosedK] = 0
+            XR[client][sosedRight][sosedK] = 0
+            YR[client][sosedK] = 0  # тепреь машина соседа обслуживает клиента
 
-        # Подсчет времени приезда к клиенту от соседа
-        AR = TimeOfArrival(XR, YR, SR, file)
+            # Подсчет времени приезда к клиенту от соседа
+            AR = TimeOfArrival(XR, YR, SR, file)
+    if sosedLeft != -1:
+        try:
+            file.write("Вставляем клиента к соседу слева" + '\n')
+            # машина соседа будет работать у клиента столько же
+            Sl[client][sosedK] += Sl[client][clientK]
 
-    try:
-        file.write("Вставляем клиента к соседу слева" + '\n')
-        # машина соседа будет работать у клиента столько же
-        Sl[client][sosedK] += Sl[client][clientK]
+            # Чтобы все корректно работало, сначала надонаписать
+            # новое время приезда и новое время работы, потом
+            # удалить старое решение, и только потом заполнять Х и У
+            Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
+            Xl[sosedLeft][sosed][sosedK] = 0
+            Xl[sosedLeft][client][sosedK] = 1
+            Xl[client][sosed][sosedK] = 1
+            Yl[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
 
-        # Чтобы все корректно работало, сначала надонаписать
-        # новое время приезда и новое время работы, потом
-        # удалить старое решение, и только потом заполнять Х и У
-        Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
-        Xl[sosedLeft][sosed][sosedK] = 0
-        Xl[sosedLeft][client][sosedK] = 1
-        Xl[client][sosed][sosedK] = 1
-        Yl[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+            # Подсчет времени приезда к клиенту от соседа
+            Al = TimeOfArrival(Xl, Yl, Sl, file)
 
-        # Подсчет времени приезда к клиенту от соседа
-        Al = TimeOfArrival(Xl, Yl, Sl, file)
+        except IOError:
+            file.write("Объект не удален" + '\n')
+            Xl[sosedLeft][sosed][sosedK] = 1
+            Xl[sosedLeft][client][sosedK] = 0
+            Xl[client][sosed][sosedK] = 0
+            Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
 
-    except IOError:
-        file.write("Объект не удален" + '\n')
-        Xl[sosedLeft][sosed][sosedK] = 1
-        Xl[sosedLeft][client][sosedK] = 0
-        Xl[client][sosed][sosedK] = 0
-        Yl[client][sosedK] = 0  # теперь машина соседа обслуживает клиента
+            # Подсчет времени приезда к клиенту от соседа
+            Al = TimeOfArrival(Xl, Yl, Sl, file)
 
-        # Подсчет времени приезда к клиенту от соседа
-        Al = TimeOfArrival(Xl, Yl, Sl, file)
-
-    file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого" + '\n')
-    if window_time_up(Al, Sl, Yl, file) == 0:
-        if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true", file) == 1:
-            file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
+    if sosedLeft != -1 and sosedRight != -1:
+        file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого" + '\n')
+        if window_time_up(Al, Sl, Yl, file) == 0:
+            if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true", file) == 1:
+                file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
+                targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
+                file.write("Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
+            else:
+                targetL = -1
+                file.write(
+                    "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
+        elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "false", file) == 1:
+            file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
             targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
             file.write("Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
         else:
             targetL = -1
-            file.write(
-                "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-    elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "false", file) == 1:
-        file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
-        targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
-        file.write("Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
-    else:
-        targetL = -1
-        file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
+            file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
 
-    file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для правого" + '\n')
-    if window_time_up(AR, SR, YR, file) == 0:
-        if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true", file) == 1:
-            file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
+        file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для правого" + '\n')
+        if window_time_up(AR, SR, YR, file) == 0:
+            if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true", file) == 1:
+                file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
+                targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
+                file.write("Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
+            else:
+                targetR = -1
+                file.write(
+                    "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
+        elif VerificationOfBoundaryConditions(XR, YR, SR, AR, "false", file) == 1:
+            file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
             targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
             file.write("Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
         else:
             targetR = -1
-            file.write(
-                "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-    elif VerificationOfBoundaryConditions(XR, YR, SR, AR, "false", file) == 1:
-        file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
-        targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
-        file.write("Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
-    else:
-        targetR = -1
-        file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
+            file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
 
-    file.write("Теперь ищем минимум из двух целевых" + '\n')
-    minimum = min(targetL, targetR)
-    if minimum == targetL and minimum != -1:
-        file.write("Выбрали левого у него целевая меньше" + '\n')
-        return Xl, Yl, Sl, Al, targetL, sizeK
+        file.write("Теперь ищем минимум из двух целевых" + '\n')
+        minimum = min(targetL, targetR)
+        if minimum == targetL and minimum != -1:
+            file.write("Выбрали левого у него целевая меньше" + '\n')
+            return Xl, Yl, Sl, Al, targetL, sizeK
 
-    elif minimum == targetR and minimum != -1 and targetR != targetL:
-        file.write("Выбрали правого у него целевая меньше" + '\n')
-        return XR, YR, SR, AR, targetR, sizeK
+        elif minimum == targetR and minimum != -1 and targetR != targetL:
+            file.write("Выбрали правого у него целевая меньше" + '\n')
+            return XR, YR, SR, AR, targetR, sizeK
 
-    else:
-        file.write("Все пошло по пизде ничего не сохранили" + '\n')
-        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+        else:
+            file.write("Все пошло по пизде ничего не сохранили" + '\n')
+            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+
+    file.write("По какой-то причине нет соседей" + '\n')
+    return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
 
 # переставляем клиента к новому соседу, локальный поиск
 def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
     file = open("log/relog.txt", 'a')
     file.write("->Relocate start" + '\n')
+    file.write("Целевая функция до применения Relocate = " + str(target_function_start) + '\n')
 
     SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
     TargetFunction = target_function_start
@@ -146,7 +152,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
         for sosedK in range(SizeK):
             for sosed in range(1, factory.N):
-                if Y[client][sosedK] == 1 and client != sosed:
+                if Y[sosed][sosedK] == 1 and client != sosed and clientCar != sosedK:
 
                     file.write("К соседу " + str(sosed) + '\n')
                     file.write("На машине " + str(sosedK) + '\n')
@@ -198,16 +204,6 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
             file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
             file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
     file.write("While stop\n")
-
-    # x_start, y_start, s_start, a_start = ReadLocalSearchOfFile(SizeK)
-    # file.write("Локальный оптимум найден сохраняем в популяцию решение" + '\n')
-    # for k in range(SizeK):
-    #     for i in range(factory.N):
-    #         for j in range(factory.N):
-    #             file.write(str(X[i][j][k]) + ' ')
-    #         file.write("\n")
-    #     file.write("\n")
-    # X, Y, Sresh, A = ReadLocalSearchOfFile(SizeK)
 
     file.write("<-Relocate stop" + '\n')
     file.close()
@@ -442,10 +438,11 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
 
 # Возможность приезжать нескольким машинам на одну локацию
 def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
-    file = open("log/helog.txt", 'w')
+    file = open("log/helog.txt", 'a')
     file.write("Help start: ->" + '\n')
-
+#TODO если есть свободная машина, то тдавать ей скважины
     SaveStartHelp(Xstart, Ystart, Sstart, Astart, sizeK_start)
+    file.write("Целевая функция до применения оператора хелп = " + str(target_function_start) + "\n")
 
     file.write("Начинаем поиск объектов, которые в маршруте не успевают закончить работу\n")
     fileflag = 0
@@ -501,6 +498,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                                             file.write(
                                                 "Выбираем минимальное решение из стартового и измененного" + '\n')
+                                            file.write("Последняя целевая функция = " + str(TargetFunction)+ '\n')
                                             minimum1 = min(TargetFunction, target_function)
                                             if minimum1 == target_function:
                                                 file.write(
@@ -511,6 +509,9 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                 TargetFunction = target_function
                                                 SizeK = sizeK
                                                 fileflag = 1
+                                                sequence2 = GettingTheSequence(X)
+                                                sequence1 = TransferX2toX1(sequence2, X)
+                                                file.write("Новое решение " + str(sequence1) + '\n')
                                             else:
                                                 file.write("Новое перемещение, хуже чем то что было, возвращаем наше "
                                                            "старое решение" + '\n')
@@ -545,7 +546,6 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                         else:
                             file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
                             file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-                            return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start
 
     file.write("По максимуму постарались поделиться скважинами" + '\n')
     Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
@@ -678,6 +678,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
 
             Xl[sosedLeft][sosed][sosedCar] = 0
             if sosedLeft != client:
+                file.write("    Сосед слева не равен клиенту\n")
                 Xl[sosedLeft][client][sosedCar] = 1
             Xl[client][sosed][sosedCar] = 1
             Yl[client][sosedCar] = 1  # теперь машина соседа обслуживает клиента
