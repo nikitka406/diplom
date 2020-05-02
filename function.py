@@ -551,6 +551,43 @@ def DeleteTail(x, y, s, a, sosed, tail, car, file):
     file.write("    DeleteTail stop: <-\n")
     return x, y, s, a
 
+
+# Подбрасываем монетку, берем эту окрестность или нет
+def ResultCoins():
+    return random.choice(factory.coins)
+
+
+# Проверка ограничений и подсчет целевой
+def Cheker(X, Y, Sresh, A, SizeK, iteration, file):
+    file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ" + '\n')
+    if window_time_up(A, Sresh, Y, file) == 0:
+        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
+            file.write("    NOTIFICATION from Two_Opt: вставили с нарушением временного окна" + '\n')
+            Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
+            file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
+            file.write("OperatorJoinFromTwoOpt stop: <-\n")
+            return X, Y, Sresh, A, Target_Function, SizeK
+        else:
+            file.write(
+                "   ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
+                "стартовое" + '\n')
+            file.write("OperatorJoinFromTwoOpt stop: <-\n")
+            return x, y, s, a, target_function, SizeK
+
+    elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
+        file.write("    NOTIFICATION from Two_Opt: вставили без нарушений ограничений" + '\n')
+        Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
+        file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
+        file.write("OperatorJoinFromTwoOpt stop: <-\n")
+        return X, Y, Sresh, A, Target_Function, SizeK
+    else:
+        file.write("ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
+                   "стартовое" + '\n')
+        file.write("OperatorJoinFromTwoOpt stop: <-\n")
+        return x, y, s, a, target_function, sizeK
+
+
+
 ''' Функции для кроссоверов'''
 
 
