@@ -86,41 +86,15 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
 
         if sosedLeft != -1 and sosedRight != -1:
-            file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого" + '\n')
-            if window_time_up(Al, Sl, Yl, file) == 0:
-                if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true", file) == 1:
-                    file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
-                    targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
-                    file.write("Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
-                else:
-                    targetL = -1
-                    file.write(
-                        "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-            elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "false", file) == 1:
-                file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
-                targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
-                file.write("Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
-            else:
+            try:
+                Xl, Yl, Sl, Al, targetL, sizeK = Checker(Xl, Yl, Sl, Al, sizeK, iteration, "Relocate", file)
+            except TypeError:
                 targetL = -1
-                file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
 
-            file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для правого" + '\n')
-            if window_time_up(AR, SR, YR, file) == 0:
-                if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true", file) == 1:
-                    file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
-                    targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
-                    file.write("Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
-                else:
-                    targetR = -1
-                    file.write(
-                        "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-            elif VerificationOfBoundaryConditions(XR, YR, SR, AR, "false", file) == 1:
-                file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
-                targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
-                file.write("Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
-            else:
+            try:
+                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, sizeK, iteration, "Relocate", file)
+            except TypeError:
                 targetR = -1
-                file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
 
             file.write("Теперь ищем минимум из двух целевых" + '\n')
             minimum = min(targetL, targetR)
@@ -152,24 +126,12 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
             Sresh[sosed][sosedK] -= factory.S[client] / factory.wells[client]
             Sresh[client][clientK] += factory.S[client] / factory.wells[client]
 
-        file.write("СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого" + '\n')
-        if window_time_up(A, Sresh, Y, file) == 0:
-            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
-                file.write("NOTIFICATION from Relocate: вставили с нарушением временного окна" + '\n')
-                target = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-                file.write("Подсчет целевой функции для левого вставления " + str(target) + '\n')
-                return X, Y, Sresh, A, target, sizeK
-            else:
-                file.write(
-                    "ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-                return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
-        elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
-            file.write("NOTIFICATION from Relocate: вставили без нарушений ограничений" + '\n')
-            target = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-            file.write("Подсчет целевой функции для левого вставления " + str(target) + '\n')
-            return X, Y, Sresh, A, target, sizeK
-        else:
-            file.write("ERROR from Relocate: не получилось переставить, что-то пошло нет" + '\n')
+        try:
+            X, Y, Sresh, A, target, SizeK = Checker(X, Y, Sresh, A, sizeK, iteration, "Two_Opt", file)
+            file.write("OperatorJoinFromReloc stop: <-\n")
+            return X, Y, Sresh, A, target, SizeK
+        except TypeError:
+            file.write("OperatorJoinFromReloc stop: <-\n")
             return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
     file.write("Что-то пошло не так" + '\n')
@@ -372,30 +334,11 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
 
         A = TimeOfArrival(X, Y, Sresh, file)
 
-    file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ" + '\n')
-    if window_time_up(A, Sresh, Y, file) == 0:
-        if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
-            file.write("    NOTIFICATION from Two_Opt: вставили с нарушением временного окна" + '\n')
-            Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-            file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
-            file.write("OperatorJoinFromTwoOpt stop: <-\n")
-            return X, Y, Sresh, A, Target_Function, SizeK
-        else:
-            file.write(
-                "   ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
-                "стартовое" + '\n')
-            file.write("OperatorJoinFromTwoOpt stop: <-\n")
-            return x, y, s, a, target_function, sizeK
-
-    elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
-        file.write("    NOTIFICATION from Two_Opt: вставили без нарушений ограничений" + '\n')
-        Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-        file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
+    try:
+        X, Y, Sresh, A, Target_Function, SizeK = Checker(X, Y, Sresh, A, SizeK, iteration, "Two_Opt", file)
         file.write("OperatorJoinFromTwoOpt stop: <-\n")
         return X, Y, Sresh, A, Target_Function, SizeK
-    else:
-        file.write("ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
-                   "стартовое" + '\n')
+    except TypeError:
         file.write("OperatorJoinFromTwoOpt stop: <-\n")
         return x, y, s, a, target_function, sizeK
 
@@ -427,39 +370,38 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                     file.write("С машины " + str(client1Car) + '\n')
 
                     for client2Car in range(SizeK):
-                        if client2Car != client1Car:
-                            for client2 in range(1, factory.N):
-                                if Y[client2][client2Car] == 1:
+                        for client2 in range(1, factory.N):
+                            if Y[client2][client2Car] == 1:
+                                file.write(
+                                    "У маршрутов " + str(client1Car) + " " + str(
+                                        client2Car) + " меняем хвосты\nНачиная с "
+                                                      "объектов " + str(
+                                        client1) + " и " + str(client2) + " соответствено\n")
+
+                                x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A, SizeK,
+                                                                                            TargetFunction, client1,
+                                                                                            client1Car,
+                                                                                            client2, client2Car,
+                                                                                            iteration,
+                                                                                            file)
+                                file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+
+                                file.write("Выбираем минимальное решение" + '\n')
+                                file.write("Последняя минимальная целевая = " + str(TargetFunction) + '\n')
+                                file.write("Новая целевая = " + str(target_function) + '\n')
+                                minimum = min(TargetFunction, target_function)
+                                if minimum == target_function:
                                     file.write(
-                                        "У маршрутов " + str(client1Car) + " " + str(
-                                            client2Car) + " меняем хвосты\nНачиная с "
-                                                          "объектов " + str(
-                                            client1) + " и " + str(client2) + " соответствено\n")
-
-                                    x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A, SizeK,
-                                                                                                TargetFunction, client1,
-                                                                                                client1Car,
-                                                                                                client2, client2Car,
-                                                                                                iteration,
-                                                                                                file)
-                                    file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
-
-                                    file.write("Выбираем минимальное решение" + '\n')
-                                    file.write("Последняя минимальная целевая = " + str(TargetFunction) + '\n')
-                                    file.write("Новая целевая = " + str(target_function) + '\n')
-                                    minimum = min(TargetFunction, target_function)
-                                    if minimum == target_function:
-                                        file.write(
-                                            "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                        file.write("Новая целевая функция равна " + str(target_function) + '\n')
-                                        SaveLocalSearch(x, y, s, a, sizeK)
-                                        TargetFunction = target_function
-                                        SizeK = sizeK
-                                        fileflag = 1
-                                    else:
-                                        file.write(
-                                            "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                                        file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                                        "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                    SaveLocalSearch(x, y, s, a, sizeK)
+                                    TargetFunction = target_function
+                                    SizeK = sizeK
+                                    fileflag = 1
+                                else:
+                                    file.write(
+                                        "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                                    file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
 
         x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
         target_function_start = CalculationOfObjectiveFunction(x_start, PenaltyFunction(y_start, s_start,
@@ -653,28 +595,11 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
 
         A = TimeOfArrival(X, Y, Sresh, file)
 
-        file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ" + '\n')
-        if window_time_up(A, Sresh, Y, file) == 0:
-            if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
-                file.write("    NOTIFICATION from Help: вставили с нарушением временного окна" + '\n')
-                target_function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-                file.write("    Подсчет целевой функции после вставления " + str(target_function) + '\n')
-                file.write("    OperatorJoinFromHelp stop: <-\n")
-                return X, Y, Sresh, A, target_function, sizeK
-            else:
-                file.write(
-                    "   ERROR from Help: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-                file.write("    OperatorJoinFromHelp stop: <-\n")
-                return x, y, s, a, target_function_start, sizeK_start
-
-        elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
-            file.write("    NOTIFICATION from Help: вставили без нарушений ограничений" + '\n')
-            target_function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
-            file.write("    Подсчет целевой функции после вставления " + str(target_function) + '\n')
+        try:
+            X, Y, Sresh, A, target_function, sizeK = Checker(X, Y, Sresh, A, sizeK, iteration, "Help", file)
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return X, Y, Sresh, A, target_function, sizeK
-        else:
-            file.write("    ERROR from Help: не получилось переставить, что-то пошло нет" + '\n')
+        except TypeError:
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return x, y, s, a, target_function_start, sizeK_start
 
@@ -764,41 +689,15 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             # Подсчет времени приезда к клиенту от соседа
             Al = TimeOfArrival(Xl, Yl, Sl, file)
 
-        file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для левого" + '\n')
-        if window_time_up(Al, Sl, Yl, file) == 0:
-            if VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "true", file) == 1:
-                file.write("    NOTIFICATION from Help: вставили с нарушением временного окна" + '\n')
-                targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
-                file.write("    Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
-            else:
-                targetL = -1
-                file.write(
-                    "   ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-        elif VerificationOfBoundaryConditions(Xl, Yl, Sl, Al, "false", file) == 1:
-            file.write("    NOTIFICATION from Help: вставили без нарушений ограничений" + '\n')
-            targetL = CalculationOfObjectiveFunction(Xl, PenaltyFunction(Yl, Sl, Al, iteration))
-            file.write("    Подсчет целевой функции для левого вставления " + str(targetL) + '\n')
-        else:
+        try:
+            Xl, Yl, Sl, Al, targetL, sizeK = Checker(Xl, Yl, Sl, Al, sizeK, iteration, "Relocate", file)
+        except TypeError:
             targetL = -1
-            file.write("    ERROR from Help: не получилось переставить, что-то пошло нет" + '\n')
 
-        file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ для правого" + '\n')
-        if window_time_up(AR, SR, YR, file) == 0:
-            if VerificationOfBoundaryConditions(XR, YR, SR, AR, "true", file) == 1:
-                file.write("    NOTIFICATION from Help: вставили с нарушением временного окна" + '\n')
-                targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
-                file.write("    Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
-            else:
-                targetR = -1
-                file.write(
-                    "   ERROR from Relocate: из-за сломанных вышестоящих ограничений, решение не сохранено" + '\n')
-        elif VerificationOfBoundaryConditions(XR, YR, SR, AR, "false", file) == 1:
-            file.write("    NOTIFICATION from Help: вставили без нарушений ограничений" + '\n')
-            targetR = CalculationOfObjectiveFunction(XR, PenaltyFunction(YR, SR, AR, iteration))
-            file.write("    Подсчет целевой функции для правого вставления " + str(targetR) + '\n')
-        else:
+        try:
+            XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, sizeK, iteration, "Relocate", file)
+        except TypeError:
             targetR = -1
-            file.write("    ERROR from Help: не получилось переставить, что-то пошло нет" + '\n')
 
         file.write("    Теперь ищем минимум из двух целевых" + '\n')
         minimum = min(targetL, targetR)

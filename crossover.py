@@ -1128,7 +1128,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', '2Opt']#, 'Exchange']
     # oper = random.choice(local_search_oper)
-    oper = 'relocate'
+    oper = '2Opt'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':

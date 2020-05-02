@@ -558,34 +558,29 @@ def ResultCoins():
 
 
 # Проверка ограничений и подсчет целевой
-def Cheker(X, Y, Sresh, A, SizeK, iteration, file):
+def Checker(X, Y, Sresh, A, SizeK, iteration, name, file):
     file.write("    СЛЕДУЮЩИЕ ТРИ ERROR УПУСТИТЬ" + '\n')
     if window_time_up(A, Sresh, Y, file) == 0:
         if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
-            file.write("    NOTIFICATION from Two_Opt: вставили с нарушением временного окна" + '\n')
+            file.write("    NOTIFICATION from " + name + ": вставили с нарушением временного окна" + '\n')
             Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
             file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
-            file.write("OperatorJoinFromTwoOpt stop: <-\n")
             return X, Y, Sresh, A, Target_Function, SizeK
         else:
             file.write(
-                "   ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
+                "   ERROR from " + name + ": не получилось переставить, потому что сломались ограничения, возвращаем "
                 "стартовое" + '\n')
-            file.write("OperatorJoinFromTwoOpt stop: <-\n")
-            return x, y, s, a, target_function, SizeK
+            return -1
 
     elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
-        file.write("    NOTIFICATION from Two_Opt: вставили без нарушений ограничений" + '\n')
+        file.write("    NOTIFICATION from " + name + ": вставили без нарушений ограничений" + '\n')
         Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
         file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
-        file.write("OperatorJoinFromTwoOpt stop: <-\n")
         return X, Y, Sresh, A, Target_Function, SizeK
     else:
-        file.write("ERROR from Two_Opt: не получилось переставить, потому что сломались ограничения, возвращаем "
+        file.write("ERROR from " + name + ": не получилось переставить, потому что сломались ограничения, возвращаем "
                    "стартовое" + '\n')
-        file.write("OperatorJoinFromTwoOpt stop: <-\n")
-        return x, y, s, a, target_function, sizeK
-
+        return -1
 
 
 ''' Функции для кроссоверов'''
