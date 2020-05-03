@@ -129,7 +129,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
             Sresh[client][clientK] += factory.S[client] / factory.wells[client]
 
         try:
-            X, Y, Sresh, A, target, SizeK = Checker(X, Y, Sresh, A, sizeK, iteration, "Two_Opt", file)
+            X, Y, Sresh, A, target, SizeK = Checker(X, Y, Sresh, A, sizeK, iteration, "Relocate", file)
             file.write("OperatorJoinFromReloc stop: <-\n")
             return X, Y, Sresh, A, target, SizeK
         except TypeError:
@@ -140,18 +140,16 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
     return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
 
-def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1Car, client2, client2Car, iteration,
-                           file):
+def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1Car, tail1, client2, client2Car, tail2,
+                           iteration, file):
     file.write("OperatorJoinFromTwoOpt start: ->" + '\n')
     SizeK = sizeK
     X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
 
     if client1Car != client2Car:
 
-        tail1 = SearchTail(X, client1, client1Car, file)
         time1 = SaveTime(Sresh, tail1, client1Car, file)
 
-        tail2 = SearchTail(X, client2, client2Car, file)
         time2 = SaveTime(Sresh, tail2, client2Car, file)
 
         sosed1 = SearchSosedLeftOrRight(X, Y, client1, "left", client1Car)
@@ -257,10 +255,8 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
 
     elif client1Car == client2Car:
 
-        tail1 = SearchTail(X, client1, client1Car, file)
         time1 = SaveTime(Sresh, tail1, client1Car, file)
 
-        tail2 = SearchTail(X, client2, client2Car, file)
         time2 = SaveTime(Sresh, tail2, client2Car, file)
 
         sosed1 = SearchSosedLeftOrRight(X, Y, client1, "left", client1Car)
@@ -322,6 +318,8 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
     file.write("OperatorJoinFromHelp start: ->\n")
     sizeK = sizeK_start
 
+    sequenceX2 = GettingTheSequence(x)
+
     file.write("    Проверяем на равенство клиента и соседа\n")
     if client == sosed:
         file.write("    Равны\n")
@@ -347,7 +345,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return x, y, s, a, target_function_start, sizeK_start
 
-    if not IsContainWells(y, client, sosedCar):
+    elif not IsContainWells(sequenceX2[sosedCar], client):
         file.write("    Не равны\n")
         Xl, Yl, Sl, Al = ReadStartHelpOfFile(sizeK)
         XR, YR, SR, AR = ReadStartHelpOfFile(sizeK)

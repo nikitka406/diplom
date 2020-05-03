@@ -120,45 +120,60 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
         # client, clientCar = ChooseRandomObjAndCar(Y, SizeK)
         for client1Car in range(SizeK):
             for client1 in range(1, factory.N):
-                coins = ResultCoins()
-                if Y[client1][client1Car] == 1 and coins == 1:
-                    file.write("Монетка сказала что рассматриваем эту окрестность coins = " + str(coins) + '\n')
+                if Y[client1][client1Car] == 1:
                     file.write("Переставляем от клиентa " + str(client1) + '\n')
                     file.write("С машины " + str(client1Car) + '\n')
+
+                    tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
 
                     for client2Car in range(SizeK):
                         for client2 in range(1, factory.N):
                             if Y[client2][client2Car] == 1:
-                                file.write(
-                                    "У маршрутов " + str(client1Car) + " " + str(
-                                        client2Car) + " меняем хвосты\nНачиная с "
-                                                      "объектов " + str(
-                                        client1) + " и " + str(client2) + " соответствено\n")
+                                tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
-                                x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A, SizeK,
-                                                                                            TargetFunction, client1,
-                                                                                            client1Car,
-                                                                                            client2, client2Car,
-                                                                                            iteration,
-                                                                                            file)
-                                file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                                if not IsContainTailInStart(sequenceX2[client1Car], tail2, client1) and not \
+                                        IsContainTailInStart(sequenceX2[client2Car], tail1, client2):
 
-                                file.write("Выбираем минимальное решение" + '\n')
-                                file.write("Последняя минимальная целевая = " + str(TargetFunction) + '\n')
-                                file.write("Новая целевая = " + str(target_function) + '\n')
-                                minimum = min(TargetFunction, target_function)
-                                if minimum == target_function:
+                                    coins = ResultCoins()
                                     file.write(
-                                        "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
-                                    SaveLocalSearch(x, y, s, a, sizeK)
-                                    TargetFunction = target_function
-                                    SizeK = sizeK
-                                    fileflag = 1
+                                        "Монетка сказала что рассматриваем эту окрестность coins = " + str(
+                                            coins) + '\n')
+                                    if coins == 1:
+                                        file.write(
+                                            "У маршрутов " + str(client1Car) + " " + str(
+                                                client2Car) + " меняем хвосты\nНачиная с "
+                                                              "объектов " + str(
+                                                client1) + " и " + str(client2) + " соответствено\n")
+
+                                        x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A,
+                                                                                                    SizeK,
+                                                                                                    TargetFunction,
+                                                                                                    client1,
+                                                                                                    client1Car, tail1,
+                                                                                                    client2, client2Car,
+                                                                                                    tail2,
+                                                                                                    iteration,
+                                                                                                    file)
+                                        file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+
+                                        file.write("Выбираем минимальное решение" + '\n')
+                                        file.write("Последняя минимальная целевая = " + str(TargetFunction) + '\n')
+                                        file.write("Новая целевая = " + str(target_function) + '\n')
+                                        minimum = min(TargetFunction, target_function)
+                                        if minimum == target_function:
+                                            file.write(
+                                                "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                            SaveLocalSearch(x, y, s, a, sizeK)
+                                            TargetFunction = target_function
+                                            SizeK = sizeK
+                                            fileflag = 1
+                                        else:
+                                            file.write(
+                                                "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                                            file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
                                 else:
-                                    file.write(
-                                        "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                                    file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                                    file.write("Это решение мусор, такое не смотрим\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -319,7 +334,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
     return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start
 
 
-def Swap(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
+# def Swap(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
 
 # Cоздаем популяцию решений
 def PopulationOfSolutions(Target_Function, SizeSolution, iteration):

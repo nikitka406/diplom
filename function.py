@@ -461,10 +461,22 @@ def SolutionStore(target_start, sizeK):
     return X, Y, Sresh, A, Target_Function, SizeSolution
 
 
+# Проверка на содержание хвоста в новом начале
+def IsContainTailInStart(sequence, tail, place):
+    for i in range(len(tail)):
+        if IsContainWells(sequence, tail[i], place):
+            return True
+    return False
+
+
 # Проверка на содержание скважин тех же объектов car у soseda
-def IsContainWells(y, client, sosedCar):
-    for i in range(1, factory.N):
-        if y[i][sosedCar] == 1 and i == client:
+def IsContainWells(sequence, client, place='all'):
+    if place == 'all':
+        size = len(sequence)
+    else:
+        size = sequence.index(place)
+    for i in range(size):
+        if sequence[i] == client:
             return True
     return False
 
@@ -497,10 +509,10 @@ def CountObjInCar(y, car):
 
 # Поиск хвоста
 def SearchTail(x, client, clientCar, file):
-    file.write("    SearchTail start: ->\n")
+    file.write("SearchTail start: ->\n")
     sequence = GettingTheSequence(x)
-    file.write("        Ищем хвост для маршрута\n")
-    file.write("        " + str(sequence[clientCar]) + "\n      начиная с объекта " + str(client) + '\n')
+    file.write("Ищем хвост для маршрута\n")
+    file.write(str(sequence[clientCar]) + "\nначиная с объекта " + str(client) + '\n')
     tail = []
     start = sequence[clientCar].index(client)
     for i in range(start, len(sequence[clientCar])):
@@ -509,9 +521,9 @@ def SearchTail(x, client, clientCar, file):
         else:
             break
     tail.append(0)
-    file.write("        Хвост = " + str(tail) + '\n')
-    file.write("    SearchTail stop: <-\n")
-    return tail
+    file.write("Хвост = " + str(tail) + '\n')
+    file.write("SearchTail stop: <-\n")
+    return tail, sequence
 
 
 # Сохраняем время работы
