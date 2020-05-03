@@ -40,7 +40,8 @@ SaveStartSolution(x, y, s, a)
 X, Y, Sresh, A, Target_Function, Size_Solution = SolutionStore(target_function, len(y[0]))
 
 # Cоздаем популяцию решений
-PopulationOfSolutions(Target_Function, Size_Solution, iteration)
+timeLocal = [[0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help;
+timeLocal = PopulationOfSolutions(Target_Function, Size_Solution, iteration, timeLocal)
 
 # Считываем популяцию из файла
 ReadSolutionPopulationOnFile(X, Y, Sresh, A)
@@ -49,6 +50,8 @@ print("Минимальная целевая функция в популяци�
 print("Максимальная целевая функция в популяции = ", max(Target_Function))
 SaveDateResult("Минимальная целевая функция в популяции = " + str(min(Target_Function)))
 SaveDateResult("Максимальная целевая функция в популяции = " + str(max(Target_Function)))
+SaveDateResult("Среднее время работы Relocate в популяции = " + str(timeLocal[0][0] / timeLocal[0][1]))
+SaveDateResult("Среднее время работы Help в популяции = " + str(timeLocal[2][0] / timeLocal[2][1]))
 
 # Создаем последовательность решения
 Sequence = CreateSequence(X)

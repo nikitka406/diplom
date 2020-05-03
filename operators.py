@@ -3,10 +3,11 @@ import time
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
     file = open("log/relog.txt", 'a')
 
     start = time.time()
+    timeLocal[1] += 1
 
     file.write("->Relocate start" + '\n')
     file.write("Целевая функция до применения Relocate = " + str(target_function_start) + '\n')
@@ -89,18 +90,20 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
 
     Time = time.time() - start
+    timeLocal[0] += Time
     file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
 
     file.write("<-Relocate stop" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start
+    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
 
-def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration):
+def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
     file = open("log/twooptlog.txt", 'a')
 
     start = time.time()
+    timeLocal[1] += 1
 
     file.write("Two_Opt start: ->" + '\n')
     file.write("Целевая функция до применения Two_Opt = " + str(target_function_start) + '\n')
@@ -205,19 +208,21 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
 
     Time = time.time() - start
+    timeLocal[0] += Time
     file.write("Время работы Two_Opt = " + str(Time) + 'seconds\n')
 
     file.write("Two_Opt stop: <-" + '\n')
     file.close()
 
-    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start
+    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
 
 # Возможность приезжать нескольким машинам на одну локацию
-def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
+def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration, timeLocal):
     file = open("log/helog.txt", 'a')
 
     start = time.time()
+    timeLocal[1] += 1
 
     file.write("Help start: ->" + '\n')
     SaveStartHelp(Xstart, Ystart, Sstart, Astart, sizeK_start)
@@ -326,18 +331,19 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
     Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
 
     Time = time.time() - start
+    timeLocal[0] += Time
     file.write("Время работы Help = " + str(Time) + 'seconds\n')
 
     file.write("<-Help stop" + '\n')
     file.close()
 
-    return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start
+    return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
 
 
 # def Swap(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
 
 # Cоздаем популяцию решений
-def PopulationOfSolutions(Target_Function, SizeSolution, iteration):
+def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
     for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
         # Берем стартовое решение из файла, потому что какой-то пиздюк его испортил
 
@@ -348,11 +354,16 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration):
         X, Y, Sresh, A = ReadStartSolutionOfFile(SizeSolution[n])
 
         if oper == 'reloc':
-            x, y, s, a, Target_Function[n], SizeSolution[n] = Relocate(X, Y, Sresh, A, Target_Function[n],
-                                                                       SizeSolution[n], iteration)
+            x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
+                                                                                     SizeSolution[n], iteration,
+                                                                                     timeLocal[0])
+            # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[2] = Help(x, y, s, a, Target_Function[n], SizeSolution[n], iteration,
+            #                                                         timeLocal[2])
+
         elif oper == '2-Opt':
-            x, y, s, a, Target_Function[n], SizeSolution[n] = Two_Opt(X, Y, Sresh, A, Target_Function[n],
-                                                                      SizeSolution[n], iteration)
+            x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[1] = Two_Opt(X, Y, Sresh, A, Target_Function[n],
+                                                                                    SizeSolution[n], iteration,
+                                                                                    timeLocal[1])
 
         print("\nРешение номер", n, "построено")
         print("_____________________________")
@@ -361,3 +372,4 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration):
     # iteration += 1
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
+    return timeLocal

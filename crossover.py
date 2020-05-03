@@ -795,8 +795,12 @@ def SelectFirstObj(flagAll):
 
 
 # кроссовер AEX
-def AEX(sequence1, sequence2):
+def AEX(sequence1, sequence2, timeCros):
     file = open("log/aexlog.txt", 'a')
+
+    start = time.time()
+    timeCros[1] += 1
+
     file.write("AEX start: ->" + '\n')
     print("Скрещивание решений усуществляется с помощью оператора АЕХ" + '\n')
     # первый индекс это номер машины, второй это последовательность
@@ -1006,12 +1010,20 @@ def AEX(sequence1, sequence2):
     print("children = " + str(children) + '\n')
     print(
         "______________________________________________________________________________________________________" + '\n')
+
+    Time = time.time() - start
+    timeCros[0] += Time
+    file.write("Время работы AEX = " + str(Time) + 'seconds\n')
+
+    file.write("<-AEX stop" + '\n')
     file.close()
-    return children
+
+    file.close()
+    return children, timeCros
 
 
 # кроссовер HGreX
-def HGreX(sequence1, sequence2):
+def HGreX(sequence1, sequence2, aex=0, countOper=0):
     children = [[0, 0]]
     numberInCar = 0
     flag = [0 for i in range(factory.N)]
@@ -1091,37 +1103,37 @@ def HGreX(sequence1, sequence2):
 
 
 # Оператор HRndX
-def HRndX(sequence1, sequence2):
+def HRndX(sequence1, sequence2, aex=0, countOper=0):
     return
 
 
 # Оператор HProX
-def HProX(sequence1, sequence2):
+def HProX(sequence1, sequence2, aex=0, countOper=0):
     return
 
 
 # Функция вызывает выбранный оператор
-def UsedOperators(sequence1, sequence2, operator):
+def UsedCrossovers(sequence1, sequence2, operator, timeCros):
     print("Запускаем оператор ", operator)
     if operator == 'AEX':
-        children = AEX(sequence1, sequence2)
-        return children
+        children, timeCros[0] = AEX(sequence1, sequence2, timeCros[0])
+        return children, timeCros
 
     elif operator == 'HGreX':
-        return HGreX(sequence1, sequence2)
+        return HGreX(sequence1, sequence2, timeCros[1])
 
     elif operator == 'HRndX':
-        return HRndX(sequence1, sequence2)
+        return HRndX(sequence1, sequence2, timeCros[2])
 
     elif operator == 'HProX':
-        return HProX(sequence1, sequence2)
+        return HProX(sequence1, sequence2, timeCros[3])
 
     else:
-        print("ERROR from UsedOperators: название такого оператора нет")
+        print("ERROR from UsedCrossovers: название такого оператора нет")
 
 
 # Локальный поиск (локально меняем решение)
-def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
+def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
@@ -1131,14 +1143,14 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
-        x, y, s, a, target_function, sizeK = Relocate(x, y, s, a, target_function, sizeK, iteration)
+        x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration, timeLocal[0])
         iteration += 1
-        return x, y, s, a, target_function, sizeK, iteration
+        return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == '2Opt':
-        x, y, s, a, target_function, sizeK = Two_Opt(x, y, s, a, target_function, sizeK, iteration)
+        x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration, timeLocal[1])
         iteration += 1
-        return x, y, s, a, target_function, sizeK, iteration
+        return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == 'Exchange':
         print("")
@@ -1204,6 +1216,16 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
     maximumLocal = Target_Function[0]
     minimumHelp = Target_Function[0]
     maximumHelp = Target_Function[0]
+    timeCros = [[0, 0], [0, 0], [0, 0], [0, 0]]  # 0- AEX; 1- HGreX; 2- HRndX; 3- HProX
+    timeLocal = [[0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help;
+    # aex = 0
+    # countAex = 0
+    # hgrex = 0
+    # countHgrex = 0
+    # hrndx = 0
+    # countHrndx = 0
+    # hprox = 0
+    # countHprox = 0
 
     for crossing in range(factory.param_crossing):
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
@@ -1247,7 +1269,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             file.write("Второе рандомное решение" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
         elif scenario == 'randomAndBad':
             file.write("Пошли по сценарию, один рандомный второй самый худший" + '\n')
@@ -1267,7 +1289,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             file.write("Второе решение, худшие из всех" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
         elif scenario == 'BestAndRand':
             file.write("Пошли по сценарию, один рандомный второй самый лучший" + '\n')
@@ -1287,7 +1309,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             file.write("Второе решение, лучшие из всех" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
         elif scenario == 'BestAndBad':
             file.write("Пошли по сценарию, один самый лудший второй самый худший" + '\n')
@@ -1309,7 +1331,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             file.write("Второе решение, худшие из всех" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
-            children = UsedOperators(Sequence[index], Sequence[jndex], crossover)
+            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
         # iteration += 1
 
@@ -1338,13 +1360,15 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
         # Применяем локальный поиск
         file.write("LocalSearch start\n")
-        x, y, s, a, target_function, sizek, iteration = LocalSearch(x, y, s, a, target_function, sizek, iteration)
+        x, y, s, a, target_function, sizek, iteration, timeLocal = LocalSearch(x, y, s, a, target_function, sizek,
+                                                                               iteration, timeLocal)
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
 
         file.write("Help start" + '\n')
-        x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration-1)
+        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration-1,
+                                                                timeLocal[2])
         file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
         minimumHelp = min(minimumHelp, target_function)
         maximumHelp = max(maximumHelp, target_function)
@@ -1407,6 +1431,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
     SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
     SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Число итераций = " + str(iteration))
+    SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0]/timeCros[0][1]))
+    # SaveDateResult("Среднее время работы HGreX = " + str(timeCros[1][0]/timeCros[1][1]))
+    # SaveDateResult("Среднее время работы HRndX = " + str(timeCros[2][0]/timeCros[2][1]))
+    # SaveDateResult("Среднее время работы HProX = " + str(timeCros[3][0]/timeCros[3][1]))
+    SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
+    SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
+    SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
 
     min_result = min(Target_Function)
     number_solution = Target_Function.count(min(Target_Function))
