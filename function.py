@@ -1,9 +1,6 @@
 import random
-import sys
-import factory
 from forFile import *
 from math import *
-import csv
 
 
 # красивая печать
@@ -115,7 +112,7 @@ def AmountCarUsed(lokal_y):
     summa = 0  # счетчик
     amount = 0  # число машин
     for k in range(len(lokal_y[0])):
-        for j in range(factory.N):
+        for j in range(1, factory.N):
             summa += lokal_y[j][k]  # смотрим посещает ли К-ая машина хотя бы один город
         if summa != 0:  # если не 0 значит  посетила
             amount += 1  # прибавляем еденичку
@@ -185,14 +182,6 @@ def OneCarOneLocation():
                 k += 1
             # print("\n")
     return x, y, s, a
-
-
-# номер машины которая обслуживает клиента
-def NumberCarClienta(y, client):
-    # TODO Берет первую попавшуюся машину которая обслуживает, это не правильно!!
-    for k in range(len(y[0])):
-        if y[client][k] == 1:
-            return k
 
 
 # удаляем машину с локации если позволяют огр
@@ -539,7 +528,7 @@ def SaveTime(s, tail, car, file):
 
 
 # Удаление хвоста
-def DeleteTail(x, y, s, a, sosed, tail, car, file):
+def DeleteTail(x, y, s, a, sosed, tail, car,  file, tail0="def"):
     file.write("    DeleteTail start: ->\n")
     sos = sosed
     for i in range(len(tail)):
@@ -548,6 +537,10 @@ def DeleteTail(x, y, s, a, sosed, tail, car, file):
         y[tail[i]][car] = 0
         s[tail[i]][car] = 0
         a[tail[i]][car] = 0
+
+    if tail0 != 'def':
+        x[tail[-1]][tail0][car] = 0
+
     file.write("    DeleteTail stop: <-\n")
     return x, y, s, a
 
@@ -685,15 +678,18 @@ def SequenceDisplayInTheXYSA(sequence):
     # print("Переделываем последовательность в матрицы решений")
 
     count_car = CountUsedMachines(sequence)
-    # print("Количество машин используемых ребенком = ", count_car)
+    print("Количество машин используемых ребенком = ", count_car)
+    count_carBig = count_car
+    if count_car < factory.K:
+        count_carBig = factory.K
 
-    x = [[[0 for k in range(count_car)] for j in range(factory.N)] for i in
+    x = [[[0 for k in range(count_carBig)] for j in range(factory.N)] for i in
          range(factory.N)]  # едет или нет ТС с номером К из города I в J
-    y = [[0 for k in range(count_car)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    y = [[0 for k in range(count_carBig)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
     for k in range(count_car):
         y[0][k] = 1
-    s = [[0 for k in range(count_car)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
-    a = [[0 for k in range(count_car)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+    s = [[0 for k in range(count_carBig)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    a = [[0 for k in range(count_carBig)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
 
     k = 0
     # print("Теперь перейдем к заполнению матрицы Х У")

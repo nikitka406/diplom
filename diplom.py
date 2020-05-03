@@ -1,8 +1,5 @@
-from function import *
-import factory
 from crossover import *
 from operators import *
-import time
 
 start = time.time()
 
@@ -27,7 +24,7 @@ SaveStartSolution(x, y, s, a)
 # Освобождаем машины если позволяют гран усл
 DeleteCarNonNarushOgr(len(y[0]))
 x, y, s, a = ReadStartSolutionOfFile(len(y[0]))
-
+# TODO надо удалить не нужные машинки
 # Проверяем что ничего не сломалось
 target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1

@@ -1,5 +1,4 @@
 from operators import *
-import random
 
 
 # рекурсивный поиск для скрещивания
@@ -1127,8 +1126,8 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration):
 
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', '2Opt']#, 'Exchange']
-    # oper = random.choice(local_search_oper)
-    oper = '2Opt'
+    oper = random.choice(local_search_oper)
+    # oper = '2Opt'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
@@ -1330,6 +1329,12 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Целевая функция нового решения после оператора скрещивания и мутации равна " + str(target_function) + '\n')
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
+
+        # file.write("Help start" + '\n')
+        # x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration)
+        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+        # minimumHelp = min(minimumHelp, target_function)
+        # maximumHelp = max(maximumHelp, target_function)
 
         # Применяем локальный поиск
         file.write("LocalSearch start\n")
