@@ -313,8 +313,8 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
             return x, y, s, a, target_function, sizeK
 
 
-def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sosedCar, target_function_start, iteration,
-                         flag, file):
+def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sosedCar, timeWork, target_function_start,
+                         iteration, flag, file):
     file.write("OperatorJoinFromHelp start: ->\n")
     sizeK = sizeK_start
 
@@ -326,12 +326,12 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
         X, Y, Sresh, A = ReadStartHelpOfFile(sizeK)
 
         file.write("    Время работы до забирания скважины " + str(Sresh[client][clientCar]) + "\n")
-        Sresh[client][clientCar] -= factory.S[client] / factory.wells[client]
+        Sresh[client][clientCar] -= timeWork
         file.write("    Время работы после забирания скважины " + str(Sresh[client][clientCar]) + "\n")
 
-        Sresh[sosed][sosedCar] += factory.S[client] / factory.wells[client]
+        Sresh[sosed][sosedCar] += timeWork
         if flag == 'last':
-            file.write("    Забрали с объекта все скважины, и эта оказаласть последняя, "
+            file.write("    Забрали с объекта все скважины, и эта оказаласть последняя,\n"
                        "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
             X, Y, Sresh, A = DeleteClientaFromPath(X, Y, Sresh, A, client, clientCar)
 
@@ -352,8 +352,8 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
 
         file.write("    Время работы до забирания скважины " + str(Sl[client][clientCar]) + "\n")
         file.write("    Забираем проебанную скважину\n")
-        Sl[client][clientCar] -= factory.S[client] / factory.wells[client]
-        SR[client][clientCar] -= factory.S[client] / factory.wells[client]
+        Sl[client][clientCar] -= timeWork
+        SR[client][clientCar] -= timeWork
         file.write("    Время работы после забирания скважины " + str(Sl[client][clientCar]) + "\n")
 
         sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedCar)  # левый сосед соседа
@@ -373,7 +373,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             try:
                 file.write("    Вставляем скважину к соседу справа" + '\n')
                 # машина соседа будет работать у клиента столько же
-                SR[client][sosedCar] += factory.S[client] / factory.wells[client]
+                SR[client][sosedCar] += timeWork
 
                 # на случай если мы в итоге все скважины забрали, и эта была последняя
                 if flag == 'last':
@@ -412,7 +412,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             try:
                 file.write("    Вставляем клиента к соседу слева" + '\n')
                 # машина соседа будет работать у клиента столько же
-                Sl[client][sosedCar] += factory.S[client] / factory.wells[client]
+                Sl[client][sosedCar] += timeWork
 
                 # на случай если мы в итоге все скважины забрали, и эта была последняя
                 if flag == 'last':
@@ -450,7 +450,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             try:
                 file.write("    Вставляем скважину в новый маршрут" + '\n')
                 # машина соседа будет работать у клиента столько же
-                SR[client][sosedCar] += factory.S[client] / factory.wells[client]
+                SR[client][sosedCar] += timeWork
 
                 # на случай если мы в итоге все скважины забрали, и эта была последняя
                 if flag == 'last':

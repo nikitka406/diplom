@@ -492,9 +492,13 @@ def GetObjForCar(y, car):
 
 # Возвращает число скважин которые не уложились во временное окно
 def CountWellsWithFane(s, a, i, k):
+    # Если приехали во временное окно
     if factory.e[i] <= a[i][k] <= factory.l[i]:
-        return ceil((a[i][k] + s[i][k] - factory.l[i]) / 2)
+        # мах на случай если уложились
+        return max(0, ceil((a[i][k] + s[i][k] - factory.l[i]) / 2))
+    # Если приехали позже окончания работ
     else:
+        # Возвращаем число скважин конкретно на этом объекте этой машиной
         return int(s[i][k] / (factory.S[i] / factory.wells[i]))
 
 

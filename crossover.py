@@ -1139,7 +1139,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', '2Opt']#, 'Exchange']
     oper = random.choice(local_search_oper)
-    # oper = '2Opt'
+    oper = 'relocate'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
@@ -1233,13 +1233,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'randomAndRandom'
+        scenario = 'BestAndRand'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
         scenario_add_new_solution = ['deleteTheBad', 'deleteTheBadParents']
         scenario_add = random.choice(scenario_add_new_solution)
-        scenario_add = 'deleteTheBad'
+        # scenario_add = 'deleteTheBad'
         file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
@@ -1352,11 +1352,11 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
 
-        # file.write("Help start" + '\n')
-        # x, y, s, a, target_function, sizek = Help(x, y, s, a, target_function, sizek, iteration)
-        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        # minimumHelp = min(minimumHelp, target_function)
-        # maximumHelp = max(maximumHelp, target_function)
+        file.write("Help start" + '\n')
+        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
+        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+        minimumHelp = min(minimumHelp, target_function)
+        maximumHelp = max(maximumHelp, target_function)
 
         # Применяем локальный поиск
         file.write("LocalSearch start\n")
@@ -1365,13 +1365,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
-
-        file.write("Help start" + '\n')
-        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration-1,
-                                                                timeLocal[2])
-        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        minimumHelp = min(minimumHelp, target_function)
-        maximumHelp = max(maximumHelp, target_function)
+        #
+        # file.write("Help start" + '\n')
+        # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration-1,
+        #                                                         timeLocal[2])
+        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+        # minimumHelp = min(minimumHelp, target_function)
+        # maximumHelp = max(maximumHelp, target_function)
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции
@@ -1426,17 +1426,17 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
-    SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
-    SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
     SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
     SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
+    SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
+    SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
     SaveDateResult("Число итераций = " + str(iteration))
     SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0]/timeCros[0][1]))
     # SaveDateResult("Среднее время работы HGreX = " + str(timeCros[1][0]/timeCros[1][1]))
     # SaveDateResult("Среднее время работы HRndX = " + str(timeCros[2][0]/timeCros[2][1]))
     # SaveDateResult("Среднее время работы HProX = " + str(timeCros[3][0]/timeCros[3][1]))
     SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
-    SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
+    # SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
     SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
 
     min_result = min(Target_Function)
