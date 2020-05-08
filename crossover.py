@@ -543,6 +543,7 @@ def RandomClientWithWells(countOfRaces):
 # ЗАебись!!!
 def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces, children, flag, numberInCar, file):
     file.write("SearchForAnUnvisitedZero start: ->\n")
+    # TODO надо просмотреть
     # #Сначала проверим есть ли те которых мне не посетили ни разу
     # if sum(flagAll) <= factory.N:
     #
@@ -1144,12 +1145,12 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Используем оператор ", oper)
     if oper == 'relocate':
         x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration, timeLocal[0])
-        iteration += 1
+        # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == '2Opt':
         x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration, timeLocal[1])
-        iteration += 1
+        # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == 'Exchange':
@@ -1158,48 +1159,54 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
 
 # Мутация
 def Mutation(sequence, file):
-    file.write("____________________________________________________________________________________________________\n")
-    file.write("Начилась мутация\n")
-    count_car = CountUsedMachines(sequence)
-    file.write("Число используемых машин = " + str(count_car) + "\n")
+    # TODO пересмотеть реализацию
+    if ResultCoins(factory.coinsMut):
+        file.write(
+            "____________________________________________________________________________________________________\n")
+        file.write("Начилась мутация\n")
+        count_car = CountUsedMachines(sequence)
+        file.write("Число используемых машин = " + str(count_car) + "\n")
 
-    buf_random = []
-    k = 0
-    # print("Последовательность до мутации ")
-    # print(sequence)
-    for i in range(1, len(sequence)):
-        if sequence[i][0] != 0:
-            # print("Составляем массив какие клиенты обслуживаются этим маршрутом, сейчас добавляем ", sequence[i][0])
-            buf_random.append(sequence[i][0])
-        elif sequence[i][0] == 0 and len(buf_random) > 1:
+        buf_random = []
+        k = 0
+        # print("Последовательность до мутации ")
+        # print(sequence)
+        for i in range(1, len(sequence)):
+            if sequence[i][0] != 0:
+                buf_random.append(sequence[i][0])
+            elif sequence[i][0] == 0 and len(buf_random) > 1:
 
-            # print("Полученный массив ", buf_random)
-            obj1 = int(random.choice(buf_random))
-            # print("Берем рандомного клиента ", obj1)
-            buf_random.remove(obj1)
-            obj2 = int(random.choice(buf_random))
-            # print("Берем рандомного клиента ", obj2)
+                # print("Полученный массив ", buf_random)
+                obj1 = int(random.choice(buf_random))
+                # print("Берем рандомного клиента ", obj1)
+                buf_random.remove(obj1)
+                obj2 = int(random.choice(buf_random))
+                # print("Берем рандомного клиента ", obj2)
+                buf_random.remove(obj2)
 
-            index1 = sequence.index([obj1, 0], k)
-            # print("Их места в последовательности ", index1)
-            index2 = sequence.index([obj2, 0], k)
-            # print("Их места в последовательности ", index2)
+                index1 = sequence.index([obj1, 0], k)
+                # print("Их места в последовательности ", index1)
+                index2 = sequence.index([obj2, 0], k)
+                # print("Их места в последовательности ", index2)
 
-            sequence[index1][0] = obj2
-            sequence[index2][0] = obj1
-            # print("Получившаяся последовательность")
-            # print(sequence)
+                sequence[index1][0] = obj2
+                sequence[index2][0] = obj1
+                # print("Получившаяся последовательность")
+                # print(sequence)
 
-            buf_random = []
-            k = i
+                buf_random = []
+                k = i
 
-        elif sequence[i][0] == 0 and len(buf_random) == 1:
-            # print("Машина обслуживает только одного клиента, никого никуда не переставляем")
-            buf_random = []
-            k = i
+            elif sequence[i][0] == 0 and len(buf_random) == 1:
+                # print("Машина обслуживает только одного клиента, никого никуда не переставляем")
+                buf_random = []
+                k = i
 
-    file.write("Итоговая, измененая последовательность = \n")
-    file.write(str(sequence) + '\n')
+        file.write("Итоговая, измененая последовательность = \n")
+        file.write(str(sequence) + '\n')
+        return sequence
+    else:
+        return sequence
 
 
 # Функция которая позволяет родить ребенка (скрестить два решения)
@@ -1217,15 +1224,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
     minimumHelp = Target_Function[0]
     maximumHelp = Target_Function[0]
     timeCros = [[0, 0], [0, 0], [0, 0], [0, 0]]  # 0- AEX; 1- HGreX; 2- HRndX; 3- HProX
-    timeLocal = [[0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help;
-    # aex = 0
-    # countAex = 0
-    # hgrex = 0
-    # countHgrex = 0
-    # hrndx = 0
-    # countHrndx = 0
-    # hprox = 0
-    # countHprox = 0
+    timeLocal = [[0, 0], [0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help 3- Exchange;
 
     for crossing in range(factory.param_crossing):
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
@@ -1233,7 +1232,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'BestAndRand'
+        scenario = 'randomAndRandom'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -1333,14 +1332,12 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
-        # iteration += 1
-
         # У ребенка в конце может не быть нуля
         if children[-1] != [0, 0]:
             children.append([0, 0])
         file.write("children = " + str(children) + '\n')
         # Применяем мутацию
-        Mutation(children, file)
+        children = Mutation(children, file)
 
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
@@ -1352,11 +1349,11 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
 
-        file.write("Help start" + '\n')
-        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
-        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        minimumHelp = min(minimumHelp, target_function)
-        maximumHelp = max(maximumHelp, target_function)
+        # file.write("Help start" + '\n')
+        # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
+        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+        # minimumHelp = min(minimumHelp, target_function)
+        # maximumHelp = max(maximumHelp, target_function)
 
         # Применяем локальный поиск
         file.write("LocalSearch start\n")
@@ -1365,13 +1362,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
-        #
-        # file.write("Help start" + '\n')
-        # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration-1,
-        #                                                         timeLocal[2])
-        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        # minimumHelp = min(minimumHelp, target_function)
-        # maximumHelp = max(maximumHelp, target_function)
+
+        file.write("Help start" + '\n')
+        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration-1,
+                                                                timeLocal[2])
+        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+        minimumHelp = min(minimumHelp, target_function)
+        maximumHelp = max(maximumHelp, target_function)
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции

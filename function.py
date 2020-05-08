@@ -428,7 +428,7 @@ def PenaltyFunction(y, s, a, iteration):
 
     # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
     if AmountCarUsed(y) > factory.K:
-        fine = (AmountCarUsed(y) - factory.K) * factory.car_cost * iteration
+        fine = max(0, (AmountCarUsed(y) - factory.K) * factory.car_cost * iteration)
 
     return penalty_sum + fine
 
@@ -462,23 +462,38 @@ def SolutionStore(target_start, sizeK):
 
 
 # Проверка на содержание хвоста в новом начале
-def IsContainTailInStart(sequence, tail, place):
+def IsContainTailInStart(sequence, tail, place1):
     for i in range(len(tail)):
-        if IsContainWells(sequence, tail[i], place):
+        if IsContainWells(sequence, tail[i], place1, "start"):
+            return True
+    return False
+
+
+def IsContainTailInEnd(sequence, tail, place1):
+    for i in range(len(tail)):
+        if IsContainWells(sequence, tail[i], place1, "end"):
             return True
     return False
 
 
 # Проверка на содержание скважин тех же объектов car у soseda
-def IsContainWells(sequence, client, place='all'):
-    if place == 'all':
-        size = len(sequence)
-    else:
-        size = sequence.index(place)
-    for i in range(size):
-        if sequence[i] == client:
-            return True
-    return False
+def IsContainWells(sequence, client, place='all', flag='start'):
+    if flag == 'start':
+        if place == 'all':
+            size = len(sequence)
+        else:
+            size = sequence.index(place)
+        for i in range(size):
+            if sequence[i] == client:
+                return True
+        return False
+
+    elif flag == 'end':
+        start = sequence.index(place)
+        for i in range(start, len(sequence)):
+            if sequence[i] == client:
+                return True
+        return False
 
 
 # Возвращает номер объекта который обслуживает конкретная машина
@@ -562,8 +577,12 @@ def DeleteTail(x, y, s, a, sosed, tail, car,  file, tail0="def"):
 
 
 # Подбрасываем монетку, берем эту окрестность или нет
-def ResultCoins():
-    return random.choice(factory.coins)
+def ResultCoins(monetochka=factory.coinsLS):
+    coins = random.choice(monetochka)
+    if coins == 1:
+        return True
+    else:
+        return False
 
 
 # Проверка ограничений и подсчет целевой
@@ -590,6 +609,16 @@ def Checker(X, Y, Sresh, A, SizeK, iteration, name, file):
         file.write("ERROR from " + name + ": не получилось переставить, потому что сломались ограничения, возвращаем "
                    "стартовое" + '\n')
         return -1
+
+
+# Добавляем подпоследовательности в маршрут в Exchange
+def AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, car2, time1, start=0):
+    for i in range(start, len(subseq1)):
+        X[subseq2Left][subseq1[i]][car2] = 1
+        Y[subseq1[i]][car2] = 1
+        Sresh[subseq1[i]][car2] = time1[i]
+        subseq2Left = subseq1[i]
+    return X, Y, Sresh
 
 
 ''' Функции для кроссоверов'''

@@ -20,7 +20,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
 
         # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
         # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-        if sosedRight != -1:
+        if sosedRight != -1:  # and factory.t[sosed][client] < factory.l[client]:
             try:
                 file.write("Вставляем клиента к соседу справа" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -53,7 +53,15 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
-        if sosedLeft != -1:
+
+            try:
+                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, sizeK, iteration, "Relocate", file)
+            except TypeError:
+                targetR = -1
+        else:
+            targetR = -1
+
+        if sosedLeft != -1:  # and factory.t[client][sosed] < factory.l[sosed]:
             try:
                 file.write("Вставляем клиента к соседу слева" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -87,16 +95,13 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 # Подсчет времени приезда к клиенту от соседа
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
 
-        if sosedLeft != -1 and sosedRight != -1:
             try:
                 Xl, Yl, Sl, Al, targetL, sizeK = Checker(Xl, Yl, Sl, Al, sizeK, iteration, "Relocate", file)
             except TypeError:
                 targetL = -1
 
-            try:
-                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, sizeK, iteration, "Relocate", file)
-            except TypeError:
-                targetR = -1
+        else:
+            targetL = -1
 
             file.write("Теперь ищем минимум из двух целевых" + '\n')
             minimum = min(targetL, targetR)
@@ -369,7 +374,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
 
         # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
         # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-        if sosedRight != -1:
+        if sosedRight != -1 and sosed != 0:
             try:
                 file.write("    Вставляем скважину к соседу справа" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -408,7 +413,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
         else:
             targetR = -1
 
-        if sosedLeft != -1:
+        if sosedLeft != -1 and sosed != 0:
             try:
                 file.write("    Вставляем клиента к соседу слева" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -446,7 +451,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
         else:
             targetL = -1
 
-        if sosed == 0 and sosedRight == -1:
+        if sosed == 0 and not CarIsWork(YR, sosedCar):
             try:
                 file.write("    Вставляем скважину в новый маршрут" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -508,3 +513,238 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
     file.write("OperatorJoinFromHelp stop: <-\n")
     return x, y, s, a, target_function_start, sizeK_start
 
+
+def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientCar, subseq1,
+                             sosed, sosedCar, subseq2, iteration, file):
+    file.write("->OperatorJoinFromExchange start" + '\n')
+
+    SizeK = sizeK
+    TargetFunction = target_function
+    X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
+
+    subseq1Left = SearchSosedLeftOrRight(X, Y, subseq1[0], "left", clientCar)  # левый сосед клиента
+    subseq1Right = SearchSosedLeftOrRight(X, Y, subseq1[-1], "right", clientCar)  # левый сосед клиента
+    subseq2Left = SearchSosedLeftOrRight(X, Y, subseq2[0], "left", sosedCar)  # правый сосед соседа
+    subseq2Right = SearchSosedLeftOrRight(X, Y, subseq2[-1], "right", sosedCar)  # правый сосед соседа
+
+    file.write("    Слева от последовательности клиента " + str(subseq1Left) + "\n")
+    file.write("    Справа от последовательности клиента " + str(subseq1Right) + "\n")
+    file.write("    Слева от последовательности соседа " + str(subseq2Left) + "\n")
+    file.write("    Справа от последовательности соседа " + str(subseq2Right) + "\n")
+
+    # Сценарий когда какие-нибудь края равны соседям другой последовательности
+    if subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or \
+            subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right:
+        file.write("    Сценарий когда какие-нибудь края равны соседям другой последовательности\n")
+
+        X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, subseq1Left, subseq1, clientCar, file, subseq1Right)
+        time1 = SaveTime(Sresh, subseq1, clientCar, file)
+        X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, subseq2Left, subseq2, sosedCar, file, subseq2Right)
+        time2 = SaveTime(Sresh, subseq2, sosedCar, file)
+
+        if subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left остальные не равны\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[-1] == subseq2Right остальные не равны\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right остальные не равны\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq1[-1] != subseq2Right\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq1[0] != subseq2Left\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Все равны\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq2[-1] == subseq1Right остальные не равны\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    subseq1[-1] == subseq2Rightand subseq2[-1] == subseq1Right остальные не равны\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq2[0] != subseq1Left\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq1[0] == subseq2Left and subseq2[0] == subseq1Left остальные не равны\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    subseq2[0] == subseq1Left and subseq1[-1] == subseq2Right остальные не равны\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] == subseq2Left and subseq1[-1] == subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    Только эти не равны subseq2[-1] != subseq1Right\n")
+
+            Sresh[subseq1[0]][sosedCar] += time1[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 1)
+            Sresh[subseq1[-1]][sosedCar] += time1[-1]
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq2[-1] != subseq1Right\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] == subseq1Left and subseq2[-1] != subseq1Right:
+            file.write("    Только эти не равны subseq2[-1] != subseq1Right\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            Sresh[subseq2[0]][clientCar] += time2[0]
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 1)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        elif subseq1[0] != subseq2Left and subseq1[-1] != subseq2Right and \
+                subseq2[0] != subseq1Left and subseq2[-1] == subseq1Right:
+            file.write("    Только эти не равны subseq2[-1] != subseq1Right\n")
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+
+            X, Y, Sresh = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
+            Sresh[subseq2[-1]][clientCar] += time2[-1]
+
+            A = TimeOfArrival(X, Y, Sresh, file)
+
+        try:
+            X, Y, Sresh, A, Target_Function, SizeK = Checker(X, Y, Sresh, A, SizeK, iteration, "Exchange", file)
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return X, Y, Sresh, A, Target_Function, SizeK
+        except TypeError:
+            file.write("OperatorJoinFromExchange stop: <-\n")
+            return x, y, s, a, target_function, sizeK
+
+    else:
+        file.write("    Сценарий когда никакие края не равны с соседями из другой последовательности\n")

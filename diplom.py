@@ -40,7 +40,7 @@ SaveStartSolution(x, y, s, a)
 X, Y, Sresh, A, Target_Function, Size_Solution = SolutionStore(target_function, len(y[0]))
 
 # Cоздаем популяцию решений
-timeLocal = [[0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help;
+timeLocal = [[0, 0], [0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help; 3- Exchange
 timeLocal = PopulationOfSolutions(Target_Function, Size_Solution, iteration, timeLocal)
 
 # Считываем популяцию из файла

@@ -35,10 +35,9 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                     for sosedK in range(SizeK):
                         for sosed in range(1, factory.N):
-                            coins = ResultCoins()
-                            if Y[sosed][sosedK] == 1 and coins == 1:
+                            if Y[sosed][sosedK] == 1 and ResultCoins():
                                 file.write(
-                                    "Монетка сказала что рассматриваем эту окрестность coins = " + str(coins) + '\n')
+                                    "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
                                 file.write("К соседу " + str(sosed) + '\n')
                                 file.write("На машине " + str(sosedK) + '\n')
 
@@ -75,9 +74,9 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
             fileflag = 0
         else:
             target_function = -1
-
+        # TODO сравнивать с вероятностью
         minimum2 = min(target_function_start, target_function)
-        if minimum2 == target_function and target_function != -1:
+        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
             file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
             file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
@@ -143,11 +142,9 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                 if not IsContainTailInStart(sequenceX2[client1Car], tail2, client1) and not \
                                         IsContainTailInStart(sequenceX2[client2Car], tail1, client2):
 
-                                    coins = ResultCoins()
                                     file.write(
-                                        "Монетка сказала что рассматриваем эту окрестность coins = " + str(
-                                            coins) + '\n')
-                                    if coins == 1:
+                                        "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
+                                    if ResultCoins():
                                         file.write(
                                             "У маршрутов " + str(client1Car) + " " + str(
                                                 client2Car) + " меняем хвосты\nНачиная с "
@@ -248,7 +245,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                     file.write("По одной скважине отдаем\n")
 
                     howMuch = 0
-                    for proebSkv in range(1, contWells+1):
+                    for proebSkv in range(1, contWells + 1):
                         X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
                         TargetFunction = target_function_start
                         SizeK = sizeK_start
@@ -346,7 +343,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                         contWells = CountWellsWithFane(Sstart, Astart, client, k)
                         file.write("Всего не укладывается " + str(contWells) + " скважин\n")
 
-                        for proebSkv in range(2, contWells+1):
+                        for proebSkv in range(2, contWells + 1):
                             file.write("Отдаем " + str(proebSkv) + " скважин\n")
                             X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
                             TargetFunction = target_function_start
@@ -457,7 +454,169 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
     return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
 
 
-# def Swap(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration):
+def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
+    file = open("log/exchlog.txt", 'a')
+
+    start = time.time()
+    timeLocal[1] += 1
+
+    file.write("->Exchange start" + '\n')
+    file.write("Целевая функция до применения Exchange = " + str(target_function_start) + '\n')
+
+    SaveStartLocalSearch(x_start, y_start, s_start, a_start, sizeK_start)
+    TargetFunction = target_function_start
+    SizeK = sizeK_start
+    buf_targ = 0
+
+    fileflag = 0
+    it = 0
+    # for it in range(factory.param_local_search):
+    while it < factory.param_local_search:
+        it += 1
+        buf_targ = TargetFunction
+        X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
+        sequenceX2 = GettingTheSequence(X)
+
+        # Bыбираем клиента
+        for clientCar in range(SizeK):
+            for client in range(1, factory.N):
+                if Y[client][clientCar] == 1:
+                    file.write("Переставляем клиентa " + str(client) + '\n')
+                    file.write("С машины " + str(clientCar) + '\n')
+
+                    for sosedCar in range(SizeK):
+                        for sosed in range(1, factory.N):
+                            # TODO случай с равными машинами
+                            if Y[sosed][sosedCar] == 1:
+                                file.write(
+                                    "Монетка сказала что рассматриваем эту окрестность" + '\n')
+                                file.write("К соседу " + str(sosed) + '\n')
+                                file.write("На машине " + str(sosedCar) + '\n')
+
+                                file.write("Собираем подпоследовательности\n")
+                                subseq1 = []
+                                subseq2 = []
+
+                                indexCl = sequenceX2[clientCar].index(client)
+                                indexSos = sequenceX2[sosedCar].index(sosed)
+
+                                for i in range(indexCl, len(sequenceX2[clientCar])):
+                                    if i <= indexCl + factory.param_len_subseq and sequenceX2[clientCar][i] != 0:
+                                        subseq1.append(sequenceX2[clientCar][i])
+                                    else:
+                                        break
+                                for i in range(indexSos, len(sequenceX2[sosedCar])):
+                                    if i <= indexCl + factory.param_len_subseq and sequenceX2[sosedCar][i] != 0:
+                                        subseq2.append(sequenceX2[sosedCar][i])
+                                    else:
+                                        break
+
+                                file.write("subseq1 = " + str(subseq1) + '\n')
+                                file.write("subseq2 = " + str(subseq2) + '\n')
+
+                                sequence1Left = sequenceX2[clientCar][indexCl - 1]
+                                sequence1Right = sequenceX2[clientCar][indexCl + factory.param_len_subseq + 2]
+                                sequence2Left = sequenceX2[sosedCar][indexSos - 1]
+                                sequence2Right = sequenceX2[clientCar][indexSos + factory.param_len_subseq + 2]
+
+                                file.write("Пред Слева от последовательности клиента " + str(sequence1Left) + "\n")
+                                file.write("После Справа от последовательности клиента " + str(sequence1Right) + "\n")
+                                file.write("Перд Слева от последовательности соседа " + str(sequence2Left) + "\n")
+                                file.write("После Справа от последовательности соседа " + str(sequence2Right) + "\n")
+
+                                buf1 = []
+                                # Отсекаем мусорные решения, если первые элементы подпоследовательностей
+                                # не содержатся ни в начале ни в конце
+                                if not IsContainWells(sequenceX2[sosedCar], subseq1[0], sequence2Left) \
+                                        and not IsContainWells(sequenceX2[sosedCar], subseq1[0], sequence2Right, 'end') \
+                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], sequence1Left) \
+                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], sequence1Right, 'end'):
+                                    file.write("Первые элементы подпоследовательностей "
+                                               "не содержатся ни в начале ни в конце\n")
+
+                                    for i in range(len(subseq1)):
+                                        if subseq1[-1] != 0:
+                                            buf1.append(subseq1[i])
+                                            buf2 = []
+                                            for j in range(len(subseq2)):
+                                                if subseq2[-1] != 0 and ResultCoins():
+                                                    buf2.append(subseq2[j])
+                                                    x, y, s, a, target_function, sizeK = OperatorJoinFromExchange(X, Y,
+                                                                                                                  Sresh,
+                                                                                                                  A,
+                                                                                                                  SizeK,
+                                                                                                                  TargetFunction,
+                                                                                                                  client,
+                                                                                                                  clientCar,
+                                                                                                                  subseq1,
+                                                                                                                  sosed,
+                                                                                                                  sosedCar,
+                                                                                                                  subseq2,
+                                                                                                                  iteration,
+                                                                                                                  file)
+
+                                                    file.write(
+                                                        "Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+
+                                                    file.write("Выбираем минимальное решение" + '\n')
+                                                    minimum = min(TargetFunction, target_function)
+                                                    if minimum == target_function:
+                                                        file.write(
+                                                            "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                                        file.write(
+                                                            "Новая целевая функция равна " + str(
+                                                                target_function) + '\n')
+
+                                                        SaveLocalSearch(x, y, s, a, sizeK)
+                                                        TargetFunction = target_function
+                                                        SizeK = sizeK
+                                                        fileflag = 1
+                                                    else:
+                                                        file.write(
+                                                            "Новое перемещение, хуже чем то что было, "
+                                                            "возвращаем наше старое решение" + '\n')
+                                                        file.write(
+                                                            "Старая целевая функция равна " + str(
+                                                                TargetFunction) + '\n')
+
+        file.write(
+            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+        if fileflag == 1:
+            x, y, s, a = ReadLocalSearchOfFile(SizeK)
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            file.write(
+                "Целевая функция последнего минимального переставления = " + str(
+                    target_function) + '\n')
+            fileflag = 0
+        else:
+            target_function = -1
+        # TODO сравнивать по вероятностb
+        minimum2 = min(target_function_start, target_function)
+        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
+            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+            SaveStartLocalSearch(x, y, s, a, SizeK)
+            target_function_start = target_function
+            TargetFunction = target_function
+            sizeK_start = SizeK
+        else:
+            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+
+    file.write("While stop\n")
+    x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+    Time = time.time() - start
+    timeLocal[0] += Time
+    file.write("Время работы Exchange = " + str(Time) + 'seconds\n')
+
+    file.write("<-Exchange stop" + '\n')
+    file.close()
+
+    return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+
 
 # Cоздаем популяцию решений
 def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
