@@ -460,6 +460,12 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
 
 # Отчищаем файл
 def ClearAllFile():
+    file = open('log/aexlog.txt', 'w')
+    file.close()
+    file = open('log/exchlog.txt', 'w')
+    file.close()
+    file = open("log/genalog.txt", 'w')
+    file.close()
     file = open('log/helog.txt', 'w')
     file.close()
     file = open('log/relog.txt', 'w')
@@ -467,8 +473,6 @@ def ClearAllFile():
     file = open('log/Two_Opt.txt', 'w')
     file.close()
     file = open('log/twooptlog.txt', 'w')
-    file.close()
-    file = open("log/genalog.txt", 'w')
     file.close()
     file = open('output/Help.txt', 'w')
     file.close()

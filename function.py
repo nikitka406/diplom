@@ -107,6 +107,24 @@ def BeautifulPrintInFile(lokal_X, lokal_Y, lokal_Sresh, lokal_A, target_function
     file.close()
 
 
+# печать конкретного маршрута и время работы
+def PrintForCar(lokal_X, lokal_Sresh, car1, file, car2):
+    sequenceX2 = GettingTheSequence(lokal_X)
+    file.write("car1 = " + str(sequenceX2[car1]) + '\n')
+    for i in range(factory.N):
+        file.write(str(lokal_Sresh[i][car1]) + ' ')
+    file.write("\n")
+
+    file.write("car2 = " + str(sequenceX2[car2]) + '\n')
+    for i in range(factory.N):
+        file.write(str(lokal_Sresh[i][car2]) + ' ')
+    file.write("\n")
+    # if car2 != 'def':
+    #     file.write("car2 = " + str(sequenceX2[car2]) + '\n')
+    #     for i in range(factory.N):
+    #         file.write(str(lokal_Sresh[i][car2]) + '\n')
+
+
 # Считаем кол-во используемых ТС
 def AmountCarUsed(lokal_y):
     summa = 0  # счетчик
@@ -477,22 +495,30 @@ def IsContainTailInEnd(sequence, tail, place1):
 
 
 # Проверка на содержание скважин тех же объектов car у soseda
-def IsContainWells(sequence, client, place='all', flag='start'):
+def IsContainWells(sequence, client, file, place='all', flag='start'):
+    file.write("IsContainWells start: ->\n")
     if flag == 'start':
         if place == 'all':
             size = len(sequence)
         else:
             size = sequence.index(place)
-        for i in range(size):
+        for i in range(size+1):
+            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '     ')
             if sequence[i] == client:
+                file.write("\nIsContainWells stop: <-\n")
+
                 return True
+        file.write("\nIsContainWells stop: <-\n")
         return False
 
     elif flag == 'end':
         start = sequence.index(place)
         for i in range(start, len(sequence)):
+            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '    ')
             if sequence[i] == client:
+                file.write("\nIsContainWells stop: <-\n")
                 return True
+        file.write("\nIsContainWells stop: <-\n")
         return False
 
 
@@ -616,9 +642,9 @@ def AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, car2, time1, start=0):
     for i in range(start, len(subseq1)):
         X[subseq2Left][subseq1[i]][car2] = 1
         Y[subseq1[i]][car2] = 1
-        Sresh[subseq1[i]][car2] = time1[i]
+        Sresh[subseq1[i]][car2] += time1[i]
         subseq2Left = subseq1[i]
-    return X, Y, Sresh
+    return X, Y, Sresh, subseq2Left
 
 
 ''' Функции для кроссоверов'''
