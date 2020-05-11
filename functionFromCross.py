@@ -1,7 +1,6 @@
 import factory
 import random
 
-
 """ Функции для кроссоверов"""
 
 
@@ -265,3 +264,87 @@ def RandNotVisitClient(countOfRaces, flag, file):
         file.write("    Больше нет клиентов с свободными скважинами" + '\n')
         file.write("RandNotVisitClient stop: <-\n")
         return -1
+
+
+# Добавляем клиента в последовательность, со всеми флагами
+# ЗАебись!!!
+def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, file):
+    file.write("AddClientaInSequence start: ->\n")
+    file.write("    Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence" + '\n')
+    children.append([bufer[i_in][0], 0])
+
+    # из первого нуля больше никуда не едем
+    bufer[i_in][1] = 1
+
+    # Расставляем флажки локально для первой машины и для общего решения
+    flag[0] += 1
+    flag[bufer[i_in][0]] = 1
+    flagAll[bufer[i_in][0]] = 1
+    # на одну мащину к нему (bufer1[1.txt]) теперь может приехать меньше
+    countOfRaces[bufer[i_in][0]] -= 1
+
+    file.write("    Ребенок выглядит пока вот так " + '\n')
+    file.write("    " + str(children) + '\n')
+    file.write("    AddClientaInSequence stop: <-\n")
+    file.write("______________________________" + '\n')
+
+
+# Выбор рандомного города из тех у который остались свободные скважины
+def RandomClientWithWells(countOfRaces):
+    # список в котором будут хранится клиенты в которорых остались скважины
+    ostatok = []
+    for i in factory.N:
+        if countOfRaces[i] > 0:
+            ostatok.append(i)
+
+    return random.choise(ostatok)
+
+
+# Выбор первого клиента с минимальным временем начала
+def SelectFirstObj(sequence1, sequence2, flagAll, file):
+    buf = []
+    file.write("SelectFirstObj start: ->\n")
+
+    file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
+    for i in range(1, len(sequence1)):
+        if i == 1 and flagAll[i] == 0:
+            buf.append(i)
+        elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [0, 0] \
+                and flagAll[sequence1[i + 1][0]] == 0:
+            file.write("    Нашли первый объект в каком-то маршруте\n")
+            buf.append(sequence1[i + 1][0])
+
+    file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
+    for i in range(1, len(sequence2)):
+        if i == 1 and flagAll[i] == 0:
+            buf.append(i)
+        elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [0, 0]\
+                and flagAll[sequence2[i + 1][0]] == 0:
+            file.write("    Нашли первый объект в каком-то маршруте\n")
+            buf.append(sequence2[i + 1][0])
+
+    if buf:
+        file.write("buf = " + str(buf) + '\n')
+        return random.choice(buf)
+    else:
+        file.write("    Не нашли ни одного не посещенного первого, берем любого\n")
+
+        file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
+        for i in range(1, len(sequence1)):
+            if i == 1 and flagAll[i] == 0:
+                buf.append(i)
+            elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [0, 0]:
+                file.write("    Нашли первый объект в каком-то маршруте\n")
+                buf.append(sequence1[i + 1][0])
+
+        file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
+        for i in range(1, len(sequence2)):
+            if i == 1 and flagAll[i] == 0:
+                buf.append(i)
+            elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [0, 0]:
+                file.write("    Нашли первый объект в каком-то маршруте\n")
+                buf.append(sequence2[i + 1][0])
+
+        file.write("    buf = " + str(buf) + '\n')
+        file.write("SelectFirstObj stop: <-\n")
+        return random.choice(buf)

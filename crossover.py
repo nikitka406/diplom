@@ -226,89 +226,120 @@ def AEX(sequence1, sequence2, timeCros):
 
     file.write("<-AEX stop" + '\n')
     file.close()
-
-    file.close()
     return children, timeCros
 
 
 # кроссовер HGreX
-def HGreX(sequence1, sequence2, aex=0, countOper=0):
+def HGreX(sequence1, sequence2, timeCros):
+    file = open("log/hgrexlog.txt", 'a')
+
+    start = time.time()
+    timeCros[1] += 1
+
+    file.write("HGreX start: ->" + '\n')
+    print("Скрещивание решений осуществляется с помощью оператора HGreX" + '\n')
+
     children = [[0, 0]]
+    # число клиентов в текущей машине
     numberInCar = 0
+    # флаг, для посещенных городов в одном маршруте(одной машиной)
     flag = [0 for i in range(factory.N)]
     flag[0] = -1
+    # флаг, для посещенных городов в заключительном решении
     flagAll = [0 for i in range(factory.N)]
     flagAll[0] = 1
 
-    first = SelectFirstObj(flag)
+    first = SelectFirstObj(sequence1, sequence2, flagAll, file)
     print("Выбираем случайную вершину = ", first)
+    #
+    # print("Расставляем флаги")
+    # flagAll[first] += 1
+    # flag[first] = 1
+    # print("flag = ", flag)
+    # print("flagAll = ", flagAll)
+    #
+    # print("Добавили первое ребро в ребенка, ")
+    # children.append([first, 0])
+    # numberInCar += 1
+    # print(children)
+    #
+    # number = random.randint(1, 2)
+    # if number == 1:
+    #     sequence1[first][1] = 1
+    # elif number == 2:
+    #     sequence2[first][1] = 1
+    #
+    # index = sequence1.index([first, 0])
+    # jndex = sequence2.index([first, 0])
+    # i = sequence1[index + 1][0]
+    # j = sequence2[jndex + 1][0]
+    #
+    # if factory.t[first][i] < factory.t[first][j] and i != 0:
+    #     print("Если i < j и i не ноль")
+    #     RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+    #
+    # elif factory.t[first][i] < factory.t[first][j] and j != 0:
+    #     print("Если i < j и j не ноль")
+    #     RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+    #
+    # elif factory.t[first][i] >= factory.t[first][j] and j != 0:
+    #     print("Если j < i и j не ноль")
+    #     RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+    #
+    # elif factory.t[first][i] >= factory.t[first][j] and i != 0:
+    #     print("Если j < i и j не ноль")
+    #     RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+    #
+    # else:
+    #     print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
+    #     ti = factory.t[first].copy()
+    #     print("Кондидаты на выбор самого короткого ", ti)
+    #
+    #     minimum = min(ti)
+    #     index = ti.index(minimum)
+    #     print("Самое короткое ребро = ", index)
+    #     ti[index] = 999999
+    #     print("Теперь кондидаты выглядят так")
+    #
+    #     while index == first or index == 0:
+    #         print("Предыдущие короткое ребро не подошло ищем новое")
+    #         minimum = min(ti)
+    #         index = ti.index(minimum)
+    #         print("Самое короткое ребро = ", index)
+    #         ti[index] = 999999
+    #         print("Теперь кондидаты выглядят так")
+    #
+    #     print("Итоговое короткое ребро = ", index)
+    #     print("Добавим его через рекурсию")
+    #
+    #     if number == 1:
+    #         RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
+    #     elif number == 2:
+    #         RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
+    #
+    # file.write("Оператор HGreX закончил своб работу с решениями" + '\n')
+    # file.write("sequence1 = " + str(sequence1) + '\n')
+    # file.write("sequence2 = " + str(sequence2) + '\n')
+    # file.write("И получился ребенок " + '\n')
+    # file.write("children = " + str(children) + '\n')
+    # file.write(
+    #     "______________________________________________________________________________________________________" + '\n')
+    # print("Оператор HGreX закончил своб работу с решениями" + '\n')
+    # print("sequence1 = " + str(sequence1) + '\n')
+    # print("sequence2 = " + str(sequence2) + '\n')
+    # print("И получился ребенок " + '\n')
+    # print("children = " + str(children) + '\n')
+    # print(
+    #     "______________________________________________________________________________________________________" + '\n')
+    #
+    # Time = time.time() - start
+    # timeCros[0] += Time
+    # file.write("Время работы HGreX = " + str(Time) + 'seconds\n')
+    #
+    # file.write("<-HGreX stop" + '\n')
+    # file.close()
 
-    print("Расставляем флаги")
-    flagAll[first] += 1
-    flag[first] = 1
-    print("flag = ", flag)
-    print("flagAll = ", flagAll)
-
-    print("Добавили первое ребро в ребенка, ")
-    children.append([first, 0])
-    numberInCar += 1
-    print(children)
-
-    number = random.randint(1, 2)
-    if number == 1:
-        sequence1[first][1] = 1
-    elif number == 2:
-        sequence2[first][1] = 1
-
-    index = sequence1.index([first, 0])
-    jndex = sequence2.index([first, 0])
-    i = sequence1[index + 1][0]
-    j = sequence2[jndex + 1][0]
-
-    if factory.t[first][i] < factory.t[first][j] and i != 0:
-        print("Если i < j и i не ноль")
-        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
-
-    elif factory.t[first][i] < factory.t[first][j] and j != 0:
-        print("Если i < j и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
-
-    elif factory.t[first][i] >= factory.t[first][j] and j != 0:
-        print("Если j < i и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
-
-    elif factory.t[first][i] >= factory.t[first][j] and i != 0:
-        print("Если j < i и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
-
-    else:
-        print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
-        ti = factory.t[first].copy()
-        print("Кондидаты на выбор самого короткого ", ti)
-
-        minimum = min(ti)
-        index = ti.index(minimum)
-        print("Самое короткое ребро = ", index)
-        ti[index] = 999999
-        print("Теперь кондидаты выглядят так")
-
-        while index == first or index == 0:
-            print("Предыдущие короткое ребро не подошло ищем новое")
-            minimum = min(ti)
-            index = ti.index(minimum)
-            print("Самое короткое ребро = ", index)
-            ti[index] = 999999
-            print("Теперь кондидаты выглядят так")
-
-        print("Итоговое короткое ребро = ", index)
-        print("Добавим его через рекурсию")
-
-        if number == 1:
-            RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
-        elif number == 2:
-            RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
-
-    return children
+    return children, timeCros
 
 
 # Оператор HRndX
