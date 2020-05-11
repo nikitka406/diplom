@@ -3,7 +3,7 @@ import time
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, evolution=2):
     file = open("log/relog.txt", 'a')
 
     start = time.time()
@@ -46,6 +46,9 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                                                                            sosed, sosedK, iteration,
                                                                                            file)
                                 file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                                file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
+                                file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
+                                file.write("Целевая функция после релока " + str(target_function) + '\n')
 
                                 file.write("Выбираем минимальное решение" + '\n')
                                 minimum = min(TargetFunction, target_function)
@@ -74,19 +77,25 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
             fileflag = 0
         else:
             target_function = -1
-        # TODO сравнивать с вероятностью
-        minimum2 = min(target_function_start, target_function)
-        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
-            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-            file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
+        if evolution == 1:
             SaveStartLocalSearch(x, y, s, a, SizeK)
             target_function_start = target_function
             TargetFunction = target_function
             sizeK_start = SizeK
         else:
-            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+            minimum2 = min(target_function_start, target_function)
+            if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
+                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                SaveStartLocalSearch(x, y, s, a, SizeK)
+                target_function_start = target_function
+                TargetFunction = target_function
+                sizeK_start = SizeK
+            else:
+                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
 
     file.write("While stop\n")
     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
@@ -663,6 +672,9 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
             x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
                                                                                      SizeSolution[n], iteration,
                                                                                      timeLocal[0])
+            # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Exchange(X, Y, Sresh, A, Target_Function[n],
+            #                                                                          SizeSolution[n], iteration,
+            #                                                                          timeLocal[0])
             # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[2] = Help(x, y, s, a, Target_Function[n], SizeSolution[n], iteration,
             #                                                         timeLocal[2])
 
@@ -670,7 +682,7 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
             x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[1] = Two_Opt(X, Y, Sresh, A, Target_Function[n],
                                                                                     SizeSolution[n], iteration,
                                                                                     timeLocal[1])
-
+        SaveDateFromGraph(Target_Function[n], "StartPopulation")
         print("\nРешение номер", n, "построено")
         print("_____________________________")
 

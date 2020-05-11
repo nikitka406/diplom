@@ -1,10 +1,18 @@
 import factory
 
 
-# Сохраняем решение в файл
+# Сохраняем данные решения в файл
 def SaveDateResult(date1):
     file = open('log/Result.txt', 'a')
     file.write(date1 + '\n')
+    file.close()
+
+
+# значение целевой для графика
+def SaveDateFromGraph(date1, file):
+    path = 'output/graph/' + file + ".txt"
+    file = open(path, 'a')
+    file.write(str(date1) + '\n')
     file.close()
 
 
@@ -489,4 +497,14 @@ def ClearAllFile():
     file = open('output/StartLocalSearch.txt', 'w')
     file.close()
     file = open('output/StartSolution.txt', 'w')
+    file.close()
+    file = open('output/graph/StartPopulation.txt', 'w')
+    file.close()
+    file = open('output/graph/Reloc.txt', 'w')
+    file.close()
+    file = open('output/graph/Exchange.txt', 'w')
+    file.close()
+    file = open('output/graph/Crossover.txt', 'w')
+    file.close()
+    file = open('output/graph/AfterCrosSearsh.txt', 'w')
     file.close()

@@ -103,22 +103,19 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
         else:
             targetL = -1
 
-            file.write("Теперь ищем минимум из двух целевых" + '\n')
-            minimum = min(targetL, targetR)
-            if minimum == targetL and minimum != -1:
-                file.write("Выбрали левого у него целевая меньше" + '\n')
-                return Xl, Yl, Sl, Al, targetL, sizeK
+        file.write("Теперь ищем минимум из двух целевых" + '\n')
+        minimum = min(targetL, targetR)
+        if minimum == targetL and minimum != -1:
+            file.write("Выбрали левого у него целевая меньше" + '\n')
+            return Xl, Yl, Sl, Al, targetL, sizeK
 
-            elif minimum == targetR and minimum != -1 and targetR != targetL:
-                file.write("Выбрали правого у него целевая меньше" + '\n')
-                return XR, YR, SR, AR, targetR, sizeK
+        elif minimum == targetR and minimum != -1 and targetR != targetL:
+            file.write("Выбрали правого у него целевая меньше" + '\n')
+            return XR, YR, SR, AR, targetR, sizeK
 
-            else:
-                file.write("Все пошло по пизде ничего не сохранили" + '\n')
-                return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
-
-        file.write("По какой-то причине нет соседей" + '\n')
-        return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+        else:
+            file.write("Все пошло по пизде ничего не сохранили" + '\n')
+            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
     elif client == sosed and clientK != sosedK:
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(sizeK)

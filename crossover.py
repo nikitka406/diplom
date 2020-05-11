@@ -1156,15 +1156,16 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
-    local_search_oper = ['relocate', '2Opt', 'Exchange']
+    local_search_oper = ['relocate', 'Exchange']
     oper = random.choice(local_search_oper)
-    oper = 'Exchange'
+    # oper = 'Exchange'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
         x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration,
                                                                     timeLocal[0])
-        # iteration += 1
+        SaveDateFromGraph(target_function, "Reloc")
+        iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == '2Opt':
@@ -1176,7 +1177,8 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     elif oper == 'Exchange':
         x, y, s, a, target_function, sizeK, timeLocal[3] = Exchange(x, y, s, a, target_function, sizeK, iteration,
                                                                     timeLocal[3])
-        # iteration += 1
+        SaveDateFromGraph(target_function, "Exchange")
+        iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
 
@@ -1255,7 +1257,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'randomAndRandom'
+        scenario = 'BestAndRand'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -1372,6 +1374,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             "Целевая функция нового решения после оператора скрещивания и мутации равна " + str(target_function) + '\n')
         minimumCros = min(minimumCros, target_function)
         maximumCros = max(maximumCros, target_function)
+        SaveDateFromGraph(target_function, "Crossover")
 
         # file.write("Help start" + '\n')
         # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
@@ -1402,6 +1405,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
         # Удаляем какое-нибудь решение
         if maximum >= target_function:
+            SaveDateFromGraph(target_function, "AfterCrosSearsh")
             if scenario_add == 'deleteTheBad':
                 file.write("Удаляем самое плохое решение в популяции" + '\n')
                 X.pop(i_max)
@@ -1456,7 +1460,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
     # SaveDateResult("Среднее время работы HGreX = " + str(timeCros[1][0]/timeCros[1][1]))
     # SaveDateResult("Среднее время работы HRndX = " + str(timeCros[2][0]/timeCros[2][1]))
     # SaveDateResult("Среднее время работы HProX = " + str(timeCros[3][0]/timeCros[3][1]))
-    # SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
+    SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
     # SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
     # SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
     SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
