@@ -3,7 +3,7 @@ import time
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, evolution=2):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, cycle=factory.param_local_search, evolution=2):
     file = open("log/relog.txt", 'a')
 
     start = time.time()
@@ -20,7 +20,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
     fileflag = 0
     it = 0
     # for it in range(factory.param_local_search):
-    while it < factory.param_local_search:
+    while it < cycle:
         it += 1
         buf_targ = TargetFunction
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
@@ -463,7 +463,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
     return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
 
 
-def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
+def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, cycle=factory.param_local_search):
     file = open("log/exchlog.txt", 'a')
 
     start = time.time()
@@ -480,7 +480,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
     fileflag = 0
     it = 0
     # for it in range(factory.param_local_search):
-    while it < factory.param_local_search:
+    while it < cycle:
         it += 1
         buf_targ = TargetFunction
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)

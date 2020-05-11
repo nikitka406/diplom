@@ -347,7 +347,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
             file.write("    OperatorJoinFromHelp stop: <-\n")
             return x, y, s, a, target_function_start, sizeK_start
 
-    elif not IsContainWells(sequenceX2[sosedCar], client):
+    elif not IsContainWells(sequenceX2[sosedCar], client, file):
         file.write("    Не равны\n")
         Xl, Yl, Sl, Al = ReadStartHelpOfFile(sizeK)
         XR, YR, SR, AR = ReadStartHelpOfFile(sizeK)

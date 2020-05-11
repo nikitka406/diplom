@@ -1,5 +1,4 @@
 from crossover import *
-from operators import *
 
 start = time.time()
 
