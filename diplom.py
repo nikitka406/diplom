@@ -61,7 +61,7 @@ for i in range(factory.param_population):
     file.write("____________________\n")
 file.close()
 
-children = HGreX(Sequence[0], Sequence[1], timeLocal[0])
+children, timeCros = HGreX(Sequence[0], Sequence[1], timeLocal[0])
 
 # Создаем новые решения
 # GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, iteration)

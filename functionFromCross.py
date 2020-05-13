@@ -309,18 +309,18 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
     for i in range(1, len(sequence1)):
         if i == 1 and flagAll[i] == 0:
             buf.append(i)
-        elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [0, 0] \
+        elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [
+            0, 0] \
                 and flagAll[sequence1[i + 1][0]] == 0:
-            file.write("    Нашли первый объект в каком-то маршруте\n")
             buf.append(sequence1[i + 1][0])
 
     file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
     for i in range(1, len(sequence2)):
         if i == 1 and flagAll[i] == 0:
             buf.append(i)
-        elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [0, 0]\
+        elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [
+            0, 0] \
                 and flagAll[sequence2[i + 1][0]] == 0:
-            file.write("    Нашли первый объект в каком-то маршруте\n")
             buf.append(sequence2[i + 1][0])
 
     if buf:
@@ -333,18 +333,132 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
         for i in range(1, len(sequence1)):
             if i == 1 and flagAll[i] == 0:
                 buf.append(i)
-            elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [0, 0]:
-                file.write("    Нашли первый объект в каком-то маршруте\n")
+            elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[
+                i + 1] != [0, 0]:
                 buf.append(sequence1[i + 1][0])
 
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
         for i in range(1, len(sequence2)):
             if i == 1 and flagAll[i] == 0:
                 buf.append(i)
-            elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [0, 0]:
-                file.write("    Нашли первый объект в каком-то маршруте\n")
+            elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[
+                i + 1] != [0, 0]:
                 buf.append(sequence2[i + 1][0])
 
         file.write("    buf = " + str(buf) + '\n')
         file.write("SelectFirstObj stop: <-\n")
         return random.choice(buf)
+
+
+# Возвращаем самое короткое ребро из двух родителей
+def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
+    file.write("GetShortArc start: ->\n")
+
+    file.write("    Ищем индексы всех таких объектов" + '\n')
+    buf1 = []
+    buf2 = []
+    for i in range(len(sequence1)):
+        if sequence1[i][0] == start and flag[sequence1[i+1][0]] <= 0 and sequence1[i+1][1] == 0:
+            buf1.append(i)
+    file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
+
+    for i in range(len(sequence2)):
+        if sequence2[i][0] == start and flag[sequence2[i+1][0]] <= 0 and sequence2[i+1][1] == 0:
+            buf2.append(i)
+    file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
+
+    if buf1 == [] and buf2 == []:
+        file.write("    Не нашли ни одноготакого ребра, ослабим условия\n")
+        for i in range(len(sequence1)):
+            if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0:
+                buf1.append(i)
+        file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
+
+        for i in range(len(sequence2)):
+            if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0:
+                buf2.append(i)
+        file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
+
+    file.write("    Составляем массив расстояний" + '\n')
+    distance1 = []
+    distance2 = []
+    for i in range(len(buf1)):
+        index = sequence1[buf1[i]][0]
+        jndex = sequence1[buf1[i]+1][0]
+        distance1.append(factory.d[index][jndex])
+    file.write("    distance1 = " + str(distance1) + '\n')
+
+    for i in range(len(buf2)):
+        index = sequence2[buf2[i]][0]
+        jndex = sequence2[buf2[i] + 1][0]
+        distance2.append(factory.d[index][jndex])
+    file.write("    distance2 = " + str(distance2) + '\n')
+
+    try:
+        min1 = min(distance1)
+        file.write("    min1 = " + str(min1) + '\n')
+    except ValueError:
+        try:
+            min2 = min(distance2)
+            file.write("    min2 = " + str(min2) + '\n')
+        except ValueError:
+            minimum = min(factory.d[start])
+            return factory.d[start].index(minimum)
+
+    try:
+        min2 = min(distance2)
+        file.write("    min2 = " + str(min2) + '\n')
+    except ValueError:
+        index = distance1.index(min1)
+        if buf1[index] != 0 and numberInCar >= factory.param_min_num_cl_in_car:
+            return buf1[index]
+        elif buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
+            file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
+            minimum = min(factory.d[start])
+            return factory.d[start].index(minimum)
+
+    if min1 >= min2:
+        file.write("   min1 > min2\n")
+        index = distance2.index(min2)
+        if numberInCar >= factory.param_min_num_cl_in_car:
+            return sequence2[buf2[index]+1][0]
+
+        elif numberInCar < factory.param_min_num_cl_in_car:
+
+            if sequence2[buf2[index]+1][0] == 0:
+                file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
+
+                minimum = factory.d[start][0]
+                for i in range(factory.N):
+                    if i != start and minimum >= factory.d[start][i] and i != 0:
+                        minimum = factory.d[start][i]
+
+                index = factory.d[start].index(minimum)
+                return factory.d[start][index]
+
+            else:
+                return sequence2[buf2[index] + 1][0]
+
+    elif min2 > min1:
+        file.write("   min2 > min1\n")
+        index = distance1.index(min1)
+        if numberInCar >= factory.param_min_num_cl_in_car:
+            return sequence1[buf1[index]+1][0]
+
+        elif numberInCar < factory.param_min_num_cl_in_car:
+
+            if sequence1[buf1[index]+1][0] == 0:
+                file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
+
+                minimum = factory.d[start][0]
+                for i in range(factory.N):
+                    if i != start and minimum >= factory.d[start][i] and i != 0:
+                        minimum = factory.d[start][i]
+
+                index = factory.d[start].index(minimum)
+                return factory.d[start][index]
+
+            else:
+                return sequence1[buf1[index] + 1][0]
+
+

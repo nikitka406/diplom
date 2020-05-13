@@ -50,7 +50,7 @@ def AEX(sequence1, sequence2, timeCros):
         children.append([sequence1[0][0], 0])
         children.append([sequence1[1][0], 0])
         # children[0][0] = sequence1[0][0]
-        # children[1.txt][0] = sequence1[1.txt][0]
+        # children[1][0] = sequence1[1][0]
 
         # из первого нуля больше никуда не едем
         sequence1[0][1] = 1
@@ -250,20 +250,21 @@ def HGreX(sequence1, sequence2, timeCros):
     flagAll[0] = 1
 
     first = SelectFirstObj(sequence1, sequence2, flagAll, file)
-    print("Выбираем случайную вершину = ", first)
-    #
-    # print("Расставляем флаги")
-    # flagAll[first] += 1
-    # flag[first] = 1
-    # print("flag = ", flag)
-    # print("flagAll = ", flagAll)
-    #
-    # print("Добавили первое ребро в ребенка, ")
-    # children.append([first, 0])
-    # numberInCar += 1
-    # print(children)
-    #
-    # number = random.randint(1, 2)
+    file.write("Выбираем случайную вершину = " + str(first) + '\n')
+
+    file.write("Расставляем флаги" + '\n')
+    flagAll[first] += 1
+    flag[first] = 1
+    file.write("flag = " + str(flag) + '\n')
+    file.write("flagAll = " + str(flagAll) + '\n')
+
+    file.write("Добавили первое ребро в ребенка, " + '\n')
+    children.append([first, 0])
+    numberInCar += 1
+    file.write(str(children) + '\n')
+
+    scnd = GetShortArc(sequence1, sequence2, first, flag, numberInCar, file)
+    file.write("scnd = " + str(scnd) + '\n')
     # if number == 1:
     #     sequence1[first][1] = 1
     # elif number == 2:
