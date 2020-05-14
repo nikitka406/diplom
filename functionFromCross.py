@@ -350,6 +350,31 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
         return random.choice(buf)
 
 
+# функция возвращает ребро в случаи неопределенности
+def Uncertainty(start, file):
+    file.write("    Uncertainty start:->\n")
+    buf = []
+    file.write("        Задаем заданное число случайных ребер c началом " + str(start) + "\n")
+    for i in range(factory.param_hgrex_uncertainty):
+
+        buf.append(random.randint(1, factory.N-1))
+    file.write("        buf = " + str(buf)+"\n")
+
+    file.write("        Считаем минимальное ребро\n")
+    minimum = factory.d[start][buf[0]]
+    j = 0
+    for i in range(1, len(buf)):
+        if minimum > factory.d[start][buf[i]] and buf[i] != start:
+            minimum = factory.d[start][buf[i]]
+            j = i
+            file.write("        minimum = " + str(minimum) + '\n')
+            file.write("        j = " + str(j) + '\n')
+
+    file.write("    Uncertainty stop:<-\n")
+    file.write("GetShortArc stop: <-\n")
+    return buf[j]
+
+
 # Возвращаем самое короткое ребро из двух родителей
 def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
     file.write("GetShortArc start: ->\n")
@@ -402,8 +427,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             min2 = min(distance2)
             file.write("    min2 = " + str(min2) + '\n')
         except ValueError:
-            minimum = min(factory.d[start])
-            return factory.d[start].index(minimum)
+            return Uncertainty(start, file)
 
     try:
         min2 = min(distance2)
@@ -411,16 +435,17 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
     except ValueError:
         index = distance1.index(min1)
         if buf1[index] != 0 and numberInCar >= factory.param_min_num_cl_in_car:
+            file.write("GetShortArc stop: <-\n")
             return buf1[index]
         elif buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
             file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
-            minimum = min(factory.d[start])
-            return factory.d[start].index(minimum)
+            return Uncertainty(start, file)
 
     if min1 >= min2:
-        file.write("   min1 > min2\n")
+        file.write("   min1 >= min2\n")
         index = distance2.index(min2)
         if numberInCar >= factory.param_min_num_cl_in_car:
+            file.write("GetShortArc stop: <-\n")
             return sequence2[buf2[index]+1][0]
 
         elif numberInCar < factory.param_min_num_cl_in_car:
@@ -428,21 +453,17 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             if sequence2[buf2[index]+1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                minimum = factory.d[start][0]
-                for i in range(factory.N):
-                    if i != start and minimum >= factory.d[start][i] and i != 0:
-                        minimum = factory.d[start][i]
-
-                index = factory.d[start].index(minimum)
-                return factory.d[start][index]
+                return Uncertainty(start, file)
 
             else:
+                file.write("GetShortArc stop: <-\n")
                 return sequence2[buf2[index] + 1][0]
 
     elif min2 > min1:
         file.write("   min2 > min1\n")
         index = distance1.index(min1)
         if numberInCar >= factory.param_min_num_cl_in_car:
+            file.write("GetShortArc stop: <-\n")
             return sequence1[buf1[index]+1][0]
 
         elif numberInCar < factory.param_min_num_cl_in_car:
@@ -450,15 +471,10 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             if sequence1[buf1[index]+1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                minimum = factory.d[start][0]
-                for i in range(factory.N):
-                    if i != start and minimum >= factory.d[start][i] and i != 0:
-                        minimum = factory.d[start][i]
-
-                index = factory.d[start].index(minimum)
-                return factory.d[start][index]
+                return Uncertainty(start, file)
 
             else:
+                file.write("GetShortArc stop: <-\n")
                 return sequence1[buf1[index] + 1][0]
 
 
