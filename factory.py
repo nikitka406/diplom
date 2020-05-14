@@ -92,6 +92,7 @@ with open(FILENAME2) as File:
         if row[0] != 'Name':
             K += 1
 
+timeWork = S[1] / wells[1]
 KA = 0  # кол-во ТС = кол-ву скважин
 param_crossing = 0
 for i in range(N):

@@ -325,12 +325,12 @@ def ChooseRandomObjAndCar(y, sizeK):
 # ищем соседа слева либо справа
 def SearchSosedLeftOrRight(x, y, client, leftOrRight, k=-1):
     if leftOrRight == "left":
-        for i in range(factory.N):  # ищем по столбцу
+        for i in range(factory.N):  # ищем по строке
             if x[i][client][k] == 1:
                 return i
         return -1
     if leftOrRight == "right":
-        for i in range(factory.N):  # ищем по строке
+        for i in range(factory.N):  # ищем по столбцу
             if x[client][i][k] == 1:
                 return i
         return -1
@@ -389,13 +389,15 @@ def RecursiaForTime(x, s, a, i, k, recurs):
 
 # определяем время приезда для всех локаций
 def TimeOfArrival(x, y, s, file):
+    # TODO подумать над передачей объекта и машины
     file.write("    Начнем заполнять время прибытия\n")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k):
             # print("ЗАходим в рекурсию")
-            RecursiaForTime(x, s, a, 0, k, 0)
-    if not a:
+            result = RecursiaForTime(x, s, a, 0, k, 0)
+
+    if not result:
         return -1
     return a
 
@@ -536,7 +538,7 @@ def CountWellsWithFane(s, a, i, k):
     # Если приехали во временное окно
     if factory.e[i] <= a[i][k] <= factory.l[i]:
         # мах на случай если уложились
-        return max(0, ceil((a[i][k] + s[i][k] - factory.l[i]) / 2))
+        return max(0, ceil((a[i][k] + s[i][k] - factory.l[i]) / (factory.S[i] / factory.wells[i])))
     # Если приехали позже окончания работ
     else:
         # Возвращаем число скважин конкретно на этом объекте этой машиной

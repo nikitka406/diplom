@@ -260,9 +260,9 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                         SizeK = sizeK_start
 
                         flag = 0
-                        if proebSkv < factory.wells[client]:
+                        if proebSkv < int(Sresh[client][k] / factory.timeWork):
                             flag = 'not the last'
-                        elif proebSkv == factory.wells[client]:
+                        elif proebSkv == int(Sresh[client][k] / factory.timeWork):
                             flag = 'last'
                         else:
                             flag = 'end'
@@ -277,7 +277,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                                     file.write("Начинаем цикл по объектам в этой машине\n")
                                     for sosed in range(factory.N):
-                                        if Y[sosed][sosedK] == 1:
+                                        if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
                                             file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                             file.write(
                                                 "Попробую одну скважину с объекта " + str(client) + " и машины " + str(
@@ -285,11 +285,10 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                             file.write(" отдать машине " + str(sosedK) + " рядом с объектом " + str(
                                                 sosed) + "\n")
 
-                                            timeWork = factory.S[client] / factory.wells[client]
                                             x, y, s, a, target_function, sizeK = OperatorJoinFromHelp(X, Y, Sresh, A,
                                                                                                       SizeK,
                                                                                                       client, k, sosed,
-                                                                                                      sosedK, timeWork,
+                                                                                                      sosedK, factory.timeWork,
                                                                                                       TargetFunction,
                                                                                                       iteration, flag,
                                                                                                       file)
@@ -318,32 +317,32 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                 file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
                                             file.write('\n')
 
-                        file.write(
-                            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
-
-                        if fileflag == 1:
-                            x, y, s, a = ReadHelpOfFile(SizeK)
-                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
                             file.write(
-                                "Целевая функция последнего минимального переставления = " + str(
-                                    target_function) + '\n')
-                            fileflag = 0
-                        else:
-                            target_function = -1
+                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
-                        minimum2 = min(target_function_start, target_function)
-                        if minimum2 == target_function and target_function != -1:
-                            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                            if fileflag == 1:
+                                x, y, s, a = ReadHelpOfFile(SizeK)
+                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                                file.write(
+                                    "Целевая функция последнего минимального переставления = " + str(
+                                        target_function) + '\n')
+                                fileflag = 0
+                            else:
+                                target_function = -1
 
-                            SaveStartHelp(x, y, s, a, SizeK)
-                            target_function_start = target_function
-                            sizeK_start = SizeK
-                        else:
-                            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-                            howMuch = 'all'
-                            break
+                            minimum2 = min(target_function_start, target_function)
+                            if minimum2 == target_function and target_function != -1:
+                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                SaveStartHelp(x, y, s, a, SizeK)
+                                target_function_start = target_function
+                                sizeK_start = SizeK
+                            else:
+                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+                                howMuch = 'all'
+                                break
 
                     if howMuch == 'all':
                         file.write("\nПопробуем отдать несколько скважин\n")
@@ -359,9 +358,9 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                             SizeK = sizeK_start
 
                             flag = 0
-                            if proebSkv < factory.wells[client]:
+                            if proebSkv < int(Sresh[client][k] / factory.timeWork):
                                 flag = 'not the last'
-                            elif proebSkv == factory.wells[client]:
+                            elif proebSkv == int(Sresh[client][k] / factory.timeWork):
                                 flag = 'last'
                             else:
                                 flag = 'end'
@@ -369,14 +368,14 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                             if flag != 'end':
                                 file.write("Сейчас " + flag + " скважина\n")
                                 file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
-                                for sosedK in range(1, sizeK_start):
+                                for sosedK in range(sizeK_start):
                                     if sosedK != k:
                                         file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
                                         file.write("Она не похожа на ту из которой взяли скважину\n")
 
                                         file.write("Начинаем цикл по объектам в этой машине\n")
-                                        for sosed in range(factory.N):
-                                            if Y[sosed][sosedK] == 1:
+                                        for sosed in range(1, factory.N):
+                                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
                                                 file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                 file.write(
                                                     "Попробую одну скважину с объекта " + str(
@@ -385,14 +384,13 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                 file.write(" отдать машине " + str(sosedK) + " рядом с объектом " + str(
                                                     sosed) + "\n")
 
-                                                timeWork = proebSkv * (factory.S[client] / factory.wells[client])
                                                 x, y, s, a, target_function, sizeK = OperatorJoinFromHelp(X, Y, Sresh,
                                                                                                           A,
                                                                                                           SizeK,
                                                                                                           client, k,
                                                                                                           sosed,
                                                                                                           sosedK,
-                                                                                                          timeWork,
+                                                                                                          proebSkv * factory.timeWork,
                                                                                                           TargetFunction,
                                                                                                           iteration,
                                                                                                           flag,
