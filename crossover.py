@@ -366,7 +366,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
-    local_search_oper = ['relocate', 'Exchange']
+    local_search_oper = ['relocate', 'Exchange', '2Opt']
     oper = random.choice(local_search_oper)
     # oper = 'Exchange'
 
@@ -381,7 +381,8 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     elif oper == '2Opt':
         x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration,
                                                                    timeLocal[1])
-        # iteration += 1
+        SaveDateFromGraph(target_function, "2Opt")
+        iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == 'Exchange':

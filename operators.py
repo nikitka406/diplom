@@ -56,7 +56,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                                     file.write("Выбираем минимальное решение" + '\n')
                                     minimum = min(TargetFunction, target_function)
-                                    if minimum == target_function:
+                                    if minimum == target_function and minimum != TargetFunction:
                                         file.write(
                                             "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
                                         file.write("Новая целевая функция равна " + str(target_function) + '\n')
@@ -83,24 +83,24 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
         else:
             target_function = -1
 
-        if evolution == 1:
+        # if evolution == 1:
+        #     SaveStartLocalSearch(x, y, s, a, SizeK)
+        #     target_function_start = target_function
+        #     TargetFunction = target_function
+        #     sizeK_start = SizeK
+
+        minimum2 = min(target_function_start, target_function)
+        if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
+            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
             SaveStartLocalSearch(x, y, s, a, SizeK)
             target_function_start = target_function
             TargetFunction = target_function
             sizeK_start = SizeK
         else:
-            minimum2 = min(target_function_start, target_function)
-            if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
-                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                file.write("Новая целевая функция равна " + str(target_function) + '\n')
-
-                SaveStartLocalSearch(x, y, s, a, SizeK)
-                target_function_start = target_function
-                TargetFunction = target_function
-                sizeK_start = SizeK
-            else:
-                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
 
     file.write("While stop\n")
     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
@@ -153,8 +153,8 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                             if Y[client2][client2Car] == 1:
                                 tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
-                                if not IsContainTailInStart(sequenceX2[client1Car], tail2, client1) and not \
-                                        IsContainTailInStart(sequenceX2[client2Car], tail1, client2):
+                                if not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not \
+                                        IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file):
 
                                     file.write(
                                         "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
@@ -180,7 +180,7 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                         file.write("Последняя минимальная целевая = " + str(TargetFunction) + '\n')
                                         file.write("Новая целевая = " + str(target_function) + '\n')
                                         minimum = min(TargetFunction, target_function)
-                                        if minimum == target_function:
+                                        if minimum == target_function and minimum != TargetFunction:
                                             file.write(
                                                 "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
                                             file.write("Новая целевая функция равна " + str(target_function) + '\n')
@@ -306,7 +306,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                 "Выбираем минимальное решение из стартового и измененного" + '\n')
                                             file.write("Последняя целевая функция = " + str(TargetFunction) + '\n')
                                             minimum1 = min(TargetFunction, target_function)
-                                            if minimum1 == target_function:
+                                            if minimum1 == target_function and minimum1 != TargetFunction:
                                                 file.write(
                                                     "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
                                                 file.write("Новая целевая функция равна " + str(target_function) + '\n')
@@ -410,7 +410,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                     "Выбираем минимальное решение из стартового и измененного" + '\n')
                                                 file.write("Последняя целевая функция = " + str(TargetFunction) + '\n')
                                                 minimum1 = min(TargetFunction, target_function)
-                                                if minimum1 == target_function:
+                                                if minimum1 == target_function and minimum1 != TargetFunction:
                                                     file.write(
                                                         "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
                                                     file.write(
@@ -600,7 +600,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                                                             file.write("Выбираем минимальное решение" + '\n')
                                                             minimum = min(TargetFunction, target_function)
-                                                            if minimum == target_function:
+                                                            if minimum == target_function and minimum != TargetFunction:
                                                                 file.write(
                                                                     "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
                                                                 file.write(

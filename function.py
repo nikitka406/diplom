@@ -482,16 +482,16 @@ def SolutionStore(target_start, sizeK):
 
 
 # Проверка на содержание хвоста в новом начале
-def IsContainTailInStart(sequence, tail, place1):
+def IsContainTailInStart(sequence, tail, place1, file):
     for i in range(len(tail)):
-        if IsContainWells(sequence, tail[i], place1, "start"):
+        if IsContainWells(sequence, tail[i], file, place1, "start"):
             return True
     return False
 
 
-def IsContainTailInEnd(sequence, tail, place1):
+def IsContainTailInEnd(sequence, tail, place1, file):
     for i in range(len(tail)):
-        if IsContainWells(sequence, tail[i], place1, "end"):
+        if IsContainWells(sequence, tail[i], file, place1, "end"):
             return True
     return False
 
