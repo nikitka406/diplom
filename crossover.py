@@ -50,7 +50,7 @@ def AEX(sequence1, sequence2, timeCros):
         children.append([sequence1[0][0], 0])
         children.append([sequence1[1][0], 0])
         # children[0][0] = sequence1[0][0]
-        # children[1.txt][0] = sequence1[1.txt][0]
+        # children[1][0] = sequence1[1][0]
 
         # из первого нуля больше никуда не едем
         sequence1[0][1] = 1
@@ -226,99 +226,116 @@ def AEX(sequence1, sequence2, timeCros):
 
     file.write("<-AEX stop" + '\n')
     file.close()
-
-    file.close()
     return children, timeCros
 
 
 # кроссовер HGreX
-def HGreX(sequence1, sequence2, aex=0, countOper=0):
+def HGreX(sequence1, sequence2, timeCros):
+    file = open("log/hgrexlog.txt", 'a')
+
+    start = time.time()
+    timeCros[1] += 1
+
+    file.write("HGreX start: ->" + '\n')
+    print("Скрещивание решений осуществляется с помощью оператора HGreX" + '\n')
+
     children = [[0, 0]]
+    # число клиентов в текущей машине
     numberInCar = 0
+    # число используемых машин
+    car = 0
+    # флаг, для посещенных городов в одном маршруте(одной машиной)
     flag = [0 for i in range(factory.N)]
     flag[0] = -1
+    # флаг, для посещенных городов в заключительном решении
     flagAll = [0 for i in range(factory.N)]
     flagAll[0] = 1
 
-    first = SelectFirstObj(flag)
-    print("Выбираем случайную вершину = ", first)
+    # сколько раз можно заехать к каждому
+    countOfRaces = factory.wells.copy()
 
-    print("Расставляем флаги")
-    flagAll[first] += 1
+    first = SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file)
+    file.write("Выбираем случайную вершину = " + str(first) + '\n')
+
+    file.write("Расставляем флаги" + '\n')
+    flagAll[first] = 1
     flag[first] = 1
-    print("flag = ", flag)
-    print("flagAll = ", flagAll)
+    countOfRaces[first] -= 1
+    file.write("flag = " + str(flag) + '\n')
+    file.write("flagAll = " + str(flagAll) + '\n')
+    file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
-    print("Добавили первое ребро в ребенка, ")
+    file.write("Добавили первое ребро в ребенка, " + '\n')
     children.append([first, 0])
     numberInCar += 1
-    print(children)
+    file.write("Ребенок сейчас выглядит во так " + str(children) + '\n')
 
-    number = random.randint(1, 2)
-    if number == 1:
-        sequence1[first][1] = 1
-    elif number == 2:
-        sequence2[first][1] = 1
+    scnd = first
+    while car < factory.K or sum(flagAll) < factory.N or children[-1] != [0, 0]:
+        file.write("\n")
+        scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+        file.write("Добавляем следующие ребро " + str(scnd) + "\n")
+        children.append([scnd, 0])
+        file.write("Ребенок сейчас выглядит во так " + str(children) + "\n")
 
-    index = sequence1.index([first, 0])
-    jndex = sequence2.index([first, 0])
-    i = sequence1[index + 1][0]
-    j = sequence2[jndex + 1][0]
+        flagAll[scnd] = 1
+        file.write("flagAll сейчас выглядит во так " + str(flagAll) + "\n")
 
-    if factory.t[first][i] < factory.t[first][j] and i != 0:
-        print("Если i < j и i не ноль")
-        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+        flag[scnd] += 1
+        file.write("flag сейчас выглядит во так " + str(flag) + "\n")
 
-    elif factory.t[first][i] < factory.t[first][j] and j != 0:
-        print("Если i < j и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+        if scnd != 0:
+            numberInCar += 1
+            file.write("Кол-во объектов в текущей машине " + str(numberInCar) + "\n")
 
-    elif factory.t[first][i] >= factory.t[first][j] and j != 0:
-        print("Если j < i и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, j, sequence2, sequence1, flagAll, flag, numberInCar)
+            countOfRaces[scnd] -= 1
+            file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
-    elif factory.t[first][i] >= factory.t[first][j] and i != 0:
-        print("Если j < i и j не ноль")
-        RecursiveSearchSosedFromHGreX(children, i, sequence1, sequence2, flagAll, flag, numberInCar)
+        if scnd == 0:
+            file.write("Вернулись в ноль, нужно перейти на новую машину\n")
+            car += 1
+            numberInCar = 0
+            for i in range(factory.N):
+                flag[i] = 0
 
-    else:
-        print("Не получилось вставить самое короткое выходящие ребро, попробуем просто самое короткое")
-        ti = factory.t[first].copy()
-        print("Кондидаты на выбор самого короткого ", ti)
+            if car < factory.K or sum(flagAll) < factory.N:
+                first = SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file)
+                file.write("Выбираем случайную вершину = " + str(first) + '\n')
 
-        minimum = min(ti)
-        index = ti.index(minimum)
-        print("Самое короткое ребро = ", index)
-        ti[index] = 999999
-        print("Теперь кондидаты выглядят так")
+                file.write("Расставляем флаги" + '\n')
+                flagAll[first] = 1
+                flag[first] += 1
+                countOfRaces[first] -= 1
+                file.write("flag = " + str(flag) + '\n')
+                file.write("flagAll = " + str(flagAll) + '\n')
+                file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
-        while index == first or index == 0:
-            print("Предыдущие короткое ребро не подошло ищем новое")
-            minimum = min(ti)
-            index = ti.index(minimum)
-            print("Самое короткое ребро = ", index)
-            ti[index] = 999999
-            print("Теперь кондидаты выглядят так")
+                file.write("Добавили первое ребро в ребенка, " + '\n')
+                children.append([first, 0])
+                numberInCar += 1
+                file.write("Ребенок сейчас выглядит во так " + str(children) + '\n')
+                scnd = first
 
-        print("Итоговое короткое ребро = ", index)
-        print("Добавим его через рекурсию")
+    Time = time.time() - start
+    timeCros[0] += Time
+    file.write("Время работы HGreX = " + str(Time) + 'seconds\n')
 
-        if number == 1:
-            RecursiveSearchSosedFromHGreX(children, index, sequence1, sequence2, flagAll, flag, numberInCar)
-        elif number == 2:
-            RecursiveSearchSosedFromHGreX(children, index, sequence2, sequence1, flagAll, flag, numberInCar)
+    file.write("<-HGreX stop" + '\n')
+    file.close()
 
-    return children
+    return children, timeCros
 
 
 # Оператор HRndX
-def HRndX(sequence1, sequence2, aex=0, countOper=0):
-    return
+def HRndX(sequence1, sequence2, timeCros):
+    children = sequence1
+    return children, timeCros
 
 
 # Оператор HProX
-def HProX(sequence1, sequence2, aex=0, countOper=0):
-    return
+def HProX(sequence1, sequence2, timeCros):
+    children = sequence1
+    return children, timeCros
 
 
 # Функция вызывает выбранный оператор
@@ -329,13 +346,16 @@ def UsedCrossovers(sequence1, sequence2, operator, timeCros):
         return children, timeCros
 
     elif operator == 'HGreX':
-        return HGreX(sequence1, sequence2, timeCros[1])
+        children, timeCros[1] = HGreX(sequence1, sequence2, timeCros[1])
+        return children, timeCros
 
     elif operator == 'HRndX':
-        return HRndX(sequence1, sequence2, timeCros[2])
+        children, timeCros[2] = HRndX(sequence1, sequence2, timeCros[2])
+        return children, timeCros
 
     elif operator == 'HProX':
-        return HProX(sequence1, sequence2, timeCros[3])
+        children, timeCros[2] = HProX(sequence1, sequence2, timeCros[3])
+        return children, timeCros
 
     else:
         print("ERROR from UsedCrossovers: название такого оператора нет")
@@ -447,7 +467,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'BestAndRand'
+        scenario = 'randomAndRandom'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -457,9 +477,8 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
-        name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
+        name_crossover = ['AEX', 'HGreX']#, 'HRndX', 'HProX']
         crossover = random.choice(name_crossover)
-        crossover = 'AEX'
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию
@@ -641,19 +660,19 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
-    SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
-    SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
     SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
+    SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
+    SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Число итераций = " + str(iteration))
-    SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0] / timeCros[0][1]))
+    # SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0] / timeCros[0][1]))
     # SaveDateResult("Среднее время работы HGreX = " + str(timeCros[1][0]/timeCros[1][1]))
     # SaveDateResult("Среднее время работы HRndX = " + str(timeCros[2][0]/timeCros[2][1]))
     # SaveDateResult("Среднее время работы HProX = " + str(timeCros[3][0]/timeCros[3][1]))
-    SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
+    # SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
     # SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
-    SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
-    SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
+    # SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
+    # SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
 
     min_result = min(Target_Function)
     number_solution = Target_Function.count(min(Target_Function))

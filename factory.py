@@ -92,6 +92,7 @@ with open(FILENAME2) as File:
         if row[0] != 'Name':
             K += 1
 
+timeWork = S[1] / wells[1]
 KA = 0  # кол-во ТС = кол-ву скважин
 param_crossing = 0
 for i in range(N):
@@ -120,13 +121,14 @@ for i in range(N):
 
 # клиента для стартового решения
 param_population = int(N/2)  # параметр который будет показывать, кол-во особей в популяции
-param_min_num_cl_in_car = 8  # параметр отвечающий за, сколько минимально клиентов может присутствовать в однрой машине
+param_min_num_cl_in_car = 3  # параметр отвечающий за, сколько минимально клиентов может присутствовать в однрой машине
 # param_crossing = param_population * 3  # сколько раз будем скрещивать решения
 coinsLS = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]  # Значение монетки, сколько значений такая вероятность
 coinsMut = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 coinsCheckSol = [0, 1]
 param_local_search = int(5)  # сколько раз будем запускать локальный поиск
 param_len_subseq = 2  # максимальная длина подпоследовательности в exchange
+param_hgrex_uncertainty = int(N/3)
 #
 # print("d = ")
 # for i in range(N):

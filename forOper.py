@@ -417,12 +417,12 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
                                "    значит надо удалить посещение этого объекта в старом маршруте" + '\n')
                     XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientCar)
 
+                XR[sosed][sosedRight][sosedCar] = 0
                 XR[sosed][client][sosedCar] = 1
                 if client != sosedRight:
                     file.write("    Сосед справа не равен клиенту\n")
                     XR[client][sosedRight][sosedCar] = 1
-                YR[client][sosedCar] = 1  # тепреь машина соседа обслуживает клиента
-                XR[sosed][sosedRight][sosedCar] = 0
+                YR[client][sosedCar] = 1  # теперь машина соседа обслуживает клиента
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
@@ -432,7 +432,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
                 XR[sosed][sosedRight][sosedCar] = 1
                 XR[sosed][client][sosedCar] = 0
                 XR[client][sosedRight][sosedCar] = 0
-                YR[client][sosedCar] = 0  # тепреь машина соседа обслуживает клиента
+                YR[client][sosedCar] = 0  # теперь машина соседа обслуживает клиента
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
@@ -530,7 +530,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
                 file.write("OperatorJoinFromHelp stop: <-\n")
                 return Xl, Yl, Sl, Al, targetL, sizeK
 
-            elif minimum == targetR and minimum != -1 and targetR != targetL:
+            elif minimum == targetR and minimum != -1:
                 file.write("    Выбрали правого у него целевая меньше" + '\n')
                 file.write("OperatorJoinFromHelp stop: <-\n")
                 return XR, YR, SR, AR, targetR, sizeK

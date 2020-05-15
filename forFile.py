@@ -482,6 +482,8 @@ def ClearAllFile():
     file.close()
     file = open('log/twooptlog.txt', 'w')
     file.close()
+    file = open('log/hgrexlog.txt', 'w')
+    file.close()
     file = open('output/Help.txt', 'w')
     file.close()
     file = open('output/LocalSearch.txt', 'w')

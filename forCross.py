@@ -519,39 +519,6 @@ def RecursiveSearchSosedFromAex(children, bufer_in, bufer_out, i_out, flag, flag
             "ERROR from RecursiveSearchSosedFromAex outside: проблема с флагами, не нашли не ноль, не еще не посещенный" + '\n')
 
 
-# Добавляем клиента в последовательность, со всеми флагами
-# ЗАебись!!!
-def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, file):
-    file.write("AddClientaInSequence start: ->\n")
-    file.write("    Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence" + '\n')
-    children.append([bufer[i_in][0], 0])
-
-    # из первого нуля больше никуда не едем
-    bufer[i_in][1] = 1
-
-    # Расставляем флажки локально для первой машины и для общего решения
-    flag[0] += 1
-    flag[bufer[i_in][0]] = 1
-    flagAll[bufer[i_in][0]] = 1
-    # на одну мащину к нему (bufer1[1.txt]) теперь может приехать меньше
-    countOfRaces[bufer[i_in][0]] -= 1
-
-    file.write("    Ребенок выглядит пока вот так " + '\n')
-    file.write("    " + str(children) + '\n')
-    file.write("    AddClientaInSequence stop: <-\n")
-    file.write("______________________________" + '\n')
-
-
-# Выбор рандомного города из тех у который остались свободные скважины
-def RandomClientWithWells(countOfRaces):
-    # список в котором будут хранится клиенты в которорых остались скважины
-    ostatok = []
-    for i in factory.N:
-        if countOfRaces[i] > 0:
-            ostatok.append(i)
-    return random.choise(ostatok)
-
-
 # Поиск депо из которого не выезжали
 # jndex - индекс у ребенка
 # ЗАебись!!!
@@ -634,52 +601,6 @@ def SearchForAnUnvisitedZero(bufer1, size1, bufer2, size2, flagAll, countOfRaces
 
     file.write("Notification from SearchForAnUnvisitedZero: не нашли куда ехать" + '\n')
     file.write("SearchForAnUnvisitedZero stop: <-\n")
-
-
-# Выбор первого клиента с минимальным временем начала
-def SelectFirstObj(flagAll):
-    # Копируем время начала
-    E = factory.e.copy()
-    E[0] = 99999999
-
-    minimum = min(E)
-    print(" Минимальное время начала = ", minimum)
-
-    count_min = E.count(minimum)
-    print("Всего ", count_min, " объектов начинают свою работу в это время")
-
-    arrE = []
-    print("Создаем массив для объектов с одинаковым временем начала")
-
-    index = 0
-    for i in range(count_min):
-        index = E.index(minimum, index + 1)
-        if flagAll[index] == 0:
-            arrE.append(index)
-            print("Cейчас массив выглядит следующим образом ", arrE)
-
-    arrL = []
-    print("Создаем массив в котором время окончания всех этих объектов")
-
-    for i in range(len(arrE)):
-        arrL.append(factory.l[arrE[i]])
-        print("Cейчас массив выглядит следующим образом ", arrL)
-
-    minimum = min(arrL)
-    count_min = arrL.count(minimum)
-    print("Минимальное время окончания из всех этих объектов = ", minimum, " их число = ", count_min)
-
-    result = []
-    print("Создаем массив для выбора случайного клиента из тех кто с одинаковым временем окончания")
-
-    index = -1
-    for i in range(count_min):
-        index = arrL.index(minimum, index + 1)
-        result.append(arrE[index])
-        print("Cейчас массив выглядит следующим образом ", result)
-
-    E[0] = 0
-    return random.choice(result)
 
 
 # Рекурсия для HGreX
