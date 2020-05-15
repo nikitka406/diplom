@@ -34,36 +34,40 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                     file.write("С машины " + str(clientCar) + '\n')
 
                     for sosedK in range(SizeK):
-                        for sosed in range(1, factory.N):
-                            if Y[sosed][sosedK] == 1 and ResultCoins():
+                        for sosed in range(factory.N):
+                            if ResultCoins():
                                 file.write(
                                     "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
-                                file.write("К соседу " + str(sosed) + '\n')
-                                file.write("На машине " + str(sosedK) + '\n')
 
-                                x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK,
-                                                                                           client, clientCar,
-                                                                                           sosed, sosedK, iteration,
-                                                                                           file)
-                                file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
-                                file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
-                                file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
-                                file.write("Целевая функция после релока " + str(target_function) + '\n')
+                                if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
 
-                                file.write("Выбираем минимальное решение" + '\n')
-                                minimum = min(TargetFunction, target_function)
-                                if minimum == target_function:
-                                    file.write("Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                    file.write("К соседу " + str(sosed) + '\n')
+                                    file.write("На машине " + str(sosedK) + '\n')
 
-                                    SaveLocalSearch(x, y, s, a, sizeK)
-                                    TargetFunction = target_function
-                                    SizeK = sizeK
-                                    fileflag = 1
-                                else:
-                                    file.write(
-                                        "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                                    file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                                    x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK,
+                                                                                               client, clientCar,
+                                                                                               sosed, sosedK, iteration,
+                                                                                               file)
+                                    file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                                    file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
+                                    file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
+                                    file.write("Целевая функция после релока " + str(target_function) + '\n')
+
+                                    file.write("Выбираем минимальное решение" + '\n')
+                                    minimum = min(TargetFunction, target_function)
+                                    if minimum == target_function:
+                                        file.write(
+                                            "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                        file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                        SaveLocalSearch(x, y, s, a, sizeK)
+                                        TargetFunction = target_function
+                                        SizeK = sizeK
+                                        fileflag = 1
+                                    else:
+                                        file.write(
+                                            "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                                        file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')

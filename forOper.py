@@ -20,7 +20,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
 
         # Вставляем клиента справа от соседа и смотрим что время окончания работ последовательно
         # т.е. есди сосед справа не ноль то вставляем между кем-то, или просто вставляем справа
-        if sosedRight != -1:  # and factory.t[sosed][client] < factory.l[client]:
+        if sosedRight != -1 and sosed != 0:
             try:
                 file.write("Вставляем клиента к соседу справа" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -61,7 +61,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
         else:
             targetR = -1
 
-        if sosedLeft != -1:  # and factory.t[client][sosed] < factory.l[sosed]:
+        if sosedLeft != -1 and sosed != 0:  # and factory.t[client][sosed] < factory.l[sosed]:
             try:
                 file.write("Вставляем клиента к соседу слева" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -99,9 +99,43 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 Xl, Yl, Sl, Al, targetL, sizeK = Checker(Xl, Yl, Sl, Al, sizeK, iteration, "Relocate", file)
             except TypeError:
                 targetL = -1
-
         else:
             targetL = -1
+
+        if sosed == 0 and not CarIsWork(YR, sosedK):
+            try:
+                file.write("    Вставляем скважину в новый маршрут" + '\n')
+                # машина соседа будет работать у клиента столько же
+                SR[client][sosedK] += SR[client][clientK]
+
+                XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
+
+                XR[sosed][client][sosedK] = 1
+                XR[client][sosed][sosedK] = 1
+                YR[sosed][sosedK] = 1
+                YR[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            except IOError:
+                file.write("    Объект не удален" + '\n')
+
+                XR[sosed][sosedRight][sosedK] = 1
+                XR[sosed][client][sosedK] = 0
+                XR[client][sosedRight][sosedK] = 0
+                YR[client][sosedK] = 0  # тепреь машина соседа обслуживает клиента
+
+                # Подсчет времени приезда к клиенту от соседа
+                AR = TimeOfArrival(XR, YR, SR, file)
+
+            try:
+                XR, YR, SR, AR, targetR, sizeK = Checker(XR, YR, SR, AR, sizeK, iteration, "Reloc", file)
+                file.write("OperatorJoinFromReloc stop: <-\n")
+                return XR, YR, SR, AR, targetR, sizeK
+            except TypeError:
+                file.write("OperatorJoinFromReloc stop: <-\n")
+                return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
         file.write("Теперь ищем минимум из двух целевых" + '\n')
         minimum = min(targetL, targetR)
