@@ -3,7 +3,8 @@ import time
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, cycle=factory.param_local_search, evolution=2):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal,
+             cycle=factory.param_local_search, evolution=2):
     file = open("log/relog.txt", 'a')
 
     start = time.time()
@@ -281,7 +282,8 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                                     file.write("Начинаем цикл по объектам в этой машине\n")
                                     for sosed in range(factory.N):
-                                        if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                                        if (Y[sosed][sosedK] == 1 and sosed != 0) or (
+                                                sosed == 0 and not CarIsWork(Y, sosedK)):
                                             file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                             file.write(
                                                 "Попробую одну скважину с объекта " + str(client) + " и машины " + str(
@@ -292,7 +294,8 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                             x, y, s, a, target_function, sizeK = OperatorJoinFromHelp(X, Y, Sresh, A,
                                                                                                       SizeK,
                                                                                                       client, k, sosed,
-                                                                                                      sosedK, factory.timeWork,
+                                                                                                      sosedK,
+                                                                                                      factory.timeWork,
                                                                                                       TargetFunction,
                                                                                                       iteration, flag,
                                                                                                       file)
@@ -379,7 +382,8 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                                         file.write("Начинаем цикл по объектам в этой машине\n")
                                         for sosed in range(1, factory.N):
-                                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (
+                                                    sosed == 0 and not CarIsWork(Y, sosedK)):
                                                 file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                 file.write(
                                                     "Попробую одну скважину с объекта " + str(
@@ -465,7 +469,8 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
     return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
 
 
-def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, cycle=factory.param_local_search):
+def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal,
+             cycle=factory.param_local_search):
     file = open("log/exchlog.txt", 'a')
 
     start = time.time()
@@ -495,7 +500,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                     for sosedCar in range(SizeK):
                         for sosed in range(1, factory.N):
                             # TODO случай с равными машинами
-                            if Y[sosed][sosedCar] == 1 and sosedCar != clientCar:
+                            if Y[sosed][sosedCar] == 1:
 
                                 subseq1 = []
                                 subseq2 = []
@@ -556,15 +561,15 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                     buf1 = []
                                     # Отсекаем мусорные решения, если первые элементы подпоследовательностей
                                     # не содержатся ни в начале ни в конце
-                                    if not IsContainWells(sequenceX2[sosedCar], subseq1[0], file, sequence2Left) \
-                                            and not IsContainWells(sequenceX2[sosedCar], subseq1[0], file,
-                                                                   sequence2Right,
-                                                                   'end') \
-                                            and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
-                                                                   sequence1Left) \
-                                            and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
-                                                                   sequence1Right,
-                                                                   'end'):
+                                    if (not IsContainWells(sequenceX2[sosedCar], subseq1[0], file, sequence2Left)
+                                        and not IsContainWells(sequenceX2[sosedCar], subseq1[0], file,
+                                                               sequence2Right,
+                                                               'end')
+                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
+                                                               sequence1Left)
+                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
+                                                               sequence1Right,
+                                                               'end') and clientCar != sosedCar) or clientCar == sosedCar:
                                         file.write("Первые элементы подпоследовательностей "
                                                    "не содержатся ни в начале ни в конце\n")
 

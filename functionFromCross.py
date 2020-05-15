@@ -334,7 +334,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
 
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
         for i in range(1, len(sequence1)):
-            if i == 1 and flagAll[sequence1[i][0]] == 0 and countOfRaces[sequence1[i][0]] > 0:
+            if i == 1 and countOfRaces[sequence1[i][0]] > 0:
                 buf.append(sequence1[i][0])
             elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[
                 i + 1] != [0, 0] and countOfRaces[sequence1[i+1][0]] > 0:
@@ -342,7 +342,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
 
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
         for i in range(1, len(sequence2)):
-            if i == 1 and flagAll[sequence2[i][0]] == 0 and countOfRaces[sequence2[i][0]] > 0:
+            if i == 1 and countOfRaces[sequence2[i][0]] > 0:
                 buf.append(sequence2[i][0])
             elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[
                 i + 1] != [0, 0] and countOfRaces[sequence2[i+1][0]] > 0:

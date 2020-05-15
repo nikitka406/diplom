@@ -570,8 +570,8 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
     X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, subseq2Left, subseq2, sosedCar, file, subseq2Right)
 
     # Сценарий когда какие-нибудь края равны соседям другой последовательности
-    if subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or \
-            subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right:
+    if (subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or \
+            subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right) and clientCar != sosedCar:
         file.write("    Сценарий когда какие-нибудь края равны соседям другой последовательности\n")
 
         if subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
@@ -788,7 +788,10 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
             return x, y, s, a, target_function, sizeK
 
     else:
-        file.write("    Сценарий когда никакие края не равны с соседями из другой последовательности\n")
+        if clientCar == sosedCar:
+            file.write("    Сценарий когда меняем местами в одной машине\n")
+        else:
+            file.write("    Сценарий когда никакие края не равны с соседями из другой последовательности\n")
 
         X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
         X[subseq2Left][subseq2Right][sosedCar] = 1
@@ -806,4 +809,3 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
         except TypeError:
             file.write("OperatorJoinFromExchange stop: <-\n")
             return x, y, s, a, target_function, sizeK
-    # TODO надо рассмотреть свап, когда одна машина
