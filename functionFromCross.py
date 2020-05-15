@@ -363,7 +363,7 @@ def Uncertainty(start, flag, countOfRaces, file):
     file.write("        buf = " + str(buf) + "\n")
 
     file.write("        Считаем минимальное ребро\n")
-    minimum = factory.d[start][buf[0]]
+    minimum = 999999999999999999999
     j = 0
     flagok = 0
     for i in range(len(buf)):
@@ -404,7 +404,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
     file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
     if buf1 == [] and buf2 == []:
-        file.write("    Не нашли ни одноготакого ребра, ослабим условия\n")
+        file.write("    Не нашли ни одного такого ребра, ослабим условия\n")
         for i in range(len(sequence1)-1):
             if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and countOfRaces[sequence1[i+1][0]] > 0:
                 buf1.append(i)
@@ -455,7 +455,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
         index = distance1.index(min1)
         if numberInCar >= factory.param_min_num_cl_in_car:
             file.write("GetShortArc stop: <-\n")
-            return sequence2[buf1[index] + 1][0]
+            return sequence1[buf1[index] + 1][0]
         elif buf2:
             if buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")

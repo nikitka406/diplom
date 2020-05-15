@@ -477,9 +477,8 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
-        name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
+        name_crossover = ['AEX', 'HGreX']#, 'HRndX', 'HProX']
         crossover = random.choice(name_crossover)
-        crossover = 'HGreX'
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию
@@ -577,8 +576,6 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
 
-        if VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1:
-            print("fsfwfe")
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
@@ -663,19 +660,19 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
-    SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
-    SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
     SaveDateResult("Максимальное значение целевой в поппуляции после локального поиска = " + str(maximumLocal))
+    SaveDateResult("Минимальное значение целевой в поппуляции после оператора хелп = " + str(minimumHelp))
+    SaveDateResult("Максимальное значение целевой в поппуляции после оператора хелп = " + str(maximumHelp))
     SaveDateResult("Число итераций = " + str(iteration))
-    SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0] / timeCros[0][1]))
+    # SaveDateResult("Среднее время работы AEX = " + str(timeCros[0][0] / timeCros[0][1]))
     # SaveDateResult("Среднее время работы HGreX = " + str(timeCros[1][0]/timeCros[1][1]))
     # SaveDateResult("Среднее время работы HRndX = " + str(timeCros[2][0]/timeCros[2][1]))
     # SaveDateResult("Среднее время работы HProX = " + str(timeCros[3][0]/timeCros[3][1]))
-    SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
+    # SaveDateResult("Среднее время работы Relocate в эволюции = " + str(timeLocal[0][0] / timeLocal[0][1]))
     # SaveDateResult("Среднее время работы 2-opt в эволюции = " + str(timeLocal[1][0] / timeLocal[1][1]))
-    SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
-    SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
+    # SaveDateResult("Среднее время работы Help в эволюции = " + str(timeLocal[2][0] / timeLocal[2][1]))
+    # SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
 
     min_result = min(Target_Function)
     number_solution = Target_Function.count(min(Target_Function))
