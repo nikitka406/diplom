@@ -47,7 +47,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                     x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK,
                                                                                                client, clientCar,
                                                                                                sosed, sosedK, iteration,
-                                                                                               file)
+                                                                                               evolution, file)
                                     file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
                                     file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
                                     file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
@@ -675,7 +675,7 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
         if oper == 'reloc':
             x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
                                                                                      SizeSolution[n], iteration,
-                                                                                     timeLocal[0])
+                                                                                     timeLocal[0], 1)
             # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Exchange(X, Y, Sresh, A, Target_Function[n],
             #                                                                          SizeSolution[n], iteration,
             #                                                                          timeLocal[0])

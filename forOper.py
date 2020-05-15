@@ -2,7 +2,7 @@ from function import *
 
 
 # вклиниваем между
-def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, file):
+def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, evolution, file):
     if client != sosed:
         Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
         XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
@@ -102,7 +102,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
         else:
             targetL = -1
 
-        if sosed == 0 and not CarIsWork(YR, sosedK):
+        if sosed == 0 and not CarIsWork(YR, sosedK) and evolution == 2:
             try:
                 file.write("    Вставляем скважину в новый маршрут" + '\n')
                 # машина соседа будет работать у клиента столько же
