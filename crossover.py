@@ -251,14 +251,19 @@ def HGreX(sequence1, sequence2, timeCros):
     flagAll = [0 for i in range(factory.N)]
     flagAll[0] = 1
 
-    first = SelectFirstObj(sequence1, sequence2, flagAll, file)
+    # сколько раз можно заехать к каждому
+    countOfRaces = factory.wells.copy()
+
+    first = SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file)
     file.write("Выбираем случайную вершину = " + str(first) + '\n')
 
     file.write("Расставляем флаги" + '\n')
     flagAll[first] = 1
     flag[first] = 1
+    countOfRaces[first] -= 1
     file.write("flag = " + str(flag) + '\n')
     file.write("flagAll = " + str(flagAll) + '\n')
+    file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
     file.write("Добавили первое ребро в ребенка, " + '\n')
     children.append([first, 0])
@@ -267,7 +272,8 @@ def HGreX(sequence1, sequence2, timeCros):
 
     scnd = first
     while car < factory.K or sum(flagAll) < factory.N or children[-1] != [0, 0]:
-        scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, file)
+        file.write("\n")
+        scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
         file.write("Добавляем следующие ребро " + str(scnd) + "\n")
         children.append([scnd, 0])
         file.write("Ребенок сейчас выглядит во так " + str(children) + "\n")
@@ -275,28 +281,34 @@ def HGreX(sequence1, sequence2, timeCros):
         flagAll[scnd] = 1
         file.write("flagAll сейчас выглядит во так " + str(flagAll) + "\n")
 
-        flag[scnd] = 1
+        flag[scnd] += 1
         file.write("flag сейчас выглядит во так " + str(flag) + "\n")
 
-        numberInCar += 1
-        file.write("Кол-во объектов в текущей машине " + str(numberInCar) + "\n")
+        if scnd != 0:
+            numberInCar += 1
+            file.write("Кол-во объектов в текущей машине " + str(numberInCar) + "\n")
+
+            countOfRaces[scnd] -= 1
+            file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
         if scnd == 0:
-            file.write("Вернулись в ноль, нужно перейти на новую машину")
+            file.write("Вернулись в ноль, нужно перейти на новую машину\n")
             car += 1
             numberInCar = 0
             for i in range(factory.N):
                 flag[i] = 0
 
             if car < factory.K or sum(flagAll) < factory.N:
-                first = SelectFirstObj(sequence1, sequence2, flagAll, file)
+                first = SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file)
                 file.write("Выбираем случайную вершину = " + str(first) + '\n')
 
                 file.write("Расставляем флаги" + '\n')
                 flagAll[first] = 1
-                flag[first] = 1
+                flag[first] += 1
+                countOfRaces[first] -= 1
                 file.write("flag = " + str(flag) + '\n')
                 file.write("flagAll = " + str(flagAll) + '\n')
+                file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
                 file.write("Добавили первое ребро в ребенка, " + '\n')
                 children.append([first, 0])
@@ -455,7 +467,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'BestAndRand'
+        scenario = 'randomAndRandom'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -467,7 +479,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # TODO Задаю список с названиями операторов
         name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
         crossover = random.choice(name_crossover)
-        crossover = 'AEX'
+        crossover = 'HGreX'
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию
@@ -565,6 +577,8 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
 
+        if VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1:
+            print("fsfwfe")
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))

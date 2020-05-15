@@ -304,26 +304,25 @@ def RandomClientWithWells(countOfRaces):
 
 
 # Выбор случайного первого клиента
-def SelectFirstObj(sequence1, sequence2, flagAll, file):
+def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
     buf = []
     file.write("SelectFirstObj start: ->\n")
 
+    file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
     file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
     for i in range(1, len(sequence1)):
-        if i == 1 and flagAll[i] == 0:
-            buf.append(i)
+        if i == 1 and flagAll[sequence1[i][0]] == 0 and countOfRaces[sequence1[i][0]] > 0:
+            buf.append(sequence1[i][0])
         elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[i + 1] != [
-            0, 0] \
-                and flagAll[sequence1[i + 1][0]] == 0:
+            0, 0] and flagAll[sequence1[i + 1][0]] == 0 and countOfRaces[sequence1[i+1][0]] > 0:
             buf.append(sequence1[i + 1][0])
 
     file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
     for i in range(1, len(sequence2)):
-        if i == 1 and flagAll[i] == 0:
-            buf.append(i)
+        if i == 1 and flagAll[sequence2[i][0]] == 0 and countOfRaces[sequence2[i][0]] > 0:
+            buf.append(sequence2[i][0])
         elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[i + 1] != [
-            0, 0] \
-                and flagAll[sequence2[i + 1][0]] == 0:
+            0, 0] and flagAll[sequence2[i + 1][0]] == 0 and countOfRaces[sequence2[i+1][0]] > 0:
             buf.append(sequence2[i + 1][0])
 
     if buf:
@@ -335,18 +334,18 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
 
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
         for i in range(1, len(sequence1)):
-            if i == 1 and flagAll[i] == 0:
-                buf.append(i)
+            if i == 1 and flagAll[sequence1[i][0]] == 0 and countOfRaces[sequence1[i][0]] > 0:
+                buf.append(sequence1[i][0])
             elif i != len(sequence1) - 1 and sequence1[i - 1] != [0, 0] and sequence1[i] == [0, 0] and sequence1[
-                i + 1] != [0, 0]:
+                i + 1] != [0, 0] and countOfRaces[sequence1[i+1][0]] > 0:
                 buf.append(sequence1[i + 1][0])
 
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence2) + "\n")
         for i in range(1, len(sequence2)):
-            if i == 1 and flagAll[i] == 0:
-                buf.append(i)
+            if i == 1 and flagAll[sequence2[i][0]] == 0 and countOfRaces[sequence2[i][0]] > 0:
+                buf.append(sequence2[i][0])
             elif i != len(sequence2) - 1 and sequence2[i - 1] != [0, 0] and sequence2[i] == [0, 0] and sequence2[
-                i + 1] != [0, 0]:
+                i + 1] != [0, 0] and countOfRaces[sequence2[i+1][0]] > 0:
                 buf.append(sequence2[i + 1][0])
 
         file.write("    buf = " + str(buf) + '\n')
@@ -355,7 +354,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
 
 
 # функция возвращает ребро в случаи неопределенности
-def Uncertainty(start, flag, file):
+def Uncertainty(start, flag, countOfRaces, file):
     file.write("    Uncertainty start:->\n")
     buf = []
     file.write("        Задаем заданное число случайных ребер c началом " + str(start) + "\n")
@@ -368,7 +367,7 @@ def Uncertainty(start, flag, file):
     j = 0
     flagok = 0
     for i in range(len(buf)):
-        if minimum >= factory.d[start][buf[i]] and buf[i] != start and flag[buf[i]] != 1:
+        if minimum >= factory.d[start][buf[i]] and buf[i] != start and flag[buf[i]] != 1 and countOfRaces[buf[i]] > 0:
             flagok = 1
             minimum = factory.d[start][buf[i]]
             j = i
@@ -381,36 +380,38 @@ def Uncertainty(start, flag, file):
         return buf[j]
     else:
         file.write("    Uncertainty stop:<-\n")
-        file.write("   С первого раза не получилось разрешить неопределенность попробуем еще раз")
-        return Uncertainty(start, flag, file)
+        file.write("   С первого раза не получилось разрешить неопределенность вернемся в 0\n")
+        return 0
 
 
 # Возвращаем самое короткое ребро из двух родителей
-def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
+def GetShortArc(sequence1, sequence2, start, flag, numberInCar, countOfRaces, file):
     file.write("GetShortArc start: ->\n")
 
     file.write("    Ищем индексы всех таких объектов" + '\n')
     buf1 = []
     buf2 = []
-    for i in range(len(sequence1)):
-        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0:
+    for i in range(len(sequence1)-1):
+        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0 and countOfRaces[sequence1[i+1][0]] > 0:
             buf1.append(i)
+            file.write("    sequence1[i][0] = " + str(sequence1[i][0]) + '\n')
+            file.write("    i+1 = " + str(i + 1) + '\n')
     file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
 
-    for i in range(len(sequence2)):
-        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0:
+    for i in range(len(sequence2)-1):
+        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0 and countOfRaces[sequence2[i+1][0]] > 0:
             buf2.append(i)
     file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
     if buf1 == [] and buf2 == []:
         file.write("    Не нашли ни одноготакого ребра, ослабим условия\n")
-        for i in range(len(sequence1)):
-            if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0:
+        for i in range(len(sequence1)-1):
+            if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and countOfRaces[sequence1[i+1][0]] > 0:
                 buf1.append(i)
         file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
 
-        for i in range(len(sequence2)):
-            if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0:
+        for i in range(len(sequence2)-1):
+            if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and countOfRaces[sequence2[i+1][0]] > 0:
                 buf2.append(i)
         file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
@@ -420,15 +421,23 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
     for i in range(len(buf1)):
         index = sequence1[buf1[i]][0]
         jndex = sequence1[buf1[i] + 1][0]
+        file.write("    index = " + str(index) + '\n')
+        file.write("    jndex = " + str(jndex) + '\n')
+        file.write("    d[index][jndex] = " + str(factory.d[index][jndex]) + '\n')
         distance1.append(factory.d[index][jndex])
     file.write("    distance1 = " + str(distance1) + '\n')
 
     for i in range(len(buf2)):
         index = sequence2[buf2[i]][0]
         jndex = sequence2[buf2[i] + 1][0]
+        file.write("    index = " + str(index) + '\n')
+        file.write("    jndex = " + str(jndex) + '\n')
+        file.write("    d[index][jndex] = " + str(factory.d[index][jndex]) + '\n')
         distance2.append(factory.d[index][jndex])
     file.write("    distance2 = " + str(distance2) + '\n')
 
+    min1 = 999999999999
+    min2 = 999999999999
     try:
         min1 = min(distance1)
         file.write("    min1 = " + str(min1) + '\n')
@@ -437,19 +446,24 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             min2 = min(distance2)
             file.write("    min2 = " + str(min2) + '\n')
         except ValueError:
-            return Uncertainty(start, flag, file)
+            return Uncertainty(start, flag, countOfRaces, file)
 
     try:
         min2 = min(distance2)
         file.write("    min2 = " + str(min2) + '\n')
     except ValueError:
         index = distance1.index(min1)
-        if buf1[index] != 0 and numberInCar >= factory.param_min_num_cl_in_car:
+        if numberInCar >= factory.param_min_num_cl_in_car:
             file.write("GetShortArc stop: <-\n")
-            return buf1[index]
-        elif buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
-            file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
-            return Uncertainty(start, flag, file)
+            return sequence2[buf1[index] + 1][0]
+        elif buf2:
+            if buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
+                file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
+                return Uncertainty(start, flag, countOfRaces, file)
+        # else:
+        #     # лень разбирать подслучай, идем в неопределенность
+        #     file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
+        #     return Uncertainty(start, flag, countOfRaces, file)
 
     if min1 >= min2:
         file.write("   min1 >= min2\n")
@@ -463,7 +477,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             if sequence2[buf2[index] + 1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                return Uncertainty(start, flag, file)
+                return Uncertainty(start, flag, countOfRaces, file)
 
             else:
                 file.write("GetShortArc stop: <-\n")
@@ -481,7 +495,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             if sequence1[buf1[index] + 1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                return Uncertainty(start, flag, file)
+                return Uncertainty(start, flag, countOfRaces, file)
 
             else:
                 file.write("GetShortArc stop: <-\n")
