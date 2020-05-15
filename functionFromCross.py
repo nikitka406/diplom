@@ -34,7 +34,11 @@ def XDisplayInTheSequenceX2(x, bufer, i, k, bul):
 
 # Подсчитывает число используемых машин в последовательности
 def CountUsedMachines(sequence):
-    return sequence.count([0, 0]) - 1
+    count = 0
+    for i in range(1, len(sequence)):
+        if sequence[i] == [0, 0]:
+            count += 1
+    return count
 
 
 # Выставляем сколько работает каждая машина на локации after
@@ -267,7 +271,6 @@ def RandNotVisitClient(countOfRaces, flag, file):
 
 
 # Добавляем клиента в последовательность, со всеми флагами
-# ЗАебись!!!
 def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, file):
     file.write("AddClientaInSequence start: ->\n")
     file.write("    Добавляем " + str(bufer[i_in][0]) + "в ребенка с помощью функции AddClientaInSequence" + '\n')
@@ -300,7 +303,7 @@ def RandomClientWithWells(countOfRaces):
     return random.choise(ostatok)
 
 
-# Выбор первого клиента с минимальным временем начала
+# Выбор случайного первого клиента
 def SelectFirstObj(sequence1, sequence2, flagAll, file):
     buf = []
     file.write("SelectFirstObj start: ->\n")
@@ -325,6 +328,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
 
     if buf:
         file.write("buf = " + str(buf) + '\n')
+        file.write("SelectFirstObj stop: <-\n")
         return random.choice(buf)
     else:
         file.write("    Не нашли ни одного не посещенного первого, берем любого\n")
@@ -351,28 +355,34 @@ def SelectFirstObj(sequence1, sequence2, flagAll, file):
 
 
 # функция возвращает ребро в случаи неопределенности
-def Uncertainty(start, file):
+def Uncertainty(start, flag, file):
     file.write("    Uncertainty start:->\n")
     buf = []
     file.write("        Задаем заданное число случайных ребер c началом " + str(start) + "\n")
     for i in range(factory.param_hgrex_uncertainty):
-
-        buf.append(random.randint(1, factory.N-1))
-    file.write("        buf = " + str(buf)+"\n")
+        buf.append(random.randint(1, factory.N - 1))
+    file.write("        buf = " + str(buf) + "\n")
 
     file.write("        Считаем минимальное ребро\n")
     minimum = factory.d[start][buf[0]]
     j = 0
-    for i in range(1, len(buf)):
-        if minimum > factory.d[start][buf[i]] and buf[i] != start:
+    flagok = 0
+    for i in range(len(buf)):
+        if minimum >= factory.d[start][buf[i]] and buf[i] != start and flag[buf[i]] != 1:
+            flagok = 1
             minimum = factory.d[start][buf[i]]
             j = i
             file.write("        minimum = " + str(minimum) + '\n')
             file.write("        j = " + str(j) + '\n')
 
-    file.write("    Uncertainty stop:<-\n")
-    file.write("GetShortArc stop: <-\n")
-    return buf[j]
+    if flagok == 1:
+        file.write("    Uncertainty stop:<-\n")
+        file.write("GetShortArc stop: <-\n")
+        return buf[j]
+    else:
+        file.write("    Uncertainty stop:<-\n")
+        file.write("   С первого раза не получилось разрешить неопределенность попробуем еще раз")
+        return Uncertainty(start, flag, file)
 
 
 # Возвращаем самое короткое ребро из двух родителей
@@ -383,12 +393,12 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
     buf1 = []
     buf2 = []
     for i in range(len(sequence1)):
-        if sequence1[i][0] == start and flag[sequence1[i+1][0]] <= 0 and sequence1[i+1][1] == 0:
+        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0:
             buf1.append(i)
     file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
 
     for i in range(len(sequence2)):
-        if sequence2[i][0] == start and flag[sequence2[i+1][0]] <= 0 and sequence2[i+1][1] == 0:
+        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0:
             buf2.append(i)
     file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
@@ -409,7 +419,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
     distance2 = []
     for i in range(len(buf1)):
         index = sequence1[buf1[i]][0]
-        jndex = sequence1[buf1[i]+1][0]
+        jndex = sequence1[buf1[i] + 1][0]
         distance1.append(factory.d[index][jndex])
     file.write("    distance1 = " + str(distance1) + '\n')
 
@@ -427,7 +437,7 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             min2 = min(distance2)
             file.write("    min2 = " + str(min2) + '\n')
         except ValueError:
-            return Uncertainty(start, file)
+            return Uncertainty(start, flag, file)
 
     try:
         min2 = min(distance2)
@@ -439,21 +449,21 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
             return buf1[index]
         elif buf2[index] == 0 and numberInCar < factory.param_min_num_cl_in_car:
             file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
-            return Uncertainty(start, file)
+            return Uncertainty(start, flag, file)
 
     if min1 >= min2:
         file.write("   min1 >= min2\n")
         index = distance2.index(min2)
         if numberInCar >= factory.param_min_num_cl_in_car:
             file.write("GetShortArc stop: <-\n")
-            return sequence2[buf2[index]+1][0]
+            return sequence2[buf2[index] + 1][0]
 
         elif numberInCar < factory.param_min_num_cl_in_car:
 
-            if sequence2[buf2[index]+1][0] == 0:
+            if sequence2[buf2[index] + 1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                return Uncertainty(start, file)
+                return Uncertainty(start, flag, file)
 
             else:
                 file.write("GetShortArc stop: <-\n")
@@ -464,17 +474,15 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, file):
         index = distance1.index(min1)
         if numberInCar >= factory.param_min_num_cl_in_car:
             file.write("GetShortArc stop: <-\n")
-            return sequence1[buf1[index]+1][0]
+            return sequence1[buf1[index] + 1][0]
 
         elif numberInCar < factory.param_min_num_cl_in_car:
 
-            if sequence1[buf1[index]+1][0] == 0:
+            if sequence1[buf1[index] + 1][0] == 0:
                 file.write("    Неопределенность, вернулись в ноль когда слишком мало клиентов в машине\n")
 
-                return Uncertainty(start, file)
+                return Uncertainty(start, flag, file)
 
             else:
                 file.write("GetShortArc stop: <-\n")
                 return sequence1[buf1[index] + 1][0]
-
-
