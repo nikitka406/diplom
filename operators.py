@@ -36,11 +36,11 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                     for sosedK in range(SizeK):
                         for sosed in range(factory.N):
-                            if ResultCoins():# TODO зря, надо вернуть в общий иф
-                                file.write(
-                                    "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
+                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
 
-                                if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                                if ResultCoins():
+                                    file.write(
+                                        "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
 
                                     file.write("К соседу " + str(sosed) + '\n')
                                     file.write("На машине " + str(sosedK) + '\n')
@@ -698,3 +698,35 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
     return timeLocal
+
+
+# Локальный поиск (локально меняем решение)
+def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
+    print("Применяем локальный поиск (локально меняем решение)")
+
+    # TODO выбираем оператор локального поиска
+    local_search_oper = ['relocate', 'Exchange', '2Opt']
+    oper = random.choice(local_search_oper)
+    # oper = 'Exchange'
+
+    print("Используем оператор ", oper)
+    if oper == 'relocate':
+        x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration,
+                                                                    timeLocal[0], factory.param_local_search/2)
+        SaveDateFromGraph(target_function, "Reloc")
+        iteration += 1
+        return x, y, s, a, target_function, sizeK, iteration, timeLocal
+
+    elif oper == '2Opt':
+        x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration,
+                                                                   timeLocal[1])
+        SaveDateFromGraph(target_function, "2Opt")
+        iteration += 1
+        return x, y, s, a, target_function, sizeK, iteration, timeLocal
+
+    elif oper == 'Exchange':
+        x, y, s, a, target_function, sizeK, timeLocal[3] = Exchange(x, y, s, a, target_function, sizeK, iteration,
+                                                                    timeLocal[3], factory.param_local_search/2)
+        SaveDateFromGraph(target_function, "Exchange")
+        iteration += 1
+        return x, y, s, a, target_function, sizeK, iteration, timeLocal

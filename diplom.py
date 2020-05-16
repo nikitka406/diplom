@@ -1,4 +1,4 @@
-from crossover import *
+from geneticAlgorithm import *
 
 start = time.time()
 
