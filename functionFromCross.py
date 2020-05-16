@@ -160,7 +160,8 @@ def SequenceDisplayInTheXYSA(sequence):
         if after != 0:
             try:
                 if sequence.index([after, 0], 0, i) > 0:
-                    print("Уже считали для этого ", after, " города")
+                    # print("Уже считали для этого ", after, " города")
+                    print("", end="")
 
             except ValueError:
                 # print("До этого еще не встречали город ", after)

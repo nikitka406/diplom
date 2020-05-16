@@ -2,14 +2,11 @@ from function import *
 
 
 # вклиниваем между
-def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, file):
+def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, sosedLeft, sosedRight, iteration, file):
     file.write("    OperatorJoinFromReloc start: ->\n")
     if client != sosed:
         Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
         XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
-
-        sosedLeft = SearchSosedLeftOrRight(Xl, Yl, sosed, "left", sosedK)  # левый сосед соседа
-        sosedRight = SearchSosedLeftOrRight(Xl, Yl, sosed, "right", sosedK)  # правый сосед соседа
 
         file.write("sosed_left = " + str(sosedLeft) + '\n')
         file.write("sosed_right = " + str(sosedRight) + '\n')
@@ -28,7 +25,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 buf = 0
                 if sosedK != clientK:
                     SR[client][sosedK] += SR[client][clientK]
-                else:
+                elif sosedK == clientK:
                     buf = SR[client][clientK]
 
                 # Чтобы все корректно работало, сначала надо написать
@@ -37,10 +34,11 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 XR, YR, SR, AR = DeleteClientaFromPath(XR, YR, SR, AR, client, clientK)
                 if sosedK == clientK:
                     SR[client][sosedK] += buf
-                XR[sosed][sosedRight][sosedK] = 0
-                XR[sosed][client][sosedK] = 1
-                XR[client][sosedRight][sosedK] = 1
-                YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
+                if sosedRight != client:
+                    XR[sosed][sosedRight][sosedK] = 0
+                    XR[sosed][client][sosedK] = 1
+                    XR[client][sosedRight][sosedK] = 1
+                    YR[client][sosedK] = 1  # тепреь машина соседа обслуживает клиента
 
                 # Подсчет времени приезда к клиенту от соседа
                 AR = TimeOfArrival(XR, YR, SR, file)
@@ -69,7 +67,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 buf = 0
                 if sosedK != clientK:
                     Sl[client][sosedK] += Sl[client][clientK]
-                else:
+                elif sosedK == clientK:
                     buf = Sl[client][clientK]
 
                 # Чтобы все корректно работало, сначала надонаписать
@@ -78,10 +76,11 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 Xl, Yl, Sl, Al = DeleteClientaFromPath(Xl, Yl, Sl, Al, client, clientK)
                 if sosedK == clientK:
                     Sl[client][sosedK] += buf
-                Xl[sosedLeft][sosed][sosedK] = 0
-                Xl[sosedLeft][client][sosedK] = 1
-                Xl[client][sosed][sosedK] = 1
-                Yl[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
+                if sosedLeft != client:
+                    Xl[sosedLeft][sosed][sosedK] = 0
+                    Xl[sosedLeft][client][sosedK] = 1
+                    Xl[client][sosed][sosedK] = 1
+                    Yl[client][sosedK] = 1  # теперь машина соседа обслуживает клиента
 
                 # Подсчет времени приезда к клиенту от соседа
                 Al = TimeOfArrival(Xl, Yl, Sl, file)
@@ -139,13 +138,12 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
                 return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
         file.write("Теперь ищем минимум из двух целевых" + '\n')
-        minimum = min(targetL, targetR)
-        if minimum == targetL and minimum != -1:
+        if (targetL < targetR and targetL != -1) or (targetR == -1 and targetL != -1):
             file.write("Выбрали левого у него целевая меньше" + '\n')
             file.write("    OperatorJoinFromReloc stop: <-\n")
             return Xl, Yl, Sl, Al, targetL, sizeK
 
-        elif minimum == targetR and minimum != -1 and targetR != targetL:
+        elif (targetR < targetL and targetR != -1) or (targetL == -1 and targetR != -1):
             file.write("Выбрали правого у него целевая меньше" + '\n')
             file.write("    OperatorJoinFromReloc stop: <-\n")
             return XR, YR, SR, AR, targetR, sizeK

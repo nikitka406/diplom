@@ -25,51 +25,67 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
         it += 1
         buf_targ = TargetFunction
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
+        sequenceX2 = GettingTheSequence(X)
 
         # Bыбираем клиента
         # client, clientCar = ChooseRandomObjAndCar(Y, SizeK)
         for clientCar in range(SizeK):
             for client in range(1, factory.N):
                 if Y[client][clientCar] == 1:
-                    file.write("Переставляем клиентa " + str(client) + '\n')
-                    file.write("С машины " + str(clientCar) + '\n')
 
                     for sosedK in range(SizeK):
                         for sosed in range(factory.N):
-                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)
-                                                                          and evolution == 2):
 
-                                if ResultCoins():
-                                    file.write(
-                                        "Монетка сказала что рассматриваем эту окрестность" + '\n')
+                            sosedLeft = SearchSosedLeftOrRight(X, Y, sosed, "left", sosedK)  # левый сосед соседа
+                            sosedRight = SearchSosedLeftOrRight(X, Y, sosed, "right", sosedK)  # правый сосед соседа
 
-                                    file.write("К соседу " + str(sosed) + '\n')
-                                    file.write("На машине " + str(sosedK) + '\n')
+                            if (client != sosedLeft and client != sosed and client != sosedRight
+                                and not IsContainWells(sequenceX2[sosedK], client, file))\
+                                or (client == sosedLeft or client == sosed or client == sosedRight):
 
-                                    x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK,
-                                                                                               client, clientCar,
-                                                                                               sosed, sosedK, iteration,
-                                                                                               file)
-                                    file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
-                                    file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
-                                    file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
-                                    file.write("Целевая функция после релока " + str(target_function) + '\n')
+                                file.write("Это не мусорное решение, можно смотреть\n")
 
-                                    file.write("Выбираем минимальное решение" + '\n')
-                                    minimum = min(TargetFunction, target_function)
-                                    if minimum == target_function and minimum != TargetFunction:
+                                if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)
+                                                                              and evolution == 2):
+
+                                    if ResultCoins():
                                         file.write(
-                                            "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                        file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                            "Монетка сказала что рассматриваем эту окрестность" + '\n')
+                                        file.write("Переставляем клиентa " + str(client) + '\n')
+                                        file.write("С машины " + str(clientCar) + '\n')
 
-                                        SaveLocalSearch(x, y, s, a, sizeK)
-                                        TargetFunction = target_function
-                                        SizeK = sizeK
-                                        fileflag = 1
-                                    else:
-                                        file.write(
-                                            "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
-                                        file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                                        file.write("К соседу " + str(sosed) + '\n')
+                                        file.write("На машине " + str(sosedK) + '\n')
+
+                                        x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A,
+                                                                                                   SizeK,
+                                                                                                   client, clientCar,
+                                                                                                   sosed, sosedK,
+                                                                                                   sosedLeft, sosedRight,
+                                                                                                   iteration,
+                                                                                                   file)
+                                        file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
+                                        file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
+                                        file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
+                                        file.write("Целевая функция после релока " + str(target_function) + '\n')
+
+                                        file.write("Выбираем минимальное решение" + '\n')
+                                        minimum = min(TargetFunction, target_function)
+                                        if minimum == target_function and minimum != TargetFunction:
+                                            file.write(
+                                                "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                            file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                            SaveLocalSearch(x, y, s, a, sizeK)
+                                            TargetFunction = target_function
+                                            SizeK = sizeK
+                                            fileflag = 1
+                                        else:
+                                            file.write(
+                                                "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
+                                            file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                            else:
+                                file.write("Отбросили мусорное решение\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -165,7 +181,7 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                     IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
                                     and client1Car != client2Car) or client1Car == client2Car:
 
-                                    if 1 == 1:
+                                    if ResultCoins():
                                         file.write(
                                             "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
 
@@ -734,26 +750,26 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', 'Exchange', '2Opt']
     oper = random.choice(local_search_oper)
-    # oper = '2Opt'
+    # oper = 'relocate'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
         x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration,
                                                                     timeLocal[0])
         SaveDateFromGraph(target_function, "Reloc")
-        iteration += 1
+        # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == '2Opt':
         x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration,
                                                                    timeLocal[1])
         SaveDateFromGraph(target_function, "2Opt")
-        iteration += 1
+        # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == 'Exchange':
         x, y, s, a, target_function, sizeK, timeLocal[3] = Exchange(x, y, s, a, target_function, sizeK, iteration,
                                                                     timeLocal[3], factory.param_local_search/2)
         SaveDateFromGraph(target_function, "Exchange")
-        iteration += 1
+        # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
