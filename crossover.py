@@ -230,8 +230,13 @@ def AEX(sequence1, sequence2, timeCros):
 
 
 # кроссовер HGreX
-def HGreX(sequence1, sequence2, timeCros):
-    file = open("log/hgrexlog.txt", 'a')
+def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
+    if cros == 'HGreX':
+        file = open("log/hgrexlog.txt", 'a')
+    elif cros == 'HRndX':
+        file = open("log/hrndxlog.txt", 'a')
+    elif cros == 'HProX':
+        file = open("log/hproxlog.txt", 'a')
 
     start = time.time()
     timeCros[1] += 1
@@ -273,7 +278,13 @@ def HGreX(sequence1, sequence2, timeCros):
     scnd = first
     while car < factory.K or sum(flagAll) < factory.N or children[-1] != [0, 0]:
         file.write("\n")
-        scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+        if cros == 'HGreX':
+            scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+        elif cros == 'HRndX':
+            scnd = GetArcHRndX(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+        # elif cros == 'HProX':
+        #     scnd = GetArcHProX(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+
         file.write("Добавляем следующие ребро " + str(scnd) + "\n")
         children.append([scnd, 0])
         file.write("Ребенок сейчас выглядит во так " + str(children) + "\n")
@@ -326,18 +337,6 @@ def HGreX(sequence1, sequence2, timeCros):
     return children, timeCros
 
 
-# Оператор HRndX
-def HRndX(sequence1, sequence2, timeCros):
-    children = sequence1
-    return children, timeCros
-
-
-# Оператор HProX
-def HProX(sequence1, sequence2, timeCros):
-    children = sequence1
-    return children, timeCros
-
-
 # Функция вызывает выбранный оператор
 def UsedCrossovers(sequence1, sequence2, operator, timeCros):
     print("Запускаем оператор ", operator)
@@ -346,15 +345,15 @@ def UsedCrossovers(sequence1, sequence2, operator, timeCros):
         return children, timeCros
 
     elif operator == 'HGreX':
-        children, timeCros[1] = HGreX(sequence1, sequence2, timeCros[1])
+        children, timeCros[1] = HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros[1], operator)
         return children, timeCros
 
     elif operator == 'HRndX':
-        children, timeCros[2] = HRndX(sequence1, sequence2, timeCros[2])
+        children, timeCros[2] = HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros[2], operator)
         return children, timeCros
 
     elif operator == 'HProX':
-        children, timeCros[2] = HProX(sequence1, sequence2, timeCros[3])
+        children, timeCros[2] = HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros[3], operator)
         return children, timeCros
 
     else:
@@ -478,8 +477,9 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
         # TODO Задаю список с названиями операторов
-        name_crossover = ['AEX', 'HGreX']#, 'HRndX', 'HProX']
+        name_crossover = ['AEX', 'HGreX', 'HRndX']#, 'HProX']
         crossover = random.choice(name_crossover)
+        # crossover = 'HRndX'
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию

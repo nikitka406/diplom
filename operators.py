@@ -36,7 +36,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                     for sosedK in range(SizeK):
                         for sosed in range(factory.N):
-                            if ResultCoins():
+                            if ResultCoins():# TODO зря, надо вернуть в общий иф
                                 file.write(
                                     "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
 

@@ -128,7 +128,7 @@ coinsMut = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 coinsCheckSol = [0, 1]
 param_local_search = int(5)  # сколько раз будем запускать локальный поиск
 param_len_subseq = 2  # максимальная длина подпоследовательности в exchange
-param_hgrex_uncertainty = int(N/3)
+param_hgrex_uncertainty = int(N/3)  # число для задания кол-ва случайных ребер
 #
 # print("d = ")
 # for i in range(N):
