@@ -144,22 +144,26 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
         for client1Car in range(SizeK):
             for client1 in range(1, factory.N):
                 if Y[client1][client1Car] == 1:
-                    file.write("Меняем от клиентa1 " + str(client1) + '\n')
-                    file.write("С машины1 " + str(client1Car) + '\n')
 
                     tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
 
                     for client2Car in range(SizeK):
                         for client2 in range(1, factory.N):
                             if Y[client2][client2Car] == 1:
+                                file.write("\nsequenceX2[client1Car] = " + str(sequenceX2[client1Car]) + '\n')
+                                file.write("Хвост = " + str(tail1) + '\n')
+
                                 tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
-                                file.write("Меняем от клиентa2 " + str(client1) + '\n')
-                                file.write("С машины2 " + str(client1Car) + '\n')
+                                file.write("Меняем от клиентa1 " + str(client1) + '\n')
+                                file.write("С машины1 " + str(client1Car) + '\n')
+
+                                file.write("Меняем от клиентa2 " + str(client2) + '\n')
+                                file.write("С машины2 " + str(client2Car) + '\n')
 
                                 if (not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not
                                     IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
-                                    and client1Car != client2) or client1Car == client2Car:
+                                    and client1Car != client2Car) or client1Car == client2Car:
 
                                     if 1 == 1:
                                         file.write(
@@ -171,7 +175,6 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                                               "объектов " + str(
                                                 client1) + " и " + str(client2) + " соответствено\n")
                                         tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
-                                        tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
                                         x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A,
                                                                                                     SizeK,

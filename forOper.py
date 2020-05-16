@@ -329,17 +329,6 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
             X[sosed1][tail2[0]][client1Car] = 1
 
             A = TimeOfArrival(X, Y, Sresh, file)
-            for i in range(factory.N):
-                for j in range(factory.N):
-                    file.write(str(X[i][j][client1Car]) + ' ')
-                file.write("\n")
-            file.write("\n")
-            for j in range(factory.N):
-                file.write(str(Y[j][client1Car]) + ' ')
-            file.write("\n")
-            for j in range(factory.N):
-                file.write(str(Sresh[j][client1Car]) + ' ')
-            file.write("\n")
 
         elif len(tail2) - len(tail1) > 1:
 
@@ -361,17 +350,6 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
             X[sosed2][tail1[0]][client2Car] = 1
 
             A = TimeOfArrival(X, Y, Sresh, file)
-            for i in range(factory.N):
-                for j in range(factory.N):
-                    file.write(str(X[i][j][client1Car]) + ' ')
-                file.write("\n")
-            file.write("\n")
-            for j in range(factory.N):
-                file.write(str(Y[j][client1Car]) + ' ')
-            file.write("\n")
-            for j in range(factory.N):
-                file.write(str(Sresh[j][client1Car]) + ' ')
-            file.write("\n")
 
         else:
             file.write("OperatorJoinFromTwoOpt stop: <-\n")

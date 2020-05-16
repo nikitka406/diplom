@@ -505,7 +505,7 @@ def IsContainWells(sequence, client, file, place='all', flag='start'):
             size = sequence.index(place) + 1
         for i in range(size):
             file.write("    " + str(sequence[i]) + ' == ' + str(client) + '     ')
-            if sequence[i] == client:
+            if sequence[i] == client and client != 0 and sequence[i] != 0:
                 file.write("\nIsContainWells stop: <-\n")
 
                 return True
@@ -555,6 +555,7 @@ def CountObjInCar(y, car):
 
 # Поиск хвоста
 def SearchTail(x, client, clientCar, file):
+    # TODO Можно сюда передавать последовательность, но если нет то искать
     file.write("SearchTail start: ->\n")
     sequence = GettingTheSequence(x)
     file.write("    Ищем хвост для маршрута\n")
