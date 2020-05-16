@@ -537,13 +537,15 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
         file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
     if buf1 == [] and buf2 == []:
+        file.write("    Не нашли ни одного такого индекса, уходим в неопрееделенность\n")
         return Uncertainty(start, flag, countOfRaces, file)
 
     elif buf1 != [] and buf2 != []:
         coins = random.randint(1, 2)
         if coins == 1:
             index = random.choice(buf1)
-            if numberInCar >= factory.param_min_num_cl_in_car:
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence1[index + 1][0]] <= 0 and countOfRaces[sequence1[index + 1][0]] > 0:
                 file.write("GetArcHRndX stop: <-\n")
                 return sequence1[index + 1][0]
             elif sequence1[index + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
@@ -555,7 +557,8 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
 
         elif coins == 2:
             index = random.choice(buf2)
-            if numberInCar >= factory.param_min_num_cl_in_car:
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence2[index + 1][0]] <= 0 and countOfRaces[sequence2[index + 1][0]] > 0:
                 file.write("GetArcHRndX stop: <-\n")
                 return sequence2[index + 1][0]
             elif sequence2[index + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
@@ -568,7 +571,8 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
     elif buf1 != [] or buf2 != []:
         if buf1:
             index = random.choice(buf1)
-            if numberInCar >= factory.param_min_num_cl_in_car:
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence1[index + 1][0]] <= 0 and countOfRaces[sequence1[index + 1][0]] > 0:
                 file.write("GetArcHRndX stop: <-\n")
                 return sequence1[index + 1][0]
             elif sequence1[index + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
@@ -580,7 +584,8 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
 
         elif buf2:
             index = random.choice(buf2)
-            if numberInCar >= factory.param_min_num_cl_in_car:
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence2[index + 1][0]] <= 0 and countOfRaces[sequence2[index + 1][0]] > 0:
                 file.write("GetArcHRndX stop: <-\n")
                 return sequence2[index + 1][0]
             elif sequence2[index + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
@@ -591,4 +596,166 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
                 return Uncertainty(start, flag, countOfRaces, file)
 
 
-# def GetArcHProX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, file):
+def GetArcHProX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, file):
+    file.write("GetArcHProX start: ->\n")
+
+    file.write("    Ищем индексы всех таких объектов" + '\n')
+    buf1 = []
+    buf2 = []
+    for i in range(len(sequence1) - 1):
+        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0 \
+                and countOfRaces[sequence1[i + 1][0]] > 0:
+            buf1.append(i)
+            file.write("    sequence1[i][0] = " + str(sequence1[i][0]) + '\n')
+            file.write("    i+1 = " + str(i + 1) + '\n')
+    file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
+
+    for i in range(len(sequence2) - 1):
+        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0 \
+                and countOfRaces[sequence2[i + 1][0]] > 0:
+            buf2.append(i)
+    file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
+
+    # Ослабляем поиск
+    if buf1 == [] and buf2 == []:
+        file.write("    Не нашли ни одного такого ребра, ослабим условия можно брать ребра которые уже брали\n")
+        for i in range(len(sequence1) - 1):
+            if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and countOfRaces[sequence1[i + 1][0]] > 0:
+                buf1.append(i)
+        file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
+
+        for i in range(len(sequence2) - 1):
+            if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and countOfRaces[sequence2[i + 1][0]] > 0:
+                buf2.append(i)
+        file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
+
+    # Если ничего не найдено
+    if buf1 == [] and buf2 == []:
+        file.write("    Не нашли ни одного такого индекса, уходим в неопрееделенность\n")
+        return Uncertainty(start, flag, countOfRaces, file)
+
+    elif buf1 != [] and buf2 != []:
+        file.write("    Ищем минимальное ребро в первом решении\n")
+        minimum1 = 99999999999999
+        distance1 = []
+        for i in range(len(buf1)):
+
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence1[buf1[i] + 1][0]] <= 0 and countOfRaces[sequence1[buf1[i] + 1][0]] > 0:
+                distance1.append(factory.d[start][sequence1[buf1[i]+1][0]])
+                if minimum1 > distance1[-1]:
+                    minimum1 = distance1[-1]
+
+            elif sequence1[buf1[i] + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
+                    and flag[sequence1[buf1[i] + 1][0]] <= 0 and countOfRaces[sequence1[buf1[i] + 1][0]] > 0:
+                distance1.append(factory.d[start][sequence1[buf1[i] + 1][0]])
+                if minimum1 > distance1[-1]:
+                    minimum1 = distance1[-1]
+
+        file.write("    Ищем минимальное ребро во втором решении\n")
+        minimum2 = 99999999999999
+        distance2 = []
+        for i in range(len(buf2)):
+
+            if numberInCar >= factory.param_min_num_cl_in_car \
+                    and flag[sequence2[buf2[i] + 1][0]] <= 0 and countOfRaces[sequence2[buf2[i] + 1][0]] > 0:
+                distance2.append(factory.d[start][sequence2[buf2[i]+1][0]])
+                if minimum2 > distance2[-1]:
+                    minimum2 = distance2[-1]
+
+            elif sequence2[buf2[i] + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
+                    and flag[sequence2[buf2[i] + 1][0]] <= 0 and countOfRaces[sequence2[buf2[i] + 1][0]] > 0:
+                distance2.append(factory.d[start][sequence2[buf2[i] + 1][0]])
+                if minimum2 > distance2[-1]:
+                    minimum2 = distance2[-1]
+
+        try:
+            index = distance1.index(minimum1)
+            file.write("    minimum1 = " + str(minimum1) + '\n')
+            file.write("    ребро " + str(start) + " - " + str(sequence1[buf1[index] + 1][0]) + '\n')
+        except IndexError:
+            try:
+                jndex = distance2.index(minimum2)
+                file.write("    minimum2 = " + str(minimum2) + '\n')
+                file.write("    ребро " + str(start) + " - " + str(sequence2[buf2[jndex] + 1][0]) + '\n')
+                file.write("GetArcHProX stop: <-\n")
+                return sequence2[buf2[jndex] + 1][0]
+            except IndexError:
+                return Uncertainty(start, flag, countOfRaces, file)
+        try:
+            jndex = distance2.index(minimum2)
+            file.write("    minimum2 = " + str(minimum2) + '\n')
+            file.write("    ребро " + str(start) + " - " + str(sequence2[buf2[jndex] + 1][0]) + '\n')
+        except IndexError:
+            file.write("GetArcHProX stop: <-\n")
+            return sequence1[buf1[index] + 1][0]
+
+        file.write("    Выбираем минимальное ребро из этих двух\n")
+        result = []
+        if minimum1 >= minimum2:
+            result.append(sequence2[buf2[jndex] + 1][0])
+            result.append(sequence2[buf2[jndex] + 1][0])
+            result.append(sequence1[buf1[index] + 1][0])
+        elif minimum1 < minimum2:
+            result.append(sequence1[buf1[index] + 1][0])
+            result.append(sequence1[buf1[index] + 1][0])
+            result.append(sequence2[buf2[jndex] + 1][0])
+
+        file.write("GetArcHProX stop: <-\n")
+        return random.choice(result)
+
+    # Какой-то из буферов пустой
+    elif buf1 != [] or buf2 != []:
+        if buf1:
+            file.write("    Ищем минимальное ребро в первом решении\n")
+            minimum1 = 99999999999999
+            distance1 = []
+            for i in range(len(buf1)):
+
+                if numberInCar >= factory.param_min_num_cl_in_car \
+                        and flag[sequence1[buf1[i] + 1][0]] <= 0 and countOfRaces[sequence1[buf1[i] + 1][0]] > 0:
+                    distance1.append(factory.d[start][sequence1[buf1[i] + 1][0]])
+                    if minimum1 > distance1[-1]:
+                        minimum1 = distance1[-1]
+
+                elif sequence1[buf1[i] + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
+                        and flag[sequence1[buf1[i] + 1][0]] <= 0 and countOfRaces[sequence1[buf1[i] + 1][0]] > 0:
+                    distance1.append(factory.d[start][sequence1[buf1[i] + 1][0]])
+                    if minimum1 > distance1[-1]:
+                        minimum1 = distance1[-1]
+
+            try:
+                index = distance1.index(minimum1)
+                file.write("    minimum1 = " + str(minimum1) + '\n')
+                file.write("    ребро " + str(start) + " - " + str(sequence1[buf1[index] + 1][0]) + '\n')
+                file.write("GetArcHProX stop: <-\n")
+                return sequence1[buf1[index] + 1][0]
+            except IndexError:
+                return Uncertainty(start, flag, countOfRaces, file)
+
+        elif buf2:
+            file.write("    Ищем минимальное ребро во втором решении\n")
+            minimum2 = 99999999999999
+            distance2 = []
+            for i in range(len(buf2)):
+
+                if numberInCar >= factory.param_min_num_cl_in_car \
+                        and flag[sequence2[buf2[i] + 1][0]] <= 0 and countOfRaces[sequence2[buf2[i] + 1][0]] > 0:
+                    distance2.append(factory.d[start][sequence2[buf2[i] + 1][0]])
+                    if minimum2 > distance2[-1]:
+                        minimum2 = distance2[-1]
+
+                elif sequence2[buf2[i] + 1][0] != 0 and numberInCar < factory.param_min_num_cl_in_car \
+                        and flag[sequence2[buf2[i] + 1][0]] <= 0 and countOfRaces[sequence2[buf2[i] + 1][0]] > 0:
+                    distance2.append(factory.d[start][sequence2[buf2[i] + 1][0]])
+                    if minimum2 > distance2[-1]:
+                        minimum2 = distance2[-1]
+
+            try:
+                jndex = distance2.index(minimum2)
+                file.write("    minimum2 = " + str(minimum2) + '\n')
+                file.write("    ребро " + str(start) + " - " + str(sequence2[buf2[jndex] + 1][0]) + '\n')
+                file.write("GetArcHProX stop: <-\n")
+                return sequence2[buf2[jndex] + 1][0]
+            except IndexError:
+                return Uncertainty(start, flag, countOfRaces, file)

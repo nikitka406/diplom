@@ -282,8 +282,8 @@ def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
             scnd = GetShortArc(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
         elif cros == 'HRndX':
             scnd = GetArcHRndX(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
-        # elif cros == 'HProX':
-        #     scnd = GetArcHProX(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
+        elif cros == 'HProX':
+            scnd = GetArcHProX(sequence1, sequence2, scnd, flag, numberInCar, countOfRaces, file)
 
         file.write("Добавляем следующие ребро " + str(scnd) + "\n")
         children.append([scnd, 0])
@@ -479,7 +479,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # TODO Задаю список с названиями операторов
         name_crossover = ['AEX', 'HGreX', 'HRndX']#, 'HProX']
         crossover = random.choice(name_crossover)
-        # crossover = 'HRndX'
+        crossover = 'HProX'
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
 
         # Идем по одному сценарию
