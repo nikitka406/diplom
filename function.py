@@ -557,8 +557,8 @@ def CountObjInCar(y, car):
 def SearchTail(x, client, clientCar, file):
     file.write("SearchTail start: ->\n")
     sequence = GettingTheSequence(x)
-    file.write("Ищем хвост для маршрута\n")
-    file.write(str(sequence[clientCar]) + "\nначиная с объекта " + str(client) + '\n')
+    file.write("    Ищем хвост для маршрута\n")
+    file.write("    " + str(sequence[clientCar]) + "\n      начиная с объекта " + str(client) + '\n')
     tail = []
     start = sequence[clientCar].index(client)
     for i in range(start, len(sequence[clientCar])):
@@ -567,7 +567,7 @@ def SearchTail(x, client, clientCar, file):
         else:
             break
     tail.append(0)
-    file.write("Хвост = " + str(tail) + '\n')
+    file.write("    Хвост = " + str(tail) + '\n')
     file.write("SearchTail stop: <-\n")
     return tail, sequence
 

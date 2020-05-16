@@ -155,7 +155,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
-
+        # hgcjhgc
         file.write("Help start" + '\n')
         x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration - 1,
                                                                 timeLocal[2])

@@ -510,3 +510,5 @@ def ClearAllFile():
     file.close()
     file = open('output/graph/AfterCrosSearsh.txt', 'w')
     file.close()
+    file = open('output/graph/2Opt.txt', 'w')
+    file.close()

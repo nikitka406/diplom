@@ -186,8 +186,11 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
     file.write("OperatorJoinFromTwoOpt start: ->" + '\n')
     SizeK = sizeK
     X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
+    file.write("    tail1 = " + str(tail1) + '\n')
+    file.write("    tail2 = " + str(tail2) + '\n')
 
     if client1Car != client2Car:
+        file.write("    Машинки не равны\n")
 
         time1 = SaveTime(Sresh, tail1, client1Car, file)
 
@@ -295,6 +298,7 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
             return x, y, s, a, target_function, sizeK
 
     elif client1Car == client2Car:
+        file.write("    Машинки равны\n")
 
         time1 = SaveTime(Sresh, tail1, client1Car, file)
 
@@ -305,11 +309,11 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
         file.write("    Сосед слева для хвоста один = " + str(sosed1) + '\n')
         file.write("    Сосед слева для хвоста два = " + str(sosed2) + '\n')
 
-        if len(tail1) > len(tail2):
+        if len(tail1) - len(tail2) > 1:
 
             for i in range(len(tail2)):
                 tail1.remove(tail2[i])
-                time1.remove(time2[i])
+                time1.pop(len(tail1))
 
             file.write("    Занулим хвост\n")
             X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed1, tail1, client1Car, file, tail2[0])
@@ -322,17 +326,29 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
                 Y[tail1[i]][client1Car] = 1
                 Sresh[tail1[i]][client1Car] = time1[i]
                 sosed1 = tail1[i]
+            X[sosed1][tail2[0]][client1Car] = 1
 
             A = TimeOfArrival(X, Y, Sresh, file)
+            for i in range(factory.N):
+                for j in range(factory.N):
+                    file.write(str(X[i][j][client1Car]) + ' ')
+                file.write("\n")
+            file.write("\n")
+            for j in range(factory.N):
+                file.write(str(Y[j][client1Car]) + ' ')
+            file.write("\n")
+            for j in range(factory.N):
+                file.write(str(Sresh[j][client1Car]) + ' ')
+            file.write("\n")
 
-        elif len(tail1) < len(tail2):
+        elif len(tail2) - len(tail1) > 1:
 
             for i in range(len(tail1)):
                 tail2.remove(tail1[i])
-                time2.remove(time1[i])
+                time2.pop(len(tail2))
 
             file.write("    Занулим хвост\n")
-            X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed1, tail2, client1Car, file, tail1[0])
+            X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed2, tail2, client2Car, file, tail1[0])
 
             file.write("    Разворачиваем хвост" + '\n')
             tail2.reverse()
@@ -342,8 +358,24 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
                 Y[tail2[i]][client2Car] = 1
                 Sresh[tail2[i]][client2Car] = time2[i]
                 sosed2 = tail2[i]
+            X[sosed2][tail1[0]][client2Car] = 1
 
             A = TimeOfArrival(X, Y, Sresh, file)
+            for i in range(factory.N):
+                for j in range(factory.N):
+                    file.write(str(X[i][j][client1Car]) + ' ')
+                file.write("\n")
+            file.write("\n")
+            for j in range(factory.N):
+                file.write(str(Y[j][client1Car]) + ' ')
+            file.write("\n")
+            for j in range(factory.N):
+                file.write(str(Sresh[j][client1Car]) + ' ')
+            file.write("\n")
+
+        else:
+            file.write("OperatorJoinFromTwoOpt stop: <-\n")
+            return x, y, s, a, target_function, sizeK
 
         try:
             X, Y, Sresh, A, Target_Function, SizeK = Checker(X, Y, Sresh, A, SizeK, iteration, "Two_Opt", file)

@@ -144,8 +144,8 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
         for client1Car in range(SizeK):
             for client1 in range(1, factory.N):
                 if Y[client1][client1Car] == 1:
-                    file.write("Переставляем от клиентa " + str(client1) + '\n')
-                    file.write("С машины " + str(client1Car) + '\n')
+                    file.write("Меняем от клиентa1 " + str(client1) + '\n')
+                    file.write("С машины1 " + str(client1Car) + '\n')
 
                     tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
 
@@ -154,17 +154,24 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                             if Y[client2][client2Car] == 1:
                                 tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
-                                if not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not \
-                                        IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file):
+                                file.write("Меняем от клиентa2 " + str(client1) + '\n')
+                                file.write("С машины2 " + str(client1Car) + '\n')
 
-                                    file.write(
-                                        "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
-                                    if ResultCoins():
+                                if (not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not
+                                    IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
+                                    and client1Car != client2) or client1Car == client2Car:
+
+                                    if 1 == 1:
+                                        file.write(
+                                            "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
+
                                         file.write(
                                             "У маршрутов " + str(client1Car) + " " + str(
                                                 client2Car) + " меняем хвосты\nНачиная с "
                                                               "объектов " + str(
                                                 client1) + " и " + str(client2) + " соответствено\n")
+                                        tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
+                                        tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
 
                                         x, y, s, a, target_function, sizeK = OperatorJoinFromTwoOpt(X, Y, Sresh, A,
                                                                                                     SizeK,
@@ -194,16 +201,20 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                                 "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
                                             file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
                                 else:
-                                    file.write("Это решение мусор, такое не смотрим\n")
+                                    file.write("Это решение мусор, такое не смотрим\n\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
         if fileflag == 1:
             x, y, s, a = ReadLocalSearchOfFile(SizeK)
+            target_function = CalculationOfObjectiveFunction(x, 0)
+            file.write(
+                "Целевая функция последнего минимального переставления без штрафа= " + str(
+                    target_function) + '\n')
             target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
             file.write(
-                "Целевая функция последнего минимального переставления = " + str(
+                "Целевая функция последнего минимального переставления со штрафом= " + str(
                     target_function) + '\n')
             fileflag = 0
         else:
@@ -330,9 +341,13 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                             if fileflag == 1:
                                 x, y, s, a = ReadHelpOfFile(SizeK)
+                                target_function = CalculationOfObjectiveFunction(x, 0)
+                                file.write(
+                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                        target_function) + '\n')
                                 target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
                                 file.write(
-                                    "Целевая функция последнего минимального переставления = " + str(
+                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
                                         target_function) + '\n')
                                 fileflag = 0
                             else:
@@ -437,9 +452,13 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
                         if fileflag == 1:
                             x, y, s, a = ReadHelpOfFile(SizeK)
+                            target_function = CalculationOfObjectiveFunction(x, 0)
+                            file.write(
+                                "Целевая функция последнего минимального переставления без штрафа = " + str(
+                                    target_function) + '\n')
                             target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
                             file.write(
-                                "Целевая функция последнего минимального переставления = " + str(
+                                "Целевая функция последнего минимального переставления со штрафом = " + str(
                                     target_function) + '\n')
                             fileflag = 0
                         else:
@@ -631,9 +650,13 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
         if fileflag == 1:
             x, y, s, a = ReadLocalSearchOfFile(SizeK)
+            target_function = CalculationOfObjectiveFunction(x, 0)
+            file.write(
+                "Целевая функция последнего минимального переставления без штрафа= " + str(
+                    target_function) + '\n')
             target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
             file.write(
-                "Целевая функция последнего минимального переставления = " + str(
+                "Целевая функция последнего минимального переставления со штрафом= " + str(
                     target_function) + '\n')
             fileflag = 0
         else:
@@ -706,9 +729,9 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Применяем локальный поиск (локально меняем решение)")
 
     # TODO выбираем оператор локального поиска
-    local_search_oper = ['relocate', 'Exchange', '2Opt']
+    local_search_oper = ['relocate', 'Exchange']#, '2Opt']
     oper = random.choice(local_search_oper)
-    # oper = 'Exchange'
+    oper = '2Opt'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
