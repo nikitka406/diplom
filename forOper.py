@@ -2,7 +2,8 @@ from function import *
 
 
 # вклиниваем между
-def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, evolution, file):
+def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, iteration, file):
+    file.write("    OperatorJoinFromReloc start: ->\n")
     if client != sosed:
         Xl, Yl, Sl, Al = ReadStartLocalSearchOfFile(sizeK)
         XR, YR, SR, AR = ReadStartLocalSearchOfFile(sizeK)
@@ -102,7 +103,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
         else:
             targetL = -1
 
-        if sosed == 0 and not CarIsWork(YR, sosedK) and evolution == 2:
+        if sosed == 0 and not CarIsWork(YR, sosedK):
             try:
                 file.write("    Вставляем скважину в новый маршрут" + '\n')
                 # машина соседа будет работать у клиента столько же
@@ -141,14 +142,17 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
         minimum = min(targetL, targetR)
         if minimum == targetL and minimum != -1:
             file.write("Выбрали левого у него целевая меньше" + '\n')
+            file.write("    OperatorJoinFromReloc stop: <-\n")
             return Xl, Yl, Sl, Al, targetL, sizeK
 
         elif minimum == targetR and minimum != -1 and targetR != targetL:
             file.write("Выбрали правого у него целевая меньше" + '\n')
+            file.write("    OperatorJoinFromReloc stop: <-\n")
             return XR, YR, SR, AR, targetR, sizeK
 
         else:
             file.write("Все пошло по пизде ничего не сохранили" + '\n')
+            file.write("    OperatorJoinFromReloc stop: <-\n")
             return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
     elif client == sosed and clientK != sosedK:
@@ -172,7 +176,8 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, ite
             file.write("OperatorJoinFromReloc stop: <-\n")
             return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
-    file.write("Что-то пошло не так" + '\n')
+    file.write("Переставляем одного и тоже к тому же на той же машине" + '\n')
+    file.write("OperatorJoinFromReloc stop: <-\n")
     return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
 
 

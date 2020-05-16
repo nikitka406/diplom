@@ -388,16 +388,15 @@ def RecursiaForTime(x, s, a, i, k, recurs):
 
 
 # определяем время приезда для всех локаций
+# определяем время приезда для всех локаций
 def TimeOfArrival(x, y, s, file):
-    # TODO подумать над передачей объекта и машины
     file.write("    Начнем заполнять время прибытия\n")
     a = [[0 for k in range(len(s[0]))] for i in range(factory.N)]
     for k in range(len(s[0])):
         if CarIsWork(y, k):
             # print("ЗАходим в рекурсию")
-            result = RecursiaForTime(x, s, a, 0, k, 0)
-
-    if not result:
+            RecursiaForTime(x, s, a, 0, k, 0)
+    if not a:
         return -1
     return a
 

@@ -3,8 +3,8 @@ import time
 
 
 # переставляем клиента к новому соседу, локальный поиск
-def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal,
-             cycle=factory.param_local_search, evolution=2):
+def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, evolution=2,
+             cycle=factory.param_local_search):
     file = open("log/relog.txt", 'a')
 
     start = time.time()
@@ -36,11 +36,12 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                     for sosedK in range(SizeK):
                         for sosed in range(factory.N):
-                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                            if (Y[sosed][sosedK] == 1 and sosed != 0) or (sosed == 0 and not CarIsWork(Y, sosedK)
+                                                                          and evolution == 2):
 
                                 if ResultCoins():
                                     file.write(
-                                        "Монетка сказала что рассматриваем эту окрестность coins = " + '\n')
+                                        "Монетка сказала что рассматриваем эту окрестность" + '\n')
 
                                     file.write("К соседу " + str(sosed) + '\n')
                                     file.write("На машине " + str(sosedK) + '\n')
@@ -48,7 +49,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                     x, y, s, a, target_function, sizeK = OperatorJoinFromReloc(X, Y, Sresh, A, SizeK,
                                                                                                client, clientCar,
                                                                                                sosed, sosedK, iteration,
-                                                                                               evolution, file)
+                                                                                               file)
                                     file.write("Число используемых машин " + str(AmountCarUsed(y)) + '\n')
                                     file.write("Стартовая целевая функция " + str(target_function_start) + '\n')
                                     file.write("Целевая функция до релока " + str(TargetFunction) + '\n')
@@ -712,7 +713,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     print("Используем оператор ", oper)
     if oper == 'relocate':
         x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration,
-                                                                    timeLocal[0], factory.param_local_search/2)
+                                                                    timeLocal[0])
         SaveDateFromGraph(target_function, "Reloc")
         iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
