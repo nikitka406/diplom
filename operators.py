@@ -41,7 +41,8 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
                             if (client != sosedLeft and client != sosed and client != sosedRight
                                 and not IsContainWells(sequenceX2[sosedK], client, file))\
-                                or (client == sosedLeft or client == sosed or client == sosedRight):
+                                or (client == sosedLeft or client == sosed or client == sosedRight)\
+                                    or (sosed == 0 and not CarIsWork(Y, sosedK)):
 
                                 file.write("Это не мусорное решение, можно смотреть\n")
 
@@ -84,6 +85,10 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                             file.write(
                                                 "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
                                             file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
+                                    else:
+                                        file.write("Монетка сказала не берем\n")
+                                else:
+                                    file.write("Не прошло условие\n")
                             else:
                                 file.write("Отбросили мусорное решение\n")
 

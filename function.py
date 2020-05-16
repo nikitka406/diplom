@@ -497,29 +497,29 @@ def IsContainTailInEnd(sequence, tail, place1, file):
 
 # Проверка на содержание скважин тех же объектов car у soseda
 def IsContainWells(sequence, client, file, place='all', flag='start'):
-    file.write("IsContainWells start: ->\n")
+    # file.write("IsContainWells start: ->\n")
     if flag == 'start':
         if place == 'all':
             size = len(sequence)
         else:
             size = sequence.index(place) + 1
         for i in range(size):
-            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '     ')
+            # file.write("    " + str(sequence[i]) + ' == ' + str(client) + '     ')
             if sequence[i] == client and client != 0 and sequence[i] != 0:
-                file.write("\nIsContainWells stop: <-\n")
+                # file.write("\nIsContainWells stop: <-\n")
 
                 return True
-        file.write("\nIsContainWells stop: <-\n")
+        # file.write("\nIsContainWells stop: <-\n")
         return False
 
     elif flag == 'end':
         start = sequence.index(place)
         for i in range(start, len(sequence)):
-            file.write("    " + str(sequence[i]) + ' == ' + str(client) + '    ')
+            # file.write("    " + str(sequence[i]) + ' == ' + str(client) + '    ')
             if sequence[i] == client:
-                file.write("\nIsContainWells stop: <-\n")
+                # file.write("\nIsContainWells stop: <-\n")
                 return True
-        file.write("\nIsContainWells stop: <-\n")
+        # file.write("\nIsContainWells stop: <-\n")
         return False
 
 

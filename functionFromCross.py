@@ -56,7 +56,8 @@ def WorkTimeCounting(sequence, y, s, after):
 
         div = factory.wells[after] % local_count
         if div == 0:
-            print("Свободных скважин не осталось, мы все распределили")
+            # print("Свободных скважин не осталось, мы все распределили")
+            print("")
 
         else:
             # print("Но у нас еще осталось ", div, " свободных скважин")
@@ -169,7 +170,7 @@ def SequenceDisplayInTheXYSA(sequence):
 
             a[after][k] = ArrivalTime(a, s, before, after, k)
 
-    return x, y, s, a, count_car
+    return x, y, s, a, count_carBig
 
 
 # Получаем двумерную последовательность вида
