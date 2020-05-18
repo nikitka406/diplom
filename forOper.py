@@ -558,7 +558,7 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
     return x, y, s, a, target_function_start, sizeK_start
 
 
-def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientCar, subseq1,
+def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, sequenceX2, client, clientCar, subseq1,
                              sosed, sosedCar, subseq2, iteration, file):
     file.write("->OperatorJoinFromExchange start" + '\n')
 
@@ -571,10 +571,14 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
     subseq2Left = SearchSosedLeftOrRight(X, Y, subseq2[0], "left", sosedCar)  # правый сосед соседа
     subseq2Right = SearchSosedLeftOrRight(X, Y, subseq2[-1], "right", sosedCar)  # правый сосед соседа
 
-    file.write("    Слева от последовательности клиента " + str(subseq1Left) + " Время работы = " + str(Sresh[subseq1Left][clientCar]) + "\n")
-    file.write("    Справа от последовательности клиента " + str(subseq1Right) + " Время работы = " + str(Sresh[subseq1Right][clientCar]) + "\n")
-    file.write("    Слева от последовательности соседа " + str(subseq2Left) + " Время работы = " + str(Sresh[subseq2Left][sosedCar]) + "\n")
-    file.write("    Справа от последовательности соседа " + str(subseq2Right) + " Время работы = " + str(Sresh[subseq2Right][sosedCar]) + "\n")
+    file.write("    Слева от последовательности клиента " + str(subseq1Left) + " Время работы = " + str(
+        Sresh[subseq1Left][clientCar]) + "\n")
+    file.write("    Справа от последовательности клиента " + str(subseq1Right) + " Время работы = " + str(
+        Sresh[subseq1Right][clientCar]) + "\n")
+    file.write("    Слева от последовательности соседа " + str(subseq2Left) + " Время работы = " + str(
+        Sresh[subseq2Left][sosedCar]) + "\n")
+    file.write("    Справа от последовательности соседа " + str(subseq2Right) + " Время работы = " + str(
+        Sresh[subseq2Right][sosedCar]) + "\n")
 
     time1 = SaveTime(Sresh, subseq1, clientCar, file)
     time2 = SaveTime(Sresh, subseq2, sosedCar, file)
@@ -583,8 +587,8 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
     X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, subseq2Left, subseq2, sosedCar, file, subseq2Right)
 
     # Сценарий когда какие-нибудь края равны соседям другой последовательности
-    if (subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or \
-            subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right) and clientCar != sosedCar:
+    if (subseq1[0] == subseq2Left or subseq1[-1] == subseq2Right or
+        subseq2[0] == subseq1Left or subseq2[-1] == subseq1Right) and clientCar != sosedCar:
         file.write("    Сценарий когда какие-нибудь края равны соседям другой последовательности\n")
 
         if subseq1[0] == subseq2Left and subseq1[-1] != subseq2Right and \
@@ -806,13 +810,57 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, client, clientC
         else:
             file.write("    Сценарий когда никакие края не равны с соседями из другой последовательности\n")
 
-        X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1, 0)
-        X[subseq2Left][subseq2Right][sosedCar] = 1
+        if clientCar == sosedCar \
+                and (sequenceX2[clientCar].index(subseq1[-1]) + 1 == sequenceX2[clientCar].index(subseq2[0])
+                     or sequenceX2[clientCar].index(subseq2[-1]) + 1 == sequenceX2[clientCar].index(subseq1[0])):
+            file.write("    Сценарий, когда последовательности идут друг за другом\n")
+            if sequenceX2[clientCar].index(subseq1[-1]) + 1 == sequenceX2[clientCar].index(subseq2[0]):
+                X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
+                X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, clientCar, time1)
+                X[subseq1Left][subseq2Right][clientCar] = 1
+                file.write("2clientCar\n")
+                for i in range(factory.N):
+                    for j in range(factory.N):
+                        file.write(str(X[i][j][clientCar]) + ' ')
+                    file.write('\n')
+                file.write('\n')
 
-        X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2, 0)
-        X[subseq1Left][subseq1Right][clientCar] = 1
+                A = TimeOfArrival(X, Y, Sresh, file)
 
-        A = TimeOfArrival(X, Y, Sresh, file)
+            elif sequenceX2[clientCar].index(subseq2[-1]) + 1 == sequenceX2[clientCar].index(subseq1[0]):
+                X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, clientCar, time1)
+                X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
+                X[subseq2Left][subseq1Right][clientCar] = 1
+
+                file.write("2clientCar\n")
+                for i in range(factory.N):
+                    for j in range(factory.N):
+                        file.write(str(X[i][j][clientCar]) + ' ')
+                    file.write('\n')
+                file.write('\n')
+
+                A = TimeOfArrival(X, Y, Sresh, file)
+
+        else:
+            X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1)
+            X[subseq2Left][subseq2Right][sosedCar] = 1
+            file.write("2sosedCar\n")
+            for i in range(factory.N):
+                for j in range(factory.N):
+                    file.write(str(X[i][j][sosedCar]) + ' ')
+                file.write('\n')
+            file.write('\n')
+
+            X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
+            X[subseq1Left][subseq1Right][clientCar] = 1
+            file.write("2clientCar\n")
+            for i in range(factory.N):
+                for j in range(factory.N):
+                    file.write(str(X[i][j][clientCar]) + ' ')
+                file.write('\n')
+            file.write('\n')
+
+            A = TimeOfArrival(X, Y, Sresh, file)
 
         try:
             X, Y, Sresh, A, Target_Function, SizeK = Checker(X, Y, Sresh, A, SizeK, iteration, "Exchange", file)

@@ -495,6 +495,13 @@ def IsContainTailInEnd(sequence, tail, place1, file):
     return False
 
 
+def IsContainTailInTail(tail1, tail2, file):
+    for i in range(len(tail2)):
+        if IsContainWells(tail1, tail2[i], file):
+            return True
+    return False
+
+
 # Проверка на содержание скважин тех же объектов car у soseda
 def IsContainWells(sequence, client, file, place='all', flag='start'):
     # file.write("IsContainWells start: ->\n")

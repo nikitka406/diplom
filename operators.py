@@ -543,7 +543,6 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                 if Y[client][clientCar] == 1:
                     for sosedCar in range(SizeK):
                         for sosed in range(1, factory.N):
-                            # TODO случай с равными машинами
                             if Y[sosed][sosedCar] == 1:
 
                                 subseq1 = []
@@ -577,98 +576,110 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                     file.write("subseq1 = " + str(subseq1) + '\n')
                                     file.write("subseq2 = " + str(subseq2) + '\n')
 
-                                    if indexCl - 1 == 0:
-                                        sequence1Left = 0
-                                    else:
-                                        sequence1Left = sequenceX2[clientCar][indexCl - 2]
-                                    if indexCl + factory.param_len_subseq + 2 < len(sequenceX2):
-                                        sequence1Right = sequenceX2[clientCar][indexCl + factory.param_len_subseq + 2]
-                                    else:
-                                        sequence1Right = 0
-
-                                    if indexSos - 1 == 0:
-                                        sequence2Left = 0
-                                    else:
-                                        sequence2Left = sequenceX2[sosedCar][indexSos - 2]
-                                    if indexSos + factory.param_len_subseq + 2 < len(sequenceX2):
-                                        sequence2Right = sequenceX2[sosedCar][indexSos + factory.param_len_subseq + 2]
-                                    else:
-                                        sequence2Right = 0
-
-                                    file.write("Пред Слева от последовательности клиента " + str(sequence1Left) + "\n")
-                                    file.write(
-                                        "После Справа от последовательности клиента " + str(sequence1Right) + "\n")
-                                    file.write("Перд Слева от последовательности соседа " + str(sequence2Left) + "\n")
-                                    file.write(
-                                        "После Справа от последовательности соседа " + str(sequence2Right) + "\n")
-
                                     buf1 = []
-                                    # Отсекаем мусорные решения, если первые элементы подпоследовательностей
-                                    # не содержатся ни в начале ни в конце
-                                    if (not IsContainWells(sequenceX2[sosedCar], subseq1[0], file, sequence2Left)
-                                        and not IsContainWells(sequenceX2[sosedCar], subseq1[0], file,
-                                                               sequence2Right,
-                                                               'end')
-                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
-                                                               sequence1Left)
-                                        and not IsContainWells(sequenceX2[clientCar], subseq2[0], file,
-                                                               sequence1Right,
-                                                               'end') and clientCar != sosedCar) or clientCar == sosedCar:
-                                        file.write("Первые элементы подпоследовательностей "
-                                                   "не содержатся ни в начале ни в конце\n")
+                                    for i in range(len(subseq1)):
+                                        if subseq1[-1] != 0:
+                                            buf1.append(subseq1[i])
+                                            buf2 = []
+                                            for j in range(len(subseq2)):
+                                                if subseq2[-1] != 0:
+                                                    buf2.append(subseq2[j])
 
-                                        for i in range(len(subseq1)):
-                                            if subseq1[-1] != 0:
-                                                buf1.append(subseq1[i])
-                                                buf2 = []
-                                                for j in range(len(subseq2)):
-                                                    if subseq2[-1] != 0:
-                                                        buf2.append(subseq2[j])
-                                                        if ResultCoins():
-                                                            file.write("buf1 = " + str(buf1) + '\n')
-                                                            for p in range(len(buf1)):
-                                                                file.write(str(Sresh[buf1[p]][clientCar]) + ' ')
-                                                            file.write('\n')
+                                                # подсчет пред после
+                                                if indexCl - 1 == 0:
+                                                    sequence1Left = 0
+                                                else:
+                                                    sequence1Left = sequenceX2[clientCar][indexCl - 2]
+                                                if indexCl + len(buf1) + 2 < len(sequenceX2):
+                                                    sequence1Right = sequenceX2[clientCar][
+                                                        indexCl + len(buf1) + 2]
+                                                else:
+                                                    sequence1Right = 0
 
-                                                            file.write("buf2 = " + str(buf2) + '\n')
-                                                            for p in range(len(buf2)):
-                                                                file.write(str(Sresh[buf2[p]][sosedCar]) + ' ')
-                                                            file.write('\n')
+                                                if indexSos - 1 == 0:
+                                                    sequence2Left = 0
+                                                else:
+                                                    sequence2Left = sequenceX2[sosedCar][indexSos - 2]
+                                                if indexSos + len(buf2) + 2 < len(sequenceX2):
+                                                    sequence2Right = sequenceX2[sosedCar][
+                                                        indexSos + len(buf2) + 2]
+                                                else:
+                                                    sequence2Right = 0
 
-                                                            x, y, s, a, target_function, sizeK = OperatorJoinFromExchange(
-                                                                X, Y, Sresh, A, SizeK, TargetFunction, client,
-                                                                clientCar, buf1, sosed, sosedCar, buf2, iteration, file)
+                                                file.write("buf1 = " + str(buf1) + '\n')
+                                                file.write("buf2 = " + str(buf2) + '\n')
+
+                                                if (not IsContainTailInStart(sequenceX2[sosedCar], buf1, sequence2Left,
+                                                                             file)
+                                                    and not IsContainTailInEnd(sequenceX2[sosedCar], buf1,
+                                                                               sequence2Right, file)
+                                                    and not IsContainTailInStart(sequenceX2[clientCar], buf2,
+                                                                                 sequence1Left, file)
+                                                    and not IsContainTailInEnd(sequenceX2[clientCar], buf2,
+                                                                               sequence1Right,
+                                                                               file) and clientCar != sosedCar) \
+                                                        or (
+                                                        clientCar == sosedCar and not IsContainTailInTail(buf1, buf2,
+                                                                                                          file)):
+                                                    file.write("Пред Слева от последовательности клиента " + str(
+                                                        sequence1Left) + "\n")
+                                                    file.write(
+                                                        "После Справа от последовательности клиента " + str(
+                                                            sequence1Right) + "\n")
+                                                    file.write("Перд Слева от последовательности соседа " + str(
+                                                        sequence2Left) + "\n")
+                                                    file.write(
+                                                        "После Справа от последовательности соседа " + str(
+                                                            sequence2Right) + "\n")
+                                                    file.write("Элементы подпоследовательностей "
+                                                               "не содержатся в другом маршруте\n")
+
+                                                    if ResultCoins():
+                                                        file.write("Монетка сказала, берем\n")
+                                                        file.write("buf1 = " + str(buf1) + '\n')
+                                                        for p in range(len(buf1)):
+                                                            file.write(str(Sresh[buf1[p]][clientCar]) + ' ')
+                                                        file.write('\n')
+
+                                                        file.write("buf2 = " + str(buf2) + '\n')
+                                                        for p in range(len(buf2)):
+                                                            file.write(str(Sresh[buf2[p]][sosedCar]) + ' ')
+                                                        file.write('\n')
+
+                                                        x, y, s, a, target_function, sizeK = OperatorJoinFromExchange(
+                                                            X, Y, Sresh, A, SizeK, TargetFunction, sequenceX2, client,
+                                                            clientCar, buf1, sosed, sosedCar, buf2, iteration, file)
+                                                        file.write(
+                                                            "Число используемых машин " + str(
+                                                                AmountCarUsed(y)) + '\n')
+
+                                                        file.write("Выбираем минимальное решение" + '\n')
+                                                        minimum = min(TargetFunction, target_function)
+                                                        if minimum == target_function and minimum != TargetFunction:
                                                             file.write(
-                                                                "Число используемых машин " + str(
-                                                                    AmountCarUsed(y)) + '\n')
+                                                                "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
+                                                            file.write(
+                                                                "Новая целевая функция равна " + str(
+                                                                    target_function) + '\n')
 
-                                                            file.write("Выбираем минимальное решение" + '\n')
-                                                            minimum = min(TargetFunction, target_function)
-                                                            if minimum == target_function and minimum != TargetFunction:
-                                                                file.write(
-                                                                    "Новое перемещение, лучше чем то что было, сохраняем это решение" + '\n')
-                                                                file.write(
-                                                                    "Новая целевая функция равна " + str(
-                                                                        target_function) + '\n')
-
-                                                                SaveLocalSearch(x, y, s, a, sizeK)
-                                                                TargetFunction = target_function
-                                                                SizeK = sizeK
-                                                                fileflag = 1
-                                                            else:
-                                                                file.write(
-                                                                    "Новое перемещение, хуже чем то что было, "
-                                                                    "возвращаем наше старое решение" + '\n')
-                                                                file.write(
-                                                                    "Старая целевая функция равна " + str(
-                                                                        TargetFunction) + '\n')
+                                                            SaveLocalSearch(x, y, s, a, sizeK)
+                                                            TargetFunction = target_function
+                                                            SizeK = sizeK
+                                                            fileflag = 1
                                                         else:
-                                                            file.write("Монетка сказала, не берем\n")
-                                                            file.write("buf1 = " + str(buf1) + '\n')
-                                                            file.write("buf2 = " + str(buf2) + '\n\n')
-                                    else:
-                                        file.write("Отбросили мусорные решения\n")
+                                                            file.write(
+                                                                "Новое перемещение, хуже чем то что было, "
+                                                                "возвращаем наше старое решение" + '\n')
+                                                            file.write(
+                                                                "Старая целевая функция равна " + str(
+                                                                    TargetFunction) + '\n')
+                                                    else:
+                                                        file.write("Монетка сказала, не берем\n")
+                                                        file.write("buf1 = " + str(buf1) + '\n')
+                                                        file.write("buf2 = " + str(buf2) + '\n\n')
 
+                                                else:
+                                                    file.write("Отбросили мусорные решения\n")
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
 
@@ -755,7 +766,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', 'Exchange', '2Opt']
     oper = random.choice(local_search_oper)
-    # oper = 'relocate'
+    oper = 'Exchange'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':
