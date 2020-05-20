@@ -319,9 +319,9 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                         SizeK = sizeK_start
 
                         flag = 0
-                        if proebSkv < int(Sresh[client][k] / factory.timeWork):
+                        if 1 < int(Sresh[client][k] / factory.timeWork):
                             flag = 'not the last'
-                        elif proebSkv == int(Sresh[client][k] / factory.timeWork):
+                        elif 1 == int(Sresh[client][k] / factory.timeWork):
                             flag = 'last'
                         else:
                             flag = 'end'
@@ -344,7 +344,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                     k) + "\n")
                                             file.write(" отдать машине " + str(sosedK) + " рядом с объектом " + str(
                                                 sosed) + "\n")
-
+# TODO можно ускорить отбросив мусорные решения
                                             x, y, s, a, target_function, sizeK = OperatorJoinFromHelp(X, Y, Sresh, A,
                                                                                                       SizeK,
                                                                                                       client, k, sosed,
@@ -795,7 +795,6 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', 'Exchange', '2Opt']
     oper = random.choice(local_search_oper)
-    oper = 'Exchange'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':

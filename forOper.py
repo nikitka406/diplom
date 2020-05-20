@@ -368,6 +368,15 @@ def OperatorJoinFromHelp(x, y, s, a, sizeK_start, client, clientCar, sosed, sose
     sizeK = sizeK_start
 
     sequenceX2 = GettingTheSequence(x)
+    file.write("    Переставляем скважину " + str(client) + " с маршрута " + str(sequenceX2[clientCar]) + '\n')
+    file.write("    К объекту " + str(sosed) + " в маршрута " + str(sequenceX2[sosedCar]) + '\n')
+    file.write("    Регламент работ " + str(factory.S) + '\n')
+    file.write("    Фактическое время работ\n")
+    for k in range(len(s[0])):
+        for i in range(factory.N):
+            file.write(str(s[i][k]) + ' ')
+        file.write('\n')
+    file.write('\n')
 
     file.write("    Проверяем на равенство клиента и соседа\n")
     if client == sosed:
