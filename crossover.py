@@ -233,12 +233,31 @@ def AEX(sequence1, sequence2, timeCros):
 def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
     file = 0
     if cros == 'HGreX':
-        # if os.path.getsize("log/hgrexlog.txt")
-        file = open("log/hgrexlog.txt", 'a')
+        if os.path.getsize("log/hgrexlog.txt") <= 700 * 1000000:
+            file = open("log/hgrexlog.txt", 'a')
+        else:
+            if os.path.getsize("log/hgrexlog1.txt") <= 700 * 1000000:
+                file = open("log/hgrexlog1.txt", 'a')
+            else:
+                file = open("log/hgrexlog2.txt", 'a')
+
     elif cros == 'HRndX':
-        file = open("log/hrndxlog.txt", 'a')
+        if os.path.getsize("log/hrndxlog.txt") <= 700 * 1000000:
+            file = open("log/hrndxlog.txt", 'a')
+        else:
+            if os.path.getsize("log/hrndxlog1.txt") <= 700 * 1000000:
+                file = open("log/hrndxlog1.txt", 'a')
+            else:
+                file = open("log/hrndxlog2.txt", 'a')
+
     elif cros == 'HProX':
-        file = open("log/hproxlog.txt", 'a')
+        if os.path.getsize("log/hproxlog.txt") <= 700 * 1000000:
+            file = open("log/hproxlog.txt", 'a')
+        else:
+            if os.path.getsize("log/hproxlog1.txt") <= 700 * 1000000:
+                file = open("log/hproxlog1.txt", 'a')
+            else:
+                file = open("log/hproxlog2.txt", 'a')
 
     start = time.time()
     timeCros[1] += 1

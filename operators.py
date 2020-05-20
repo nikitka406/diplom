@@ -5,7 +5,13 @@ import time
 # переставляем клиента к новому соседу, локальный поиск
 def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal, evolution=2,
              cycle=factory.param_local_search):
-    file = open("log/relog.txt", 'a')
+    if os.path.getsize("log/relog.txt") <= 700 * 1000000:
+        file = open("log/relog.txt", 'a')
+    else:
+        if os.path.getsize("log/relog1.txt") <= 700 * 1000000:
+            file = open("log/relog1.txt", 'a')
+        else:
+            file = open("log/relog2.txt", 'a')
 
     start = time.time()
     timeLocal[1] += 1
@@ -138,7 +144,13 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
 
 def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal):
-    file = open("log/twooptlog.txt", 'a')
+    if os.path.getsize("log/twooptlog.txt") <= 700 * 1000000:
+        file = open("log/twooptlog.txt", 'a')
+    else:
+        if os.path.getsize("log/twooptlog1.txt") <= 700 * 1000000:
+            file = open("log/twooptlog1.txt", 'a')
+        else:
+            file = open("log/twooptlog2.txt", 'a')
 
     start = time.time()
     timeLocal[1] += 1
@@ -272,7 +284,13 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
 
 # Возможность приезжать нескольким машинам на одну локацию
 def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, iteration, timeLocal):
-    file = open("log/helog.txt", 'a')
+    if os.path.getsize("log/helog.txt") <= 700 * 1000000:
+        file = open("log/helog.txt", 'a')
+    else:
+        if os.path.getsize("log/helog1.txt") <= 700 * 1000000:
+            file = open("log/helog1.txt", 'a')
+        else:
+            file = open("log/helog2.txt", 'a')
 
     start = time.time()
     timeLocal[1] += 1
@@ -515,7 +533,13 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
 def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_start, iteration, timeLocal,
              cycle=factory.param_local_search):
-    file = open("log/exchlog.txt", 'a')
+    if os.path.getsize("log/exchlog.txt") <= 700 * 1000000:
+        file = open("log/exchlog.txt", 'a')
+    else:
+        if os.path.getsize("log/exchlog1.txt") <= 700 * 1000000:
+            file = open("log/exchlog1.txt", 'a')
+        else:
+            file = open("log/exchlog2.txt", 'a')
 
     start = time.time()
     timeLocal[1] += 1
@@ -589,20 +613,20 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                                 if indexCl - 1 == 0:
                                                     sequence1Left = 0
                                                 else:
-                                                    sequence1Left = sequenceX2[clientCar][indexCl - 2]
-                                                if indexCl + len(buf1) + 2 < len(sequenceX2):
+                                                    sequence1Left = sequenceX2[clientCar][indexCl - 1]
+                                                if indexCl + len(buf1) + 1 < len(sequenceX2):
                                                     sequence1Right = sequenceX2[clientCar][
-                                                        indexCl + len(buf1) + 2]
+                                                        indexCl + len(buf1) + 1]
                                                 else:
                                                     sequence1Right = 0
 
                                                 if indexSos - 1 == 0:
                                                     sequence2Left = 0
                                                 else:
-                                                    sequence2Left = sequenceX2[sosedCar][indexSos - 2]
-                                                if indexSos + len(buf2) + 2 < len(sequenceX2):
+                                                    sequence2Left = sequenceX2[sosedCar][indexSos - 1]
+                                                if indexSos + len(buf2) + 1 < len(sequenceX2):
                                                     sequence2Right = sequenceX2[sosedCar][
-                                                        indexSos + len(buf2) + 2]
+                                                        indexSos + len(buf2) + 1]
                                                 else:
                                                     sequence2Right = 0
 
