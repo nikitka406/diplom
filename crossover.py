@@ -233,6 +233,7 @@ def AEX(sequence1, sequence2, timeCros):
 def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
     file = 0
     if cros == 'HGreX':
+        # if os.path.getsize("log/hgrexlog.txt")
         file = open("log/hgrexlog.txt", 'a')
     elif cros == 'HRndX':
         file = open("log/hrndxlog.txt", 'a')
@@ -304,7 +305,7 @@ def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
             file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
         if scnd == 0:
-            file.write("Вернулись в ноль, нужно перейти на новую машину\n")
+            file.write("Вернулись в ноль, нужно перейти на новую машину или завершить скрещивание\n")
             car += 1
             numberInCar = 0
             for i in range(factory.N):
@@ -312,21 +313,24 @@ def HGreXOrHRndXOrHProX(sequence1, sequence2, timeCros, cros):
 
             if car < factory.K or sum(flagAll) < factory.N:
                 first = SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file)
-                file.write("Выбираем случайную вершину = " + str(first) + '\n')
+                if first:
+                    file.write("Выбираем случайную вершину = " + str(first) + '\n')
 
-                file.write("Расставляем флаги" + '\n')
-                flagAll[first] = 1
-                flag[first] += 1
-                countOfRaces[first] -= 1
-                file.write("flag = " + str(flag) + '\n')
-                file.write("flagAll = " + str(flagAll) + '\n')
-                file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
+                    file.write("Расставляем флаги" + '\n')
+                    flagAll[first] = 1
+                    flag[first] += 1
+                    countOfRaces[first] -= 1
+                    file.write("flag = " + str(flag) + '\n')
+                    file.write("flagAll = " + str(flagAll) + '\n')
+                    file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
 
-                file.write("Добавили первое ребро в ребенка, " + '\n')
-                children.append([first, 0])
-                numberInCar += 1
-                file.write("Ребенок сейчас выглядит во так " + str(children) + '\n')
-                scnd = first
+                    file.write("Добавили первое ребро в ребенка, " + '\n')
+                    children.append([first, 0])
+                    numberInCar += 1
+                    file.write("Ребенок сейчас выглядит во так " + str(children) + '\n')
+                    scnd = first
+                else:
+                    break
 
     Time = time.time() - start
     timeCros[0] += Time

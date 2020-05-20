@@ -818,12 +818,6 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, sequenceX2, cli
                 X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
                 X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, clientCar, time1)
                 X[subseq1Left][subseq2Right][clientCar] = 1
-                file.write("2clientCar\n")
-                for i in range(factory.N):
-                    for j in range(factory.N):
-                        file.write(str(X[i][j][clientCar]) + ' ')
-                    file.write('\n')
-                file.write('\n')
 
                 A = TimeOfArrival(X, Y, Sresh, file)
 
@@ -832,33 +826,14 @@ def OperatorJoinFromExchange(x, y, s, a, sizeK, target_function, sequenceX2, cli
                 X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
                 X[subseq2Left][subseq1Right][clientCar] = 1
 
-                file.write("2clientCar\n")
-                for i in range(factory.N):
-                    for j in range(factory.N):
-                        file.write(str(X[i][j][clientCar]) + ' ')
-                    file.write('\n')
-                file.write('\n')
-
                 A = TimeOfArrival(X, Y, Sresh, file)
 
         else:
             X, Y, Sresh, subseq2Left = AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, sosedCar, time1)
             X[subseq2Left][subseq2Right][sosedCar] = 1
-            file.write("2sosedCar\n")
-            for i in range(factory.N):
-                for j in range(factory.N):
-                    file.write(str(X[i][j][sosedCar]) + ' ')
-                file.write('\n')
-            file.write('\n')
 
             X, Y, Sresh, subseq1Left = AddSubSeqInPath(X, Y, Sresh, subseq2, subseq1Left, clientCar, time2)
             X[subseq1Left][subseq1Right][clientCar] = 1
-            file.write("2clientCar\n")
-            for i in range(factory.N):
-                for j in range(factory.N):
-                    file.write(str(X[i][j][clientCar]) + ' ')
-                file.write('\n')
-            file.write('\n')
 
             A = TimeOfArrival(X, Y, Sresh, file)
 

@@ -1,5 +1,6 @@
 import factory
 import random
+import os
 
 """ Функции для кроссоверов"""
 
@@ -312,6 +313,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
 
     file.write("Число свободных скважин на каждом объекте " + str(countOfRaces) + '\n')
     file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
+    # Выбираю следующие ребра: еще не посещали никогда + чтобы были свободные скважины + именно начальные ребра
     for i in range(1, len(sequence1)):
         if i == 1 and flagAll[sequence1[i][0]] == 0 and countOfRaces[sequence1[i][0]] > 0:
             buf.append(sequence1[i][0])
@@ -334,6 +336,7 @@ def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
     else:
         file.write("    Не нашли ни одного не посещенного первого, берем любого\n")
 
+        # Выбираю следующие ребра: еще не посещали никогда + чтобы были свободные скважины
         file.write("    Ищем первые объекты в маршрутах из решения\n    " + str(sequence1) + "\n")
         for i in range(1, len(sequence1)):
             if i == 1 and countOfRaces[sequence1[i][0]] > 0:
@@ -350,9 +353,12 @@ def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
                 i + 1] != [0, 0] and countOfRaces[sequence2[i + 1][0]] > 0:
                 buf.append(sequence2[i + 1][0])
 
-        file.write("    buf = " + str(buf) + '\n')
-        file.write("SelectFirstObj stop: <-\n")
-        return random.choice(buf)
+        if buf:
+            file.write("    buf = " + str(buf) + '\n')
+            file.write("SelectFirstObj stop: <-\n")
+            return random.choice(buf)
+        else:
+            return False
 
 
 # функция возвращает ребро в случаи неопределенности
