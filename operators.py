@@ -609,30 +609,35 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                                 if subseq2[-1] != 0:
                                                     buf2.append(subseq2[j])
 
-                                                # подсчет пред после
-                                                if indexCl - 1 == 0:
+                                                seq1Start = sequenceX2[clientCar].index(buf1[0])
+                                                seq1End = sequenceX2[clientCar].index(buf1[-1])
+                                                seq2Start = sequenceX2[sosedCar].index(buf2[0])
+                                                seq2End = sequenceX2[sosedCar].index(buf2[-1])
+
+                                                if seq1Start == 1 or sequenceX2[clientCar][seq1End] == 0:
                                                     sequence1Left = 0
                                                 else:
-                                                    sequence1Left = sequenceX2[clientCar][indexCl - 1]
-                                                if indexCl + len(buf1) + 1 < len(sequenceX2):
-                                                    sequence1Right = sequenceX2[clientCar][
-                                                        indexCl + len(buf1) + 1]
-                                                else:
-                                                    sequence1Right = 0
+                                                    sequence1Left = sequenceX2[clientCar][seq1Start-2]
 
-                                                if indexSos - 1 == 0:
+                                                if sequenceX2[clientCar][seq1End+1] == 0 or sequenceX2[clientCar][seq1End] == 0:
+                                                    sequence1Right = 0
+                                                else:
+                                                    sequence1Right = sequenceX2[clientCar][seq1End+2]
+
+                                                if seq2Start == 1 or sequenceX2[sosedCar][seq2End] == 0:
                                                     sequence2Left = 0
                                                 else:
-                                                    sequence2Left = sequenceX2[sosedCar][indexSos - 1]
-                                                if indexSos + len(buf2) + 1 < len(sequenceX2):
-                                                    sequence2Right = sequenceX2[sosedCar][
-                                                        indexSos + len(buf2) + 1]
-                                                else:
+                                                    sequence2Left = sequenceX2[sosedCar][seq2Start-2]
+
+                                                if sequenceX2[sosedCar][seq2End+1] == 0 or sequenceX2[sosedCar][seq2End] == 0:
                                                     sequence2Right = 0
+                                                else:
+                                                    sequence2Right = sequenceX2[sosedCar][seq2End+2]
 
                                                 file.write("buf1 = " + str(buf1) + '\n')
                                                 file.write("buf2 = " + str(buf2) + '\n')
 
+                                                # TODO не отбрасываюся решения в которых левые и правые соседи равны элементам другой последовательности кроме первого и последнего
                                                 if (not IsContainTailInStart(sequenceX2[sosedCar], buf1, sequence2Left,
                                                                              file)
                                                     and not IsContainTailInEnd(sequenceX2[sosedCar], buf1,
