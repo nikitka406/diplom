@@ -22,9 +22,9 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
 
         # Выбираем по каком сценарию будем брать родителей
-        scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
+        scenario_cross = ['randomAndRandom', 'BestAndRand']
         scenario = random.choice(scenario_cross)
-        scenario = 'randomAndRandom'
+        scenario = 'BestAndRand'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -61,26 +61,6 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
-        elif scenario == 'randomAndBad':
-            file.write("Пошли по сценарию, один рандомный второй самый худший" + '\n')
-            # Индекс первого родителя
-            index = random.randint(0, factory.param_population - 1)
-            file.write("Номер первого решения " + str(index) + '\n')
-
-            # Ищем самое большое решение по целевой функции
-            maximum = max(Target_Function)
-            # Оно будет вторым родителем
-            jndex = Target_Function.count(maximum)
-            file.write("Номер второго решения " + str(jndex) + '\n')
-
-            file.write(str(Sequence) + '\n')
-            file.write("Первое рандомное решение" + '\n')
-            file.write(str(Sequence[index]) + '\n')
-            file.write("Второе решение, худшие из всех" + '\n')
-            file.write(str(Sequence[jndex]) + '\n')
-
-            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
-
         elif scenario == 'BestAndRand':
             file.write("Пошли по сценарию, один рандомный второй самый лучший" + '\n')
             # Индекс первого родителя
@@ -90,35 +70,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет вторым родителем
-            jndex = Target_Function.count(minimum)
+            jndex = Target_Function.index(minimum)
             file.write("Номер второго решения " + str(jndex) + '\n')
 
             file.write(str(Sequence) + '\n')
             file.write("Первое рандомное решение" + '\n')
             file.write(str(Sequence[index]) + '\n')
             file.write("Второе решение, лучшие из всех" + '\n')
-            file.write(str(Sequence[jndex]) + '\n')
-
-            children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
-
-        elif scenario == 'BestAndBad':
-            file.write("Пошли по сценарию, один самый лудший второй самый худший" + '\n')
-            # Ищем самое маленькое решение по целевой функции
-            minimum = min(Target_Function)
-            # Оно будет первым родителем
-            index = Target_Function.count(minimum)
-            file.write("Номер первого решения " + str(index) + '\n')
-
-            # Ищем самое большое решение по целевой функции
-            maximum = max(Target_Function)
-            # Оно будет вторым родителем
-            jndex = Target_Function.count(maximum)
-            file.write("Номер второго решения " + str(jndex) + '\n')
-
-            file.write(str(Sequence) + '\n')
-            file.write("Первое решение, лудшие из всех" + '\n')
-            file.write(str(Sequence[index]) + '\n')
-            file.write("Второе решение, худшие из всех" + '\n')
             file.write(str(Sequence[jndex]) + '\n')
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
