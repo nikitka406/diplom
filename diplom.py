@@ -12,28 +12,13 @@ start_target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, 
 print("Целевая функция при стартовом решении ", start_target_function)
 SaveDateResult("Целевая функция при стартовом решении " + str(start_target_function))
 SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
-BeautifulPrint(x, y, s, a)
+
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 print("Проверка стартового решения пройдена")
 SaveDateResult("Проверка стартового решения пройдена\n")
 
 # Сохраняем стартовое решение в файл
 SaveStartSolution(x, y, s, a)
-
-# # Освобождаем машины если позволяют гран усл
-# DeleteCarNonNarushOgr(len(y[0]))
-# x, y, s, a = ReadStartSolutionOfFile(len(y[0]))
-# # TODO надо удалить не нужные машинки
-# # Проверяем что ничего не сломалось
-# target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-# assert VerificationOfBoundaryConditions(x, y, s, a) == 1
-#
-# print("Целевая функция при стартовом решении, но меньшем числе машин ", target_function)
-# SaveDateResult("Целевая функция при стартовом решении, но меньшем числе машин " + str(target_function))
-# SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
-#
-# # Сохраняем стартовое решение в файл
-# SaveStartSolution(x, y, s, a)
 
 # Создаем хранилище решений, для популяции решений
 X, Y, Sresh, A, Target_Function, Size_Solution = SolutionStore(start_target_function, len(y[0]))

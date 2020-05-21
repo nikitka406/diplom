@@ -759,32 +759,17 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
     for n in range(factory.param_population):  # создаем популяцию решений в кол-ве param_population
         # Берем стартовое решение из файла, потому что какой-то пиздюк его испортил
 
-        # TODO раскоментить
-        name_oper = ['reloc', '2-Opt']
-        oper = random.choice(name_oper)
-        oper = 'reloc'
         X, Y, Sresh, A = ReadStartSolutionOfFile(SizeSolution[n])
 
-        if oper == 'reloc':
-            x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
+        x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
                                                                                      SizeSolution[n], iteration,
                                                                                      timeLocal[0], 1)
-            # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Exchange(X, Y, Sresh, A, Target_Function[n],
-            #                                                                          SizeSolution[n], iteration,
-            #                                                                          timeLocal[0])
-            # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[2] = Help(x, y, s, a, Target_Function[n], SizeSolution[n], iteration,
-            #                                                         timeLocal[2])
 
-        elif oper == '2-Opt':
-            x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[1] = Two_Opt(X, Y, Sresh, A, Target_Function[n],
-                                                                                    SizeSolution[n], iteration,
-                                                                                    timeLocal[1])
         SaveDateFromGraph(Target_Function[n], "StartPopulation")
         print("\nРешение номер", n, "построено")
         print("_____________________________")
 
         SavePopulation(x, y, s, a)
-    # iteration += 1
     print("Популяция создана и сохранена в файл!!")
     print("___________________________________________________________________________________________________________")
     return timeLocal

@@ -138,22 +138,6 @@ def AmountCarUsed(lokal_y):
     return amount
 
 
-# копирование решения
-def CopyingSolution(local_x, local_y, local_s, local_a):
-    local_X = local_x.copy()
-    # local_X = [[[0 for k in range(len(local_x[0][0]))] for j in range(factory.N)] for i in
-    #      range(factory.N)]  # едет или нет ТС с номером К из города I в J
-    # # for k in range(factory.KA):
-    # for i in range(factory.N):
-    #     local_X[i] = list(local_x[i])
-    #     for j in range(factory.N):
-    #             local_X[i][j][k] = local_x[i][j][k]
-    local_Y = local_y.copy()
-    local_S = local_s.copy()
-    local_A = local_a.copy()
-    return local_X, local_Y, local_S, local_A
-
-
 # подсчет значения целевой функции
 def CalculationOfObjectiveFunction(x, pinalty_function=0):
     target_function = 0
@@ -178,28 +162,6 @@ def OneCarOneLocation():
     # сколько раз можно заехать к каждому
     countOfRaces = factory.wells.copy()
 
-    # поочереди отправляем ТС на локации, по одному на скважину
-    # k = 0
-    # for j in range(1, factory.N):
-    #     if factory.wells[j] >= 1:
-    #         for i in range(factory.wells[j]):
-    #             x[0][j][k] = 1  # туда
-    #             x[j][0][k] = 1  # обратно
-    #             y[j][k] = 1
-    #             if factory.wells[j] > 1:
-    #                 s[j][k] = factory.S[j] / factory.wells[j]
-    #             else:
-    #                 s[j][k] = factory.S[j]
-    #
-    #             if factory.e[j] > factory.t[0][j]:
-    #                 a[j][k] = factory.e[j]
-    #                 a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
-    #             else:
-    #                 a[j][k] = factory.t[0][j]
-    #                 a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
-    #             # print(a[j][k], end=' ')
-    #             k += 1
-    #         # print("\n")
     i = 1
     for k in range(factory.KA):
         if i < factory.N:
@@ -249,126 +211,6 @@ def OneCarOneLocation():
             Sresh[i][k] = s[i][k]
 
     return X, Y, Sresh, A
-
-
-# удаляем машину с локации если позволяют огр
-def DeleteCarNonNarushOgr(sizeK):
-    # Убираем одну машину
-    for i in range(1, factory.N):
-        # копии чтобы не испортить исходное решение
-        lokal_X, lokal_Y, lokal_Sresh, lokal_A = ReadStartSolutionOfFile(sizeK)
-
-        if factory.wells[i] > 1:  # Выбираем только те локации у которых больше одной скважины
-            for k in range(sizeK - 1):
-                if lokal_Y[i][k] == 1 and lokal_Y[i][k + 1] == 1:  # -//- ту машину за которой едет еще одна
-                    lokal_Y[i][k] = 0
-                    lokal_Y[0][k] = 0
-                    lokal_Sresh[i][k + 1] += lokal_Sresh[i][k]
-                    lokal_Sresh[i][k] = 0
-                    lokal_A[i][k] = 0
-                    lokal_X[0][i][k] = 0
-                    lokal_X[i][0][k] = 0
-                    # target_function -= car_cost
-                    if VerificationOfBoundaryConditions(lokal_X, lokal_Y, lokal_Sresh, lokal_A) == 1:
-                        # BeautifulPrint(lokal_X, lokal_Y, lokal_Sresh, lokal_A)
-                        SaveStartSolution(lokal_X, lokal_Y, lokal_Sresh, lokal_A)
-                        # Если ограничения не сломались то сохраняем эти изменения
-                    else:
-                        lokal_X, lokal_Y, lokal_Sresh, lokal_A = ReadStartSolutionOfFile(sizeK)
-
-
-# перезапись одного маршрута на другой
-def Rewriting(lokal, k, m, flag):
-    if flag == "1":
-        for j in range(factory.N):
-            lokal[j][k] = lokal[j][m]
-            lokal[j][m] = 0
-    if flag == "2":
-        for i in range(factory.N):
-            for j in range(factory.N):
-                lokal[i][j][k] = lokal[i][j][m]
-                lokal[i][j][m] = 0
-
-
-# TODO делит почему портит стартовое решение
-# TODO надо полностью переписать делит с помощью флага и последующео удаления через remove
-# удаляем/уменьшаем размерность с помощью не используемых машин
-def DeleteNotUsedCar(lokal_x, lokal_y, lokal_s, lokal_a):
-    # todo сейчас удаляются машину пока получается, надо чтобы оставались те которые наши(не арендованные) под
-    #  вопросом?????
-    for k in range(len(lokal_x[0][0])):
-        summa1 = 0  # Обнуляем счетчик
-        for j in range(1, factory.N):
-            # смотрим посещает ли К-ая машина хотя бы один город
-            summa1 += lokal_y[j][k]
-        if summa1 == 0:  # если 0 значит не посещает
-            if k != len(lokal_x[0][0]) - 1:  # если пустой машиной оказалась не последняя в списке, то
-                for m in range(k + 1, len(lokal_x[0][0])):  # ищем ближайшую рабочую машину
-                    summa2 = 0
-                    for i in range(factory.N):
-                        summa2 += lokal_y[i][m]
-                    if summa2 != 0:  # сохранем ее в первый пустой маршрут
-                        Rewriting(lokal_y, k, m, "1.txt")
-                        Rewriting(lokal_s, k, m, "1.txt")
-                        Rewriting(lokal_a, k, m, "1.txt")
-                        Rewriting(lokal_x, k, m, "2")
-                        break
-
-            factory.KA = AmountCarUsed(lokal_y)
-            if factory.KA > factory.K - 1:
-                # создаем новые переменные так как они должны быть меньше по размерности относительно старых,
-                # нельзя просто прировнять
-                lokal_X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
-                           range(factory.N)]  # едет или нет ТС с номером К из города I в J
-                lokal_Y = [[0 for k in range(factory.KA)] for i in
-                           range(factory.N)]  # посещает или нет ТС с номером К объект i
-                lokal_Sresh = [[0 for k in range(factory.KA)] for i in
-                               range(factory.N)]  # время работы ТС c номером К на объекте i
-                lokal_A = [[0 for k in range(factory.KA)] for i in
-                           range(factory.N)]  # время прибытия ТС с номером К на объект i
-                for k in range(factory.KA):
-                    for i in range(factory.N):
-                        for j in range(factory.N):
-                            lokal_X[i][j][k] = lokal_x[i][j][k]
-                        lokal_Y[i][k] = lokal_y[i][k]
-                        lokal_Sresh[i][k] = lokal_s[i][k]
-                        lokal_A[i][k] = lokal_a[i][k]
-                return lokal_X, lokal_Y, lokal_Sresh, lokal_A
-            else:
-                print("NOTIFICATION from DeleteNotUsedCar: Уже удалены все арендованные машины")
-                return lokal_x, lokal_y, lokal_s, lokal_a
-
-
-# ищем минимальный путь по которому можно попасть в client
-def SearchTheBestSoseda(client):
-    neighbor = 0  # старый сосед
-    bufer = factory.d[0][client]  # расстояние от старого сосед адо клиента
-    for i in range(factory.N):
-        if bufer >= factory.d[i][client] and i != client:
-            # ищим мин расстояние до клиента с учетом что новый сосед не клиент
-            bufer = factory.d[i][client]
-            neighbor = i
-    return neighbor
-
-
-# Возвращает рандомного клиента и машину
-def ChooseRandomObjAndCar(y, sizeK):
-    # Выбираем рандомную машину
-    if sizeK > 1:
-        car = random.randint(0, (sizeK-1))
-        while not CarIsWork(y, car):
-            car = random.randint(0, (sizeK-1))
-    else:
-        car = 0
-
-    # ЗАпоминаем всех кого она обслуживает
-    buf = []
-    for i in range(1, factory.N):
-        if y[i][car] == 1:
-            buf.append(i)
-    # Выбираем случайного среди них
-    client = random.choice(buf)
-    return client, car
 
 
 # ищем соседа слева либо справа
@@ -577,15 +419,6 @@ def IsContainWells(sequence, client, file, place='all', flag='start'):
                 return True
         # file.write("\nIsContainWells stop: <-\n")
         return False
-
-
-# Возвращает номер объекта который обслуживает конкретная машина
-def GetObjForCar(y, car):
-    result = []
-    for i in range(1, factory.N):
-        if y[i][car] == 1:
-            result.append(i)
-    return result
 
 
 # Возвращает число скважин которые не уложились во временное окно

@@ -295,17 +295,6 @@ def AddClientaInSequence(children, bufer, flag, flagAll, countOfRaces, i_in, fil
     file.write("______________________________" + '\n')
 
 
-# Выбор рандомного города из тех у который остались свободные скважины
-def RandomClientWithWells(countOfRaces):
-    # список в котором будут хранится клиенты в которорых остались скважины
-    ostatok = []
-    for i in factory.N:
-        if countOfRaces[i] > 0:
-            ostatok.append(i)
-
-    return random.choise(ostatok)
-
-
 # Выбор случайного первого клиента
 def SelectFirstObj(sequence1, sequence2, flagAll, countOfRaces, file):
     buf = []
@@ -400,16 +389,16 @@ def GetShortArc(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
     buf1 = []
     buf2 = []
     for i in range(len(sequence1) - 1):
-        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0 and countOfRaces[
-            sequence1[i + 1][0]] > 0:
+        if sequence1[i][0] == start and flag[sequence1[i + 1][0]] <= 0 and sequence1[i + 1][1] == 0 \
+                and countOfRaces[sequence1[i + 1][0]] > 0:
             buf1.append(i)
             file.write("    sequence1[i][0] = " + str(sequence1[i][0]) + '\n')
             file.write("    i+1 = " + str(i + 1) + '\n')
     file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
 
     for i in range(len(sequence2) - 1):
-        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0 and countOfRaces[
-            sequence2[i + 1][0]] > 0:
+        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0 \
+                and countOfRaces[sequence2[i + 1][0]] > 0:
             buf2.append(i)
     file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
 
@@ -527,7 +516,7 @@ def GetArcHRndX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
     file.write("    В первом решении объект " + str(start) + " имеет индексы " + str(buf1) + '\n')
 
     for i in range(len(sequence2) - 1):
-        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0\
+        if sequence2[i][0] == start and flag[sequence2[i + 1][0]] <= 0 and sequence2[i + 1][1] == 0 \
                 and countOfRaces[sequence2[i + 1][0]] > 0:
             buf2.append(i)
     file.write("    Во втором решении объект " + str(start) + " имеет индексы " + str(buf2) + '\n')
@@ -650,7 +639,7 @@ def GetArcHProX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
 
             if numberInCar >= factory.param_min_num_cl_in_car \
                     and flag[sequence1[buf1[i] + 1][0]] <= 0 and countOfRaces[sequence1[buf1[i] + 1][0]] > 0:
-                distance1.append(factory.d[start][sequence1[buf1[i]+1][0]])
+                distance1.append(factory.d[start][sequence1[buf1[i] + 1][0]])
                 if minimum1 > distance1[-1]:
                     minimum1 = distance1[-1]
 
@@ -667,7 +656,7 @@ def GetArcHProX(sequence1, sequence2, start, flag, numberInCar, countOfRaces, fi
 
             if numberInCar >= factory.param_min_num_cl_in_car \
                     and flag[sequence2[buf2[i] + 1][0]] <= 0 and countOfRaces[sequence2[buf2[i] + 1][0]] > 0:
-                distance2.append(factory.d[start][sequence2[buf2[i]+1][0]])
+                distance2.append(factory.d[start][sequence2[buf2[i] + 1][0]])
                 if minimum2 > distance2[-1]:
                     minimum2 = distance2[-1]
 
