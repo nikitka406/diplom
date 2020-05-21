@@ -208,7 +208,7 @@ def AddOneCell(sequenceX1):
 def TransferX2toX1(sequenceX2, X):
     sequenceX1 = [0]
     for k in range(len(X[0][0])):
-        for i in range(1, factory.N - 1):
+        for i in range(1, len(sequenceX2[k])):
             # случай когда находишься на цифре и следующая цифра
             if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
                 sequenceX1.append(sequenceX2[k][i])

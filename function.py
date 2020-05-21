@@ -656,6 +656,40 @@ def AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, car2, time1, start=0):
     return X, Y, Sresh, subseq2Left
 
 
+# разворачиваем решение
+def RightOrder(x):
+    sequenceX2 = GettingTheSequence(x)
+    for k in range(len(sequenceX2)):
+        buf = [0]
+        for j in range(len(sequenceX2[k])):
+            minimum = 9999999999
+            for i in range(len(sequenceX2[k])):
+                if sequenceX2[k][i] != 0 and minimum > sequenceX2[k][i]:
+                    minimum = sequenceX2[k][i]
+
+            if minimum != 9999999999:
+                buf.append(minimum)
+                sequenceX2[k].remove(minimum)
+        buf.append(0)
+        sequenceX2[k] = buf
+
+    sequenceX1 = [0]
+    for k in range(len(x[0][0])):
+        for i in range(len(sequenceX2[k])):
+            # случай когда находишься на цифре и следующая цифра
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] != 0:
+                sequenceX1.append(sequenceX2[k][i])
+            # случай когда находишься на цифре и следующий ноль
+            if sequenceX2[k][i] != 0 and sequenceX2[k][i + 1] == 0:
+                sequenceX1.append(sequenceX2[k][i])
+            # случай когда находишься на нуле и предыдущая цифра
+            if sequenceX2[k][i - 1] != 0 and sequenceX2[k][i] == 0:
+                sequenceX1.append(sequenceX2[k][i])
+
+    sequenceX1 = AddOneCell(sequenceX1)
+    return sequenceX1
+
+
 # Граничные условия
 def X_join_Y(x, y, file='def'):
     bufer1 = 0

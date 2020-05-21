@@ -91,6 +91,9 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
 
+        sequence = RightOrder(x)
+        x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
+
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
