@@ -135,6 +135,9 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
         # Переводим последовательность в матрицы решений
         x, y, s, a, sizek = SequenceDisplayInTheXYSA(children)
 
+        sequence = RightOrder(x)
+        x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
+
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
         target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
@@ -189,6 +192,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
                 Target_Function.pop(i_max)
                 Sequence.pop(i_max)
                 SizeK.pop(i_max)
+                Fine.pop(i_max)
 
             elif scenario_add == 'deleteTheBadParents':
                 file.write("Удаляем самого плохого родителя" + '\n')
@@ -202,6 +206,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
                     Target_Function.pop(jndex)
                     Sequence.pop(jndex)
                     SizeK.pop(jndex)
+                    Fine.pop(jndex)
 
                 elif Target_Function[index] > Target_Function[jndex]:
                     file.write("с целевой функцией " + str(Target_Function[index]) + '\n')
@@ -212,6 +217,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
                     Target_Function.pop(index)
                     Sequence.pop(index)
                     SizeK.pop(index)
+                    Fine.pop(index)
 
             file.write("Добавляем новое решение в конец" + '\n')
             X.append(x)
@@ -221,6 +227,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
             Target_Function.append(target_function)
             Sequence.append(children)
             SizeK.append(sizek)
+            Fine.append(fineCh)
 
         file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
@@ -257,14 +264,14 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
     SaveDateResult("Число используемых машин = " + str(AmountCarUsed(Y[number_solution])))
     SaveDateResult("Решение до разворота " + str(Sequence[number_solution]))
 
-    sequence = RightOrder(X[number_solution])
-    x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
-    target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
+    # sequence = RightOrder(X[number_solution])
+    # x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
+    # target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
 
-    SaveDateResult("Итоговая минимальная целевая функция без штрафа после разворота = " + str(target_function))
-    SaveDateResult("Итоговая минимальная целевая функция со штрафом после разворота = " + str(target_function))
-    SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
-    SaveDateResult("Решение до разворота " + str(sequence))
+    # SaveDateResult("Итоговая минимальная целевая функция без штрафа после разворота = " + str(target_function))
+    # SaveDateResult("Итоговая минимальная целевая функция со штрафом после разворота = " + str(target_function))
+    # SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
+    # SaveDateResult("Решение до разворота " + str(sequence))
 
     for n in range(factory.param_population):
         file.write(str(Sequence[n]) + '\n')
