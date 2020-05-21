@@ -252,10 +252,19 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, ite
     file.write("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
     print("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
 
-    SaveDateResult("Итоговая минимальная целевая функция без штрафом = " + str(CalculationOfObjectiveFunction(X[number_solution], 0)))
-    SaveDateResult("Итоговая минимальная целевая функция со штрафом = " + str(min_result))
+    SaveDateResult("Итоговая минимальная целевая функция без штрафом до разворота = " + str(CalculationOfObjectiveFunction(X[number_solution], 0)))
+    SaveDateResult("Итоговая минимальная целевая функция со штрафом до разворота = " + str(min_result))
     SaveDateResult("Число используемых машин = " + str(AmountCarUsed(Y[number_solution])))
-    SaveDateResult("Решение " + str(Sequence[number_solution]))
+    SaveDateResult("Решение до разворота " + str(Sequence[number_solution]))
+
+    sequence = RightOrder(X[number_solution])
+    x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
+    target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
+
+    SaveDateResult("Итоговая минимальная целевая функция без штрафа после разворота = " + str(target_function))
+    SaveDateResult("Итоговая минимальная целевая функция со штрафом после разворота = " + str(target_function))
+    SaveDateResult("Число используемых машин = " + str(AmountCarUsed(y)))
+    SaveDateResult("Решение до разворота " + str(sequence))
 
     for n in range(factory.param_population):
         file.write(str(Sequence[n]) + '\n')
