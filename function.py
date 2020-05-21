@@ -162,6 +162,7 @@ def CalculationOfObjectiveFunction(x, pinalty_function=0):
             for j in range(factory.N):
                 target_function += factory.d[i][j] * x[i][j][k]
 
+    # target_function = target_function/5
     target_function += pinalty_function
     return target_function
 
@@ -436,18 +437,20 @@ def DeleteClientaFromPath(x, y, s, a, client, k):
 
 
 # штрафнвя функция
-def PenaltyFunction(y, s, a, iteration):
+def PenaltyFunction(y, s, a):
     penalty_sum = 0
-    fine = 0
+    day = [0 for i in range(factory.N)]
+    for k in range(len(y[0])):
+        for i in range(factory.N):
+            day[i] += max(0, ((a[i][k] + s[i][k]) - factory.l[i]))
+
     for i in range(factory.N):
-        for k in range(len(a[i])):
-            if a[i][k] + s[i][k] > factory.l[i]:
-                # Если время окончания не совпадает с регламентом, то умножаем разницу во времени на коэффициент
-                penalty_sum += max(0, ((a[i][k] + s[i][k]) - factory.l[i]) * factory.penalty * iteration)
+        penalty_sum += day[i]*factory.fineCof[i]
 
     # если кол-во используемых ТС пока еще боьше чем число допустимых, тогда штрафуем
+    fine = 0
     if AmountCarUsed(y) > factory.K:
-        fine = max(0, (AmountCarUsed(y) - factory.K) * factory.car_cost * iteration)
+        fine = max(0, (AmountCarUsed(y) - factory.K) * factory.car_cost)
 
     return penalty_sum + fine
 
@@ -477,7 +480,9 @@ def SolutionStore(target_start, sizeK):
     SizeSolution = [sizeK for n in
                     range(factory.param_population)]  # здесь сохраняем размер каждого решения в популяции
 
-    return X, Y, Sresh, A, Target_Function, SizeSolution
+    Fine = [0 for n in range(factory.param_population)]  # Здесь число дней которые опоздали для каждого объекта
+
+    return X, Y, Sresh, A, Target_Function, SizeSolution, Fine
 
 
 # Проверка на содержание хвоста в новом начале
@@ -626,7 +631,7 @@ def Checker(X, Y, Sresh, A, SizeK, iteration, name, file):
     if window_time_up(A, Sresh, Y, file) == 0:
         if VerificationOfBoundaryConditions(X, Y, Sresh, A, "true", file) == 1:
             file.write("    NOTIFICATION from " + name + ": вставили с нарушением временного окна" + '\n')
-            Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
+            Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A))
             file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
             return X, Y, Sresh, A, Target_Function, SizeK
         else:
@@ -637,7 +642,7 @@ def Checker(X, Y, Sresh, A, SizeK, iteration, name, file):
 
     elif VerificationOfBoundaryConditions(X, Y, Sresh, A, "false", file) == 1:
         file.write("    NOTIFICATION from " + name + ": вставили без нарушений ограничений" + '\n')
-        Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A, iteration))
+        Target_Function = CalculationOfObjectiveFunction(X, PenaltyFunction(Y, Sresh, A))
         file.write("    Подсчет целевой функции после вставления " + str(Target_Function) + '\n')
         return X, Y, Sresh, A, Target_Function, SizeK
     else:
@@ -654,6 +659,15 @@ def AddSubSeqInPath(X, Y, Sresh, subseq1, subseq2Left, car2, time1, start=0):
         Sresh[subseq1[i]][car2] += time1[i]
         subseq2Left = subseq1[i]
     return X, Y, Sresh, subseq2Left
+
+
+# Подсчет числа дней которые не укладываются в временное окно
+def FineDay(s, a, sizeK):
+    Fine = [0 for i in range(factory.N)]
+    for k in range(sizeK):
+        for i in range(factory.N):
+            Fine[i] += max(0, ((a[i][k] + s[i][k]) - factory.l[i]))
+    return Fine
 
 
 # Граничные условия

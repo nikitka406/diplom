@@ -7,7 +7,7 @@ iteration = 1
 
 # заполняем стартовое решение, одна машина на одну локацию
 x, y, s, a = OneCarOneLocation()
-start_target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+start_target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
 
 print("Целевая функция при стартовом решении ", start_target_function)
 SaveDateResult("Целевая функция при стартовом решении " + str(start_target_function))
@@ -25,7 +25,7 @@ DeleteCarNonNarushOgr(len(y[0]))
 x, y, s, a = ReadStartSolutionOfFile(len(y[0]))
 # TODO надо удалить не нужные машинки
 # Проверяем что ничего не сломалось
-target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
 assert VerificationOfBoundaryConditions(x, y, s, a) == 1
 
 print("Целевая функция при стартовом решении, но меньшем числе машин ", target_function)
@@ -36,7 +36,7 @@ SaveDateResult("Число используемых машин = " + str(AmountC
 SaveStartSolution(x, y, s, a)
 
 # Создаем хранилище решений, для популяции решений
-X, Y, Sresh, A, Target_Function, Size_Solution = SolutionStore(target_function, len(y[0]))
+X, Y, Sresh, A, Target_Function, Size_Solution, Fine = SolutionStore(target_function, len(y[0]))
 
 # Cоздаем популяцию решений
 timeLocal = [[0, 0], [0, 0], [0, 0], [0, 0]]  # 0- Relocate; 1- TwoOpt; 2- Help; 3- Exchange
@@ -50,7 +50,6 @@ print("Максимальная целевая функция в популяц�
 SaveDateResult("Минимальная целевая функция в популяции = " + str(min(Target_Function)))
 SaveDateResult("Максимальная целевая функция в популяции = " + str(max(Target_Function)))
 SaveDateResult("Среднее время работы Relocate в популяции = " + str(timeLocal[0][0] / timeLocal[0][1]))
-# SaveDateResult("Среднее время работы Help в популяции = " + str(timeLocal[2][0] / timeLocal[2][1]))
 
 # Создаем последовательность решения
 Sequence = CreateSequence(X)
@@ -61,8 +60,12 @@ for i in range(factory.param_population):
     file.write("____________________\n")
 file.close()
 
+# Создаем массив проебанных дней
+for n in range(factory.param_population):
+    Fine[n] = FineDay(Sresh[n], A[n], Size_Solution[n])
+
 # Создаем новые решения
-GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, iteration)
+GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, Size_Solution, Fine, iteration)
 
 Time = time.time() - start
 print(Time, "seconds")

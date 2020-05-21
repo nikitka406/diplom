@@ -135,7 +135,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, sos
                 return XR, YR, SR, AR, targetR, sizeK
             except TypeError:
                 file.write("OperatorJoinFromReloc stop: <-\n")
-                return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+                return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a)), sizeK
 
         file.write("Теперь ищем минимум из двух целевых" + '\n')
         if (targetL < targetR and targetL != -1) or (targetR == -1 and targetL != -1):
@@ -151,7 +151,7 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, sos
         else:
             file.write("Все пошло по пизде ничего не сохранили" + '\n')
             file.write("    OperatorJoinFromReloc stop: <-\n")
-            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a)), sizeK
 
     elif client == sosed and clientK != sosedK:
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(sizeK)
@@ -172,11 +172,11 @@ def OperatorJoinFromReloc(x, y, s, a, sizeK, client, clientK, sosed, sosedK, sos
             return X, Y, Sresh, A, target, SizeK
         except TypeError:
             file.write("OperatorJoinFromReloc stop: <-\n")
-            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+            return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a)), sizeK
 
     file.write("Переставляем одного и тоже к тому же на той же машине" + '\n')
     file.write("OperatorJoinFromReloc stop: <-\n")
-    return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration)), sizeK
+    return x, y, s, a, CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a)), sizeK
 
 
 def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1Car, tail1, client2, client2Car, tail2,

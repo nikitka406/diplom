@@ -5,7 +5,7 @@ from crossover import *
 # и отдать его в хорошую школу (оператор локального перемещения)
 # и дальнейшее его помещение в популяцию решений, если он не хуже всех
 # и все это сделает factory.param_crossing раз
-def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration):
+def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, Fine, iteration):
     file = open("log/genalog.txt", 'a')
     file.write("GeneticAlgorithm start: ->\n")
     file.write("Начинаем процесс порождения нового решения" + '\n')
@@ -24,7 +24,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'randomAndBad', 'BestAndRand', 'BestAndBad']
         scenario = random.choice(scenario_cross)
-        scenario = 'randomAndRandom'
+        scenario = 'BestAndRand'
         file.write("Выбрали сценарий по выбору родителей " + str(scenario) + '\n')
 
         # Выбираю как буду сохранять полученное решение
@@ -70,7 +70,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
-            jndex = Target_Function.count(maximum)
+            jndex = Target_Function.index(maximum)
             file.write("Номер второго решения " + str(jndex) + '\n')
 
             file.write(str(Sequence) + '\n')
@@ -90,7 +90,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет вторым родителем
-            jndex = Target_Function.count(minimum)
+            jndex = Target_Function.index(minimum)
             file.write("Номер второго решения " + str(jndex) + '\n')
 
             file.write(str(Sequence) + '\n')
@@ -101,18 +101,20 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
+            finePa = Fine[jndex]
+
         elif scenario == 'BestAndBad':
             file.write("Пошли по сценарию, один самый лудший второй самый худший" + '\n')
             # Ищем самое маленькое решение по целевой функции
             minimum = min(Target_Function)
             # Оно будет первым родителем
-            index = Target_Function.count(minimum)
+            index = Target_Function.index(minimum)
             file.write("Номер первого решения " + str(index) + '\n')
 
             # Ищем самое большое решение по целевой функции
             maximum = max(Target_Function)
             # Оно будет вторым родителем
-            jndex = Target_Function.count(maximum)
+            jndex = Target_Function.index(maximum)
             file.write("Номер второго решения " + str(jndex) + '\n')
 
             file.write(str(Sequence) + '\n')
@@ -135,7 +137,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
         assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
         # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
         file.write(
             "Целевая функция нового решения после оператора скрещивания и мутации равна " + str(target_function) + '\n')
         minimumCros = min(minimumCros, target_function)
@@ -162,6 +164,12 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
         minimumHelp = min(minimumHelp, target_function)
         maximumHelp = max(maximumHelp, target_function)
+
+        # Займемся штрафами
+        fineCh = FineDay(s, a, sizek)
+        for i in range(factory.N):
+            if finePa[i] < fineCh[i]:
+                factory.fineCof[i] += factory.penalty
 
         # Проверяем что новое решение не хуже самого плохого
         # Ищем самое большое решение по целевой функции

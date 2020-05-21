@@ -103,7 +103,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
         if fileflag == 1:
             x, y, s, a = ReadLocalSearchOfFile(SizeK)
-            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
             file.write(
                 "Целевая функция последнего минимального переставления = " + str(
                     target_function) + '\n')
@@ -132,7 +132,7 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
 
     file.write("While stop\n")
     x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
-
+    # TODO Считаем массив опозданий
     Time = time.time() - start
     timeLocal[0] += Time
     file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
@@ -250,7 +250,7 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
             file.write(
                 "Целевая функция последнего минимального переставления без штрафа= " + str(
                     target_function) + '\n')
-            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
             file.write(
                 "Целевая функция последнего минимального переставления со штрафом= " + str(
                     target_function) + '\n')
@@ -389,7 +389,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                 file.write(
                                     "Целевая функция последнего минимального переставления без штрафа= " + str(
                                         target_function) + '\n')
-                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
                                 file.write(
                                     "Целевая функция последнего минимального переставления со штрафом= " + str(
                                         target_function) + '\n')
@@ -500,7 +500,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                             file.write(
                                 "Целевая функция последнего минимального переставления без штрафа = " + str(
                                     target_function) + '\n')
-                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
                             file.write(
                                 "Целевая функция последнего минимального переставления со штрафом = " + str(
                                     target_function) + '\n')
@@ -720,7 +720,7 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
             file.write(
                 "Целевая функция последнего минимального переставления без штрафа= " + str(
                     target_function) + '\n')
-            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a))
             file.write(
                 "Целевая функция последнего минимального переставления со штрафом= " + str(
                     target_function) + '\n')
@@ -768,7 +768,7 @@ def PopulationOfSolutions(Target_Function, SizeSolution, iteration, timeLocal):
         if oper == 'reloc':
             x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Relocate(X, Y, Sresh, A, Target_Function[n],
                                                                                      SizeSolution[n], iteration,
-                                                                                     timeLocal[0], 1)
+                                                                                     timeLocal[0], 1)# todo передать старый массив с опозданиями
             # x, y, s, a, Target_Function[n], SizeSolution[n], timeLocal[0] = Exchange(X, Y, Sresh, A, Target_Function[n],
             #                                                                          SizeSolution[n], iteration,
             #                                                                          timeLocal[0])

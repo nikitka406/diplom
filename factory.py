@@ -1,9 +1,9 @@
 from math import *
 import csv
 
-v = 50  # скорость ТС
+v = 100  # скорость ТС
 car_cost = 10000  # цена за арнеду машины
-penalty = 0.5  # штраф за превышения временного срока
+penalty = 10  # штраф за превышения временного срока
 
 # N = 10  # число объектов
 # K = 5  # набор всех ТС
@@ -93,11 +93,15 @@ with open(FILENAME2) as File:
             K += 1
 
 timeWork = S[1] / wells[1]
-KA = 0  # кол-во ТС = кол-ву скважин
+KA = 0  # кол-во ТС
 param_crossing = 0
 for i in range(N):
     KA += wells[i]
     param_crossing += wells[i]
+
+# массив штрафных коэф для каждого объекта
+fineCof = [penalty for j in range(N)]
+fineCof[0] = 0
 
 # Теперь разворачиваем решение чтобы депо было в начале
 OX.reverse()
@@ -113,6 +117,9 @@ for i in range(N):
     for j in range(N):
         d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
         # d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+
+for i in range(N):
+    d[i][0] = 0
 
 t = [[0 for j in range(N)] for i in range(N)]  # время перемещения между городами
 for i in range(N):
@@ -130,21 +137,4 @@ coinsCheckSol = [0, 1]
 param_local_search = int(N/2)  # сколько раз будем запускать локальный поиск
 param_len_subseq = 2  # максимальная длина подпоследовательности в exchange
 param_hgrex_uncertainty = int(N/3)  # число для задания кол-ва случайных ребер
-#
-# print("d = ")
-# for i in range(N):
-#     for j in range(N):
-#         print(d[i][j], end=' ')
-#     print('\n')
-# print('\n')
-# print("t = ")
-# for i in range(N):
-#     for j in range(N):
-#         print(t[i][j], end=' ')
-#     print('\n')
-# print('\n')
-#
-# for i in range(N):
-#     print(OX[i], " ", OY[i], " ", S[i], " ", wells[i], " ", e[i], " ", l[i])
-# print(K)
-# print(KA)
+
