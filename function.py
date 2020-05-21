@@ -172,34 +172,83 @@ def OneCarOneLocation():
     x = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
          range(factory.N)]  # едет или нет ТС с номером К из города I в J
     y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
-    for k in range(factory.KA):
-        y[0][k] = 1
     s = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
     a = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
 
-    # поочереди отправляем ТС на локации, по одному на скважину
-    k = 0
-    for j in range(1, factory.N):
-        if factory.wells[j] >= 1:
-            for i in range(factory.wells[j]):
-                x[0][j][k] = 1  # туда
-                x[j][0][k] = 1  # обратно
-                y[j][k] = 1
-                if factory.wells[j] > 1:
-                    s[j][k] = factory.S[j] / factory.wells[j]
-                else:
-                    s[j][k] = factory.S[j]
+    # сколько раз можно заехать к каждому
+    countOfRaces = factory.wells.copy()
 
-                if factory.e[j] > factory.t[0][j]:
-                    a[j][k] = factory.e[j]
-                    a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
-                else:
-                    a[j][k] = factory.t[0][j]
-                    a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
-                # print(a[j][k], end=' ')
-                k += 1
-            # print("\n")
-    return x, y, s, a
+    # поочереди отправляем ТС на локации, по одному на скважину
+    # k = 0
+    # for j in range(1, factory.N):
+    #     if factory.wells[j] >= 1:
+    #         for i in range(factory.wells[j]):
+    #             x[0][j][k] = 1  # туда
+    #             x[j][0][k] = 1  # обратно
+    #             y[j][k] = 1
+    #             if factory.wells[j] > 1:
+    #                 s[j][k] = factory.S[j] / factory.wells[j]
+    #             else:
+    #                 s[j][k] = factory.S[j]
+    #
+    #             if factory.e[j] > factory.t[0][j]:
+    #                 a[j][k] = factory.e[j]
+    #                 a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
+    #             else:
+    #                 a[j][k] = factory.t[0][j]
+    #                 a[0][k] = a[j][k] + s[j][k] + factory.t[j][0]
+    #             # print(a[j][k], end=' ')
+    #             k += 1
+    #         # print("\n")
+    i = 1
+    for k in range(factory.KA):
+        if i < factory.N:
+            x[0][i][k] = 1
+            x[i][0][k] = 1
+            y[0][k] = 1
+            y[i][k] = 1
+            if factory.e[i] > factory.t[0][i]:
+                a[i][k] = factory.e[i]
+            else:
+                a[i][k] = factory.t[0][i]
+
+            time = factory.l[i] - a[i][k]
+            wels = time // factory.timeWork
+
+            if wels >= countOfRaces[i]:
+                s[i][k] = countOfRaces[i] * factory.timeWork
+                countOfRaces[i] = 0
+                a[0][k] = a[i][k] + s[i][k] + factory.t[i][0]
+                i += 1
+            else:
+                s[i][k] = wels * factory.timeWork
+                countOfRaces[i] -= wels
+                a[0][k] = a[i][k] + s[i][k] + factory.t[i][0]
+
+    factory.KA = AmountCarUsed(y)
+    X = [[[0 for k in range(factory.KA)] for j in range(factory.N)] for i in
+         range(factory.N)]  # едет или нет ТС с номером К из города I в J
+    Y = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # посещает или нет ТС с номером К объект i
+    for k in range(factory.KA):
+        y[0][k] = 1
+    Sresh = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время работы ТС c номером К на объекте i
+    A = [[0 for k in range(factory.KA)] for i in range(factory.N)]  # время прибытия ТС с номером К на объект i
+
+    for k in range(len(X[0][0])):
+        for i in range(factory.N):
+            for j in range(factory.N):
+                X[i][j][k] = x[i][j][k]
+
+        for i in range(factory.N):
+            Y[i][k] = y[i][k]
+
+        for i in range(factory.N):
+            A[i][k] = a[i][k]
+
+        for i in range(factory.N):
+            Sresh[i][k] = s[i][k]
+
+    return X, Y, Sresh, A
 
 
 # удаляем машину с локации если позволяют огр
