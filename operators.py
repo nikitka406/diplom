@@ -181,12 +181,14 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                     tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
 
                     for client2Car in range(SizeK):
-                        for client2 in range(1, factory.N):
-                            if Y[client2][client2Car] == 1:
+                        for client2 in range(factory.N):
+                            if (Y[client2][client2Car] == 1 and client2 != 0) or (client2 == 0 and not CarIsWork(Y, client2Car)):
                                 file.write("\nsequenceX2[client1Car] = " + str(sequenceX2[client1Car]) + '\n')
-                                file.write("Хвост = " + str(tail1) + '\n')
+                                file.write("Хвост1 = " + str(tail1) + '\n')
 
                                 tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
+                                file.write("\nsequenceX2[client2Car] = " + str(sequenceX2[client2Car]) + '\n')
+                                file.write("Хвост2 = " + str(tail2) + '\n')
 
                                 file.write("Меняем от клиентa1 " + str(client1) + '\n')
                                 file.write("С машины1 " + str(client1Car) + '\n')
@@ -196,7 +198,7 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
 
                                 if (not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not
                                     IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
-                                    and client1Car != client2Car) or client1Car == client2Car:
+                                    and client1Car != client2Car) or client1Car == client2Car or client2 == 0:
 
                                     if ResultCoins():
                                         file.write(
@@ -795,6 +797,7 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     # TODO выбираем оператор локального поиска
     local_search_oper = ['relocate', 'Exchange', '2Opt']
     oper = random.choice(local_search_oper)
+    # oper = '2Opt'
 
     print("Используем оператор ", oper)
     if oper == 'relocate':

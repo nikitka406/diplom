@@ -201,7 +201,8 @@ def OperatorJoinFromTwoOpt(x, y, s, a, sizeK, target_function, client1, client1C
 
         file.write("    Занулим хвосты\n")
         X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed1, tail1, client1Car, file)
-        X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed2, tail2, client2Car, file)
+        if sosed2 != -1:
+            X, Y, Sresh, A = DeleteTail(X, Y, Sresh, A, sosed2, tail2, client2Car, file)
 
         if sosed1 == tail2[0] or sosed2 == tail1[0]:
             file.write("    Рассматриваем вариант, что начало хвоста = соседу слева\n")

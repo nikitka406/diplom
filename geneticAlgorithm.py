@@ -240,11 +240,12 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         SaveDateResult("Среднее время работы Exchange в эволюции = " + str(timeLocal[3][0] / timeLocal[3][1]))
 
     min_result = min(Target_Function)
-    number_solution = Target_Function.count(min(Target_Function))
+    number_solution = Target_Function.index(min_result)
     file.write("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
     print("Минимальная целевая функция " + str(min_result) + " номер решения " + str(number_solution) + '\n')
 
-    SaveDateResult("Итоговая минимальная целевая функция = " + str(min_result))
+    SaveDateResult("Итоговая минимальная целевая функция без штрафом = " + str(CalculationOfObjectiveFunction(X[number_solution], 0)))
+    SaveDateResult("Итоговая минимальная целевая функция со штрафом = " + str(min_result))
     SaveDateResult("Число используемых машин = " + str(AmountCarUsed(Y[number_solution])))
     SaveDateResult("Решение " + str(Sequence[number_solution]))
 
