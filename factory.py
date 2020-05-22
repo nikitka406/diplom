@@ -134,9 +134,12 @@ param_hgrex_uncertainty = int(N/3)  # число для задания кол-в
 if path == "input/25/":
     timeAlgStart = 3.0
     timeAlg = 0.5
+    timeAlgHelp = 3.0
 elif path == "input/50/":
     timeAlgStart = 5.0
     timeAlg = 1.0
+    timeAlgHelp = 5.0
 elif path == "input/150/":
     timeAlgStart = 100.0
     timeAlg = 30.0
+    timeAlgHelp = 3.0

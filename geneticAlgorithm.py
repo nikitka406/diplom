@@ -20,6 +20,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
     for crossing in range(factory.param_crossing):
         file.write("Запускаем " + str(crossing) + "-ый раз" + '\n')
+        print("Запускаем " + str(crossing) + "-ый раз" + '\n')
 
         # Выбираем по каком сценарию будем брать родителей
         scenario_cross = ['randomAndRandom', 'BestAndRand']
@@ -118,9 +119,9 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         maximumLocal = max(maximumLocal, target_function)
 
         file.write("Help start" + '\n')
-        print("Help start" + '\n')
         x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration - 1,
                                                                 timeLocal[2])
+        print("Вышли из Help" + '\n')
         file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
         minimumHelp = min(minimumHelp, target_function)
         maximumHelp = max(maximumHelp, target_function)
@@ -136,6 +137,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             SaveDateFromGraph(target_function, "AfterCrosSearsh")
             if scenario_add == 'deleteTheBad':
                 file.write("Удаляем самое плохое решение в популяции" + '\n')
+                print("Удаляем самое плохое решение в популяции" + '\n')
                 X.pop(i_max)
                 Y.pop(i_max)
                 Sresh.pop(i_max)
@@ -146,7 +148,7 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
 
             elif scenario_add == 'deleteTheBadParents':
                 file.write("Удаляем самого плохого родителя" + '\n')
-
+                print("Удаляем самого плохого родителя" + '\n')
                 if Target_Function[index] <= Target_Function[jndex]:
                     file.write("с целевой функцией " + str(Target_Function[jndex]) + '\n')
                     X.pop(jndex)
