@@ -115,7 +115,63 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                     file.write("Отбросили мусорное решение\n")
 
                         else:
-                            break
+                            file.write(
+                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+                            if evolution == 1:
+                                SaveStartLocalSearch(x, y, s, a, SizeK)
+                                target_function_start = target_function
+                                TargetFunction = target_function
+                                sizeK_start = SizeK
+
+                                file.write("While stop\n")
+                                x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                                Time = time.time() - start
+                                timeLocal[0] += Time
+                                file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
+
+                                file.write("<-Relocate stop" + '\n')
+                                file.close()
+
+                                return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                            else:
+                                if fileflag == 1:
+                                    x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                    target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a,
+                                                                                                        iteration))
+                                    file.write(
+                                        "Целевая функция последнего минимального переставления = " + str(
+                                            target_function) + '\n')
+                                    fileflag = 0
+                                else:
+                                    target_function = -1
+
+                                minimum2 = min(target_function_start, target_function)
+                                if (minimum2 == target_function and target_function != -1) or (
+                                        fileflag == 1 and it == 0):
+                                    file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                    SaveStartLocalSearch(x, y, s, a, SizeK)
+                                    target_function_start = target_function
+                                    TargetFunction = target_function
+                                    sizeK_start = SizeK
+                                else:
+                                    file.write(
+                                        "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                    file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+
+                                file.write("While stop\n")
+                                x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                                Time = time.time() - start
+                                timeLocal[0] += Time
+                                file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
+
+                                file.write("<-Relocate stop" + '\n')
+                                file.close()
+
+                                return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -276,7 +332,44 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                         file.write("Это решение мусор, такое не смотрим\n\n")
 
                         else:
-                            break
+                            if fileflag == 1:
+                                x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                target_function = CalculationOfObjectiveFunction(x, 0)
+                                file.write(
+                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                        target_function) + '\n')
+                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                                file.write(
+                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
+                                        target_function) + '\n')
+                                fileflag = 0
+                            else:
+                                target_function = -1
+
+                            minimum2 = min(target_function_start, target_function)
+                            if minimum2 == target_function and target_function != -1:
+                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                SaveStartLocalSearch(x, y, s, a, SizeK)
+                                target_function_start = target_function
+                                TargetFunction = target_function
+                                sizeK_start = SizeK
+                            else:
+                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+
+                            file.write("While stop\n")
+                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                            Time = time.time() - start
+                            timeLocal[0] += Time
+                            file.write("Время работы Two_Opt = " + str(Time) + 'seconds\n')
+
+                            file.write("Two_Opt stop: <-" + '\n')
+                            file.close()
+
+                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -772,7 +865,44 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                                         file.write("Отбросили мусорные решения\n")
 
                         else:
-                            break
+                            if fileflag == 1:
+                                x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                target_function = CalculationOfObjectiveFunction(x, 0)
+                                file.write(
+                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                        target_function) + '\n')
+                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                                file.write(
+                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
+                                        target_function) + '\n')
+                                fileflag = 0
+                            else:
+                                target_function = -1
+                            # TODO сравнивать по вероятностb
+                            minimum2 = min(target_function_start, target_function)
+                            if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
+                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                SaveStartLocalSearch(x, y, s, a, SizeK)
+                                target_function_start = target_function
+                                TargetFunction = target_function
+                                sizeK_start = SizeK
+                            else:
+                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+
+                            file.write("While stop\n")
+                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                            Time = time.time() - start
+                            timeLocal[0] += Time
+                            file.write("Время работы Exchange = " + str(Time) + 'seconds\n')
+
+                            file.write("<-Exchange stop" + '\n')
+                            file.close()
+
+                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -852,20 +982,26 @@ def LocalSearch(x, y, s, a, target_function, sizeK, iteration, timeLocal):
     if oper == 'relocate':
         x, y, s, a, target_function, sizeK, timeLocal[0] = Relocate(x, y, s, a, target_function, sizeK, iteration,
                                                                     timeLocal[0])
+        print("Оператор ", oper, " закончился")
         SaveDateFromGraph(target_function, "Reloc")
+        print("Сохранили решение для графика")
         # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == '2Opt':
         x, y, s, a, target_function, sizeK, timeLocal[1] = Two_Opt(x, y, s, a, target_function, sizeK, iteration,
                                                                    timeLocal[1])
+        print("Оператор ", oper, " закончился")
         SaveDateFromGraph(target_function, "2Opt")
+        print("Сохранили решение для графика")
         # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal
 
     elif oper == 'Exchange':
         x, y, s, a, target_function, sizeK, timeLocal[3] = Exchange(x, y, s, a, target_function, sizeK, iteration,
-                                                                    timeLocal[3], factory.param_local_search / 2)
+                                                                    timeLocal[3])
+        print("Оператор ", oper, " закончился")
         SaveDateFromGraph(target_function, "Exchange")
+        print("Сохранили решение для графика")
         # iteration += 1
         return x, y, s, a, target_function, sizeK, iteration, timeLocal

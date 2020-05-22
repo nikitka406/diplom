@@ -146,6 +146,7 @@ def CalculationOfObjectiveFunction(x, pinalty_function=0):
             for j in range(factory.N):
                 target_function += factory.d[i][j] * x[i][j][k]
 
+    target_function = target_function/7
     target_function += pinalty_function
     return target_function
 

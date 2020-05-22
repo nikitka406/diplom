@@ -33,7 +33,6 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # scenario_add = 'deleteTheBad'
         file.write("Выбрали сценарий по сохранению нового решения " + str(scenario_add) + '\n')
 
-        # TODO Задаю список с названиями операторов
         name_crossover = ['AEX', 'HGreX', 'HRndX', 'HProX']
         crossover = random.choice(name_crossover)
         file.write("Выбрали кроссовер для скрещивания" + str(crossover) + '\n')
@@ -53,11 +52,11 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             while jndex == index:
                 jndex = random.randint(0, factory.param_population - 1)
 
-            file.write(str(Sequence) + '\n')
-            file.write("Первое рандомное решение" + '\n')
-            file.write(str(Sequence[index]) + '\n')
-            file.write("Второе рандомное решение" + '\n')
-            file.write(str(Sequence[jndex]) + '\n')
+            # file.write(str(Sequence) + '\n')
+            # file.write("Первое рандомное решение" + '\n')
+            # file.write(str(Sequence[index]) + '\n')
+            # file.write("Второе рандомное решение" + '\n')
+            # file.write(str(Sequence[jndex]) + '\n')
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
@@ -73,11 +72,11 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
             jndex = Target_Function.index(minimum)
             file.write("Номер второго решения " + str(jndex) + '\n')
 
-            file.write(str(Sequence) + '\n')
-            file.write("Первое рандомное решение" + '\n')
-            file.write(str(Sequence[index]) + '\n')
-            file.write("Второе решение, лучшие из всех" + '\n')
-            file.write(str(Sequence[jndex]) + '\n')
+            # file.write(str(Sequence) + '\n')
+            # file.write("Первое рандомное решение" + '\n')
+            # file.write(str(Sequence[index]) + '\n')
+            # file.write("Второе решение, лучшие из всех" + '\n')
+            # file.write(str(Sequence[jndex]) + '\n')
 
             children, timeCros = UsedCrossovers(Sequence[index], Sequence[jndex], crossover, timeCros)
 
@@ -113,11 +112,13 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         file.write("LocalSearch start\n")
         x, y, s, a, target_function, sizek, iteration, timeLocal = LocalSearch(x, y, s, a, target_function, sizek,
                                                                                iteration, timeLocal)
+        print("Вышли из локального поиска")
         file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
         minimumLocal = min(minimumLocal, target_function)
         maximumLocal = max(maximumLocal, target_function)
 
         file.write("Help start" + '\n')
+        print("Help start" + '\n')
         x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration - 1,
                                                                 timeLocal[2])
         file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
