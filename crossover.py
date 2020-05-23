@@ -386,23 +386,21 @@ def UsedCrossovers(sequence1, sequence2, operator, timeCros):
 
 # Мутация
 def Mutation(sequence, file):
-    # TODO пересмотеть реализацию
-    if ResultCoins(factory.coinsMut):
-        file.write(
-            "____________________________________________________________________________________________________\n")
-        file.write("Начилась мутация\n")
-        count_car = CountUsedMachines(sequence)
-        file.write("Число используемых машин = " + str(count_car) + "\n")
+    file.write(
+        "____________________________________________________________________________________________________\n")
+    file.write("Начилась мутация\n")
+    count_car = CountUsedMachines(sequence)
+    file.write("Число используемых машин = " + str(count_car) + "\n")
 
-        buf_random = []
-        k = 0
-        # print("Последовательность до мутации ")
-        # print(sequence)
-        for i in range(1, len(sequence)):
-            if sequence[i][0] != 0:
-                buf_random.append(sequence[i][0])
-            elif sequence[i][0] == 0 and len(buf_random) > 1:
-
+    buf_random = []
+    k = 0
+    # print("Последовательность до мутации ")
+    # print(sequence)
+    for i in range(1, len(sequence)):
+        if sequence[i][0] != 0:
+            buf_random.append(sequence[i][0])
+        elif sequence[i][0] == 0 and len(buf_random) > 1:
+            if ResultCoins(factory.coinsMut):
                 # print("Полученный массив ", buf_random)
                 obj1 = int(random.choice(buf_random))
                 # print("Берем рандомного клиента ", obj1)
@@ -424,13 +422,11 @@ def Mutation(sequence, file):
                 buf_random = []
                 k = i
 
-            elif sequence[i][0] == 0 and len(buf_random) == 1:
-                # print("Машина обслуживает только одного клиента, никого никуда не переставляем")
-                buf_random = []
-                k = i
+        elif sequence[i][0] == 0 and len(buf_random) == 1:
+            # print("Машина обслуживает только одного клиента, никого никуда не переставляем")
+            buf_random = []
+            k = i
 
-        file.write("Итоговая, измененая последовательность = \n")
-        file.write(str(sequence) + '\n')
-        return sequence
-    else:
-        return sequence
+    file.write("Итоговая, измененая последовательность = \n")
+    file.write(str(sequence) + '\n')
+    return sequence

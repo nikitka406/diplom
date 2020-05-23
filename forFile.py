@@ -431,7 +431,7 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
     file = open('output/SolutionPopulation.txt', 'r')
     print("Считываем популяцию из файла output/SolutionPopulation.txt")
     # прочитали весь файл, получился список из строк файла
-    line = file.readlines()
+    # line = file.readlines()
 
     index = 0
     for n in range(factory.param_population):
@@ -439,30 +439,34 @@ def ReadSolutionPopulationOnFile(local_x, local_y, local_s, local_a):
         for i in range(factory.N):
             for j in range(factory.N):
                 # for k in range(factory.KA):
-                local_x[n][i][j] = line[index].split()
+                line = file.readline()
+                local_x[n][i][j] = line.split()
                 for k in range(len(local_x[n][i][j])):
                     local_x[n][i][j][k] = int(local_x[n][i][j][k])
-                index += 1
+                # index += 1
 
         # Печатаем в файл Y
         for i in range(factory.N):
-            local_y[n][i] = line[index].split()
+            line = file.readline()
+            local_y[n][i] = line.split()
             for k in range(len(local_y[n][i])):
                 local_y[n][i][k] = int(local_y[n][i][k])
-            index += 1
+            # index += 1
 
         # Печатаем в файл S
         for i in range(factory.N):
-            local_s[n][i] = line[index].split()
+            line = file.readline()
+            local_s[n][i] = line.split()
             for k in range(len(local_s[n][i])):
                 local_s[n][i][k] = float(local_s[n][i][k])
-            index += 1
+            # index += 1
         # Печатаем в файл A
         for i in range(factory.N):
-            local_a[n][i] = line[index].split()
+            line = file.readline()
+            local_a[n][i] = line.split()
             for k in range(len(local_a[n][i])):
                 local_a[n][i][k] = float(local_a[n][i][k])
-            index += 1
+            # index += 1
     file.close()
 
 

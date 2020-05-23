@@ -38,7 +38,7 @@ penalty = 0.5  # штраф за превышения временного ср�
 
 
 # Создаем пустые списки для входных данных
-path = "input/50/"
+path = "input/150/"
 OX = []
 OY = []
 S = []
@@ -111,8 +111,8 @@ l.reverse()
 d = [[0 for j in range(N)] for i in range(N)]  # расстояния между городами
 for i in range(N):
     for j in range(N):
-        d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
-        # d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+        # d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
+        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
 
 t = [[0 for j in range(N)] for i in range(N)]  # время перемещения между городами
 for i in range(N):
@@ -138,8 +138,8 @@ if path == "input/25/":
 elif path == "input/50/":
     timeAlgStart = 5.0
     timeAlg = 1.0
-    timeAlgHelp = 5.0
+    timeAlgHelp = 2.0
 elif path == "input/150/":
-    timeAlgStart = 100.0
-    timeAlg = 30.0
-    timeAlgHelp = 3.0
+    timeAlgStart = 10.0
+    timeAlg = 1.0
+    timeAlgHelp = 1.5
