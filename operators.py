@@ -484,7 +484,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                         file.write("Начинаем цикл по объектам в этой машине\n")
                                         for sosed in range(factory.N):
                                             if (Y[sosed][sosedK] == 1 and sosed != 0) or (
-                                                    sosed == 0 and not CarIsWork(Y, sosedK)):
+                                                    sosed == 0 and not CarIsWork(Y, sosedK)) and ResultCoins():
                                                 file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                 file.write(
                                                     "Попробую одну скважину с объекта " + str(
@@ -598,7 +598,7 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                             file.write("Начинаем цикл по объектам в этой машине\n")
                                             for sosed in range(1, factory.N):
                                                 if (Y[sosed][sosedK] == 1 and sosed != 0) or (
-                                                        sosed == 0 and not CarIsWork(Y, sosedK)):
+                                                        sosed == 0 and not CarIsWork(Y, sosedK)) and ResultCoins():
                                                     file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                     file.write(
                                                         "Попробую одну скважину с объекта " + str(

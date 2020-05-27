@@ -38,7 +38,7 @@ penalty = 0.5  # штраф за превышения временного ср�
 
 
 # Создаем пустые списки для входных данных
-path = "input/150/"
+path = "input/50/"
 OX = []
 OY = []
 S = []
@@ -140,6 +140,6 @@ elif path == "input/50/":
     timeAlg = 1.0
     timeAlgHelp = 2.0
 elif path == "input/150/":
-    timeAlgStart = 10.0
-    timeAlg = 1.0
-    timeAlgHelp = 1.5
+    timeAlgStart = 8.0
+    timeAlg = 2.0
+    timeAlgHelp = 4.0
