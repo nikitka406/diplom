@@ -51,23 +51,24 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                         sosedK = random.choice(car2)
                         car2.remove(sosedK)
 
-                        if ((evolution == 1 and (time.time() - start) < factory.timeAlgStart)
-                                or (evolution == 2 and (time.time() - start) < factory.timeAlg)):
-                            for sosed in range(factory.N):
+                        for sosed in range(factory.N):
 
-                                sosedLeft = SearchSosedLeftOrRight(X, Y, sosed, "left", sosedK)  # левый сосед соседа
-                                sosedRight = SearchSosedLeftOrRight(X, Y, sosed, "right", sosedK)  # правый сосед соседа
+                            sosedLeft = SearchSosedLeftOrRight(X, Y, sosed, "left", sosedK)  # левый сосед соседа
+                            sosedRight = SearchSosedLeftOrRight(X, Y, sosed, "right", sosedK)  # правый сосед соседа
 
-                                if (client != sosedLeft and client != sosed and client != sosedRight
-                                    and not IsContainWells(sequenceX2[sosedK], client, file)) \
-                                        or (client == sosedLeft or client == sosed or client == sosedRight) \
-                                        or (sosed == 0 and not CarIsWork(Y, sosedK)):
+                            if (client != sosedLeft and client != sosed and client != sosedRight
+                                and not IsContainWells(sequenceX2[sosedK], client, file)) \
+                                    or (client == sosedLeft or client == sosed or client == sosedRight) \
+                                    or (sosed == 0 and not CarIsWork(Y, sosedK)):
 
-                                    file.write("Это не мусорное решение, можно смотреть\n")
+                                file.write("Это не мусорное решение, можно смотреть\n")
 
-                                    if (Y[sosed][sosedK] == 1 and sosed != 0) or (
-                                            sosed == 0 and not CarIsWork(Y, sosedK)
-                                            and evolution == 2):
+                                if (Y[sosed][sosedK] == 1 and sosed != 0) or (
+                                        sosed == 0 and not CarIsWork(Y, sosedK)
+                                        and evolution == 2):
+
+                                    if ((evolution == 1 and (time.time() - start) < factory.timeAlgStart)
+                                            or (evolution == 2 and (time.time() - start) < factory.timeAlg)):
 
                                         if ResultCoins():
                                             file.write(
@@ -110,68 +111,72 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                         else:
                                             file.write("Монетка сказала не берем\n")
                                     else:
-                                        file.write("Не прошло условие\n")
+                                        file.write(
+                                            "Целевая функция последнего стартового решения = " + str(
+                                                target_function_start) + '\n')
+                                        if evolution == 1:
+                                            SaveStartLocalSearch(x, y, s, a, SizeK)
+                                            target_function_start = target_function
+                                            TargetFunction = target_function
+                                            sizeK_start = SizeK
+
+                                            file.write("While stop\n")
+                                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                                            Time = time.time() - start
+                                            timeLocal[0] += Time
+                                            file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
+
+                                            file.write("<-Relocate stop" + '\n')
+                                            file.close()
+
+                                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                        else:
+                                            if fileflag == 1:
+                                                x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                                target_function = CalculationOfObjectiveFunction(x,
+                                                                                                 PenaltyFunction(y, s,
+                                                                                                                 a,
+                                                                                                                 iteration))
+                                                file.write(
+                                                    "Целевая функция последнего минимального переставления = " + str(
+                                                        target_function) + '\n')
+                                                fileflag = 0
+                                            else:
+                                                target_function = -1
+
+                                            minimum2 = min(target_function_start, target_function)
+                                            if (minimum2 == target_function and target_function != -1) or (
+                                                    fileflag == 1 and it == 0):
+                                                file.write(
+                                                    "Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+
+                                                SaveStartLocalSearch(x, y, s, a, SizeK)
+                                                target_function_start = target_function
+                                                TargetFunction = target_function
+                                                sizeK_start = SizeK
+                                            else:
+                                                file.write(
+                                                    "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                                file.write(
+                                                    "Старая целевая функция равна " + str(target_function_start) + '\n')
+
+                                            file.write("While stop\n")
+                                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+
+                                            Time = time.time() - start
+                                            timeLocal[0] += Time
+                                            file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
+
+                                            file.write("<-Relocate stop" + '\n')
+                                            file.close()
+
+                                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
                                 else:
-                                    file.write("Отбросили мусорное решение\n")
-
-                        else:
-                            file.write(
-                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
-                            if evolution == 1:
-                                SaveStartLocalSearch(x, y, s, a, SizeK)
-                                target_function_start = target_function
-                                TargetFunction = target_function
-                                sizeK_start = SizeK
-
-                                file.write("While stop\n")
-                                x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
-
-                                Time = time.time() - start
-                                timeLocal[0] += Time
-                                file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
-
-                                file.write("<-Relocate stop" + '\n')
-                                file.close()
-
-                                return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                    file.write("Не прошло условие\n")
                             else:
-                                if fileflag == 1:
-                                    x, y, s, a = ReadLocalSearchOfFile(SizeK)
-                                    target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a,
-                                                                                                        iteration))
-                                    file.write(
-                                        "Целевая функция последнего минимального переставления = " + str(
-                                            target_function) + '\n')
-                                    fileflag = 0
-                                else:
-                                    target_function = -1
-
-                                minimum2 = min(target_function_start, target_function)
-                                if (minimum2 == target_function and target_function != -1) or (
-                                        fileflag == 1 and it == 0):
-                                    file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
-
-                                    SaveStartLocalSearch(x, y, s, a, SizeK)
-                                    target_function_start = target_function
-                                    TargetFunction = target_function
-                                    sizeK_start = SizeK
-                                else:
-                                    file.write(
-                                        "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                    file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-
-                                file.write("While stop\n")
-                                x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
-
-                                Time = time.time() - start
-                                timeLocal[0] += Time
-                                file.write("Время работы Relocate = " + str(Time) + 'seconds\n')
-
-                                file.write("<-Relocate stop" + '\n')
-                                file.close()
-
-                                return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                file.write("Отбросили мусорное решение\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -266,27 +271,27 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                         client2Car = random.choice(car2)
                         car2.remove(client2Car)
 
-                        if (time.time() - start) < factory.timeAlg:
+                        for client2 in range(factory.N):
+                            if (Y[client2][client2Car] == 1 and client2 != 0) or (
+                                    client2 == 0 and not CarIsWork(Y, client2Car)):
+                                file.write("\nsequenceX2[client1Car] = " + str(sequenceX2[client1Car]) + '\n')
+                                file.write("Хвост1 = " + str(tail1) + '\n')
 
-                            for client2 in range(factory.N):
-                                if (Y[client2][client2Car] == 1 and client2 != 0) or (
-                                        client2 == 0 and not CarIsWork(Y, client2Car)):
-                                    file.write("\nsequenceX2[client1Car] = " + str(sequenceX2[client1Car]) + '\n')
-                                    file.write("Хвост1 = " + str(tail1) + '\n')
+                                tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
+                                file.write("\nsequenceX2[client2Car] = " + str(sequenceX2[client2Car]) + '\n')
+                                file.write("Хвост2 = " + str(tail2) + '\n')
 
-                                    tail2, sequenceX2 = SearchTail(X, client2, client2Car, file)
-                                    file.write("\nsequenceX2[client2Car] = " + str(sequenceX2[client2Car]) + '\n')
-                                    file.write("Хвост2 = " + str(tail2) + '\n')
+                                file.write("Меняем от клиентa1 " + str(client1) + '\n')
+                                file.write("С машины1 " + str(client1Car) + '\n')
 
-                                    file.write("Меняем от клиентa1 " + str(client1) + '\n')
-                                    file.write("С машины1 " + str(client1Car) + '\n')
+                                file.write("Меняем от клиентa2 " + str(client2) + '\n')
+                                file.write("С машины2 " + str(client2Car) + '\n')
 
-                                    file.write("Меняем от клиентa2 " + str(client2) + '\n')
-                                    file.write("С машины2 " + str(client2Car) + '\n')
+                                if (not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not
+                                IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
+                                    and client1Car != client2Car) or client1Car == client2Car or client2 == 0:
 
-                                    if (not IsContainTailInStart(sequenceX2[client1Car], tail2, client1, file) and not
-                                    IsContainTailInStart(sequenceX2[client2Car], tail1, client2, file)
-                                        and client1Car != client2Car) or client1Car == client2Car or client2 == 0:
+                                    if (time.time() - start) < factory.timeAlg:
 
                                         if ResultCoins():
                                             file.write(
@@ -329,47 +334,50 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
                                                     "Новое перемещение, хуже чем то что было, возвращаем наше старое решение" + '\n')
                                                 file.write("Старая целевая функция равна " + str(TargetFunction) + '\n')
                                     else:
-                                        file.write("Это решение мусор, такое не смотрим\n\n")
+                                        if fileflag == 1:
+                                            x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                            target_function = CalculationOfObjectiveFunction(x, 0)
+                                            file.write(
+                                                "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                                    target_function) + '\n')
+                                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a,
+                                                                                                                iteration))
+                                            file.write(
+                                                "Целевая функция последнего минимального переставления со штрафом= " + str(
+                                                    target_function) + '\n')
+                                            fileflag = 0
+                                        else:
+                                            target_function = -1
 
-                        else:
-                            if fileflag == 1:
-                                x, y, s, a = ReadLocalSearchOfFile(SizeK)
-                                target_function = CalculationOfObjectiveFunction(x, 0)
-                                file.write(
-                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
-                                        target_function) + '\n')
-                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-                                file.write(
-                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
-                                        target_function) + '\n')
-                                fileflag = 0
-                            else:
-                                target_function = -1
+                                        minimum2 = min(target_function_start, target_function)
+                                        if minimum2 == target_function and target_function != -1:
+                                            file.write(
+                                                "Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                            file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
-                            minimum2 = min(target_function_start, target_function)
-                            if minimum2 == target_function and target_function != -1:
-                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                            SaveStartLocalSearch(x, y, s, a, SizeK)
+                                            target_function_start = target_function
+                                            TargetFunction = target_function
+                                            sizeK_start = SizeK
+                                        else:
+                                            file.write(
+                                                "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                            file.write(
+                                                "Старая целевая функция равна " + str(target_function_start) + '\n')
 
-                                SaveStartLocalSearch(x, y, s, a, SizeK)
-                                target_function_start = target_function
-                                TargetFunction = target_function
-                                sizeK_start = SizeK
-                            else:
-                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+                                        file.write("While stop\n")
+                                        x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
 
-                            file.write("While stop\n")
-                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+                                        Time = time.time() - start
+                                        timeLocal[0] += Time
+                                        file.write("Время работы Two_Opt = " + str(Time) + 'seconds\n')
 
-                            Time = time.time() - start
-                            timeLocal[0] += Time
-                            file.write("Время работы Two_Opt = " + str(Time) + 'seconds\n')
+                                        file.write("Two_Opt stop: <-" + '\n')
+                                        file.close()
 
-                            file.write("Two_Opt stop: <-" + '\n')
-                            file.close()
-
-                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                        return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                else:
+                                    file.write("Это решение мусор, такое не смотрим\n\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
@@ -442,49 +450,49 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
         for client in range(1, factory.N):
             if Ystart[client][k] == 1:
                 if Astart[client][k] + Sstart[client][k] > factory.l[client]:
-                    if (time.time() - start) < factory.timeAlgHelp:
-                        file.write(
-                            "Нашли объект который опаздывает " + str(client) + " который обслуживает машина " + str(
-                                k) + '\n')
-                        contWells = CountWellsWithFane(Sstart, Astart, client, k)
-                        file.write("Всего не укладывается " + str(contWells) + " скважин\n")
+                    file.write(
+                        "Нашли объект который опаздывает " + str(client) + " который обслуживает машина " + str(
+                            k) + '\n')
+                    contWells = CountWellsWithFane(Sstart, Astart, client, k)
+                    file.write("Всего не укладывается " + str(contWells) + " скважин\n")
 
-                        file.write("По одной скважине отдаем\n")
+                    file.write("По одной скважине отдаем\n")
 
-                        howMuch = 0
-                        for proebSkv in range(1, contWells + 1):
-                            X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
-                            TargetFunction = target_function_start
-                            SizeK = sizeK_start
+                    howMuch = 0
+                    for proebSkv in range(1, contWells + 1):
+                        X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
+                        TargetFunction = target_function_start
+                        SizeK = sizeK_start
 
-                            flag = 0
-                            if 1 < int(Sresh[client][k] / factory.timeWork):
-                                flag = 'not the last'
-                            elif 1 == int(Sresh[client][k] / factory.timeWork):
-                                flag = 'last'
-                            else:
-                                flag = 'end'
+                        flag = 0
+                        if 1 < int(Sresh[client][k] / factory.timeWork):
+                            flag = 'not the last'
+                        elif 1 == int(Sresh[client][k] / factory.timeWork):
+                            flag = 'last'
+                        else:
+                            flag = 'end'
 
-                            if flag != 'end':
-                                file.write("Сейчас " + flag + " скважина\n")
-                                file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
+                        if flag != 'end':
+                            file.write("Сейчас " + flag + " скважина\n")
+                            file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
 
-                                car2 = []
-                                for j in range(sizeK_start):
-                                    car2.append(i)
+                            car2 = []
+                            for j in range(sizeK_start):
+                                car2.append(i)
 
-                                for j in range(sizeK_start):
-                                    sosedK = random.choice(car2)
-                                    car2.remove(sosedK)
+                            for j in range(sizeK_start):
+                                sosedK = random.choice(car2)
+                                car2.remove(sosedK)
 
-                                    if sosedK != k:
-                                        file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
-                                        file.write("Она не похожа на ту из которой взяли скважину\n")
+                                if sosedK != k:
+                                    file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
+                                    file.write("Она не похожа на ту из которой взяли скважину\n")
 
-                                        file.write("Начинаем цикл по объектам в этой машине\n")
-                                        for sosed in range(factory.N):
+                                    file.write("Начинаем цикл по объектам в этой машине\n")
+                                    for sosed in range(factory.N):
+                                        if (time.time() - start) < factory.timeAlgHelp:
                                             if (Y[sosed][sosedK] == 1 and sosed != 0) or (
-                                                    sosed == 0 and not CarIsWork(Y, sosedK)) and ResultCoins():
+                                                    sosed == 0 and not CarIsWork(Y, sosedK)):
                                                 file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                 file.write(
                                                     "Попробую одну скважину с объекта " + str(
@@ -532,73 +540,87 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                         "Старая целевая функция равна " + str(TargetFunction) + '\n')
                                                 file.write('\n')
 
+                                        else:
+                                            file.write("По максимуму постарались поделиться скважинами" + '\n')
+                                            Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
+
+                                            Time = time.time() - start
+                                            timeLocal[0] += Time
+                                            file.write("Время работы Help = " + str(Time) + 'seconds\n')
+
+                                            file.write("<-Help stop" + '\n')
+                                            file.close()
+
+                                            return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
+
+                            file.write(
+                                "Целевая функция последнего стартового решения = " + str(
+                                    target_function_start) + '\n')
+
+                            if fileflag == 1:
+                                x, y, s, a = ReadHelpOfFile(SizeK)
+                                target_function = CalculationOfObjectiveFunction(x, 0)
                                 file.write(
-                                    "Целевая функция последнего стартового решения = " + str(
-                                        target_function_start) + '\n')
+                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                        target_function) + '\n')
+                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a,
+                                                                                                    iteration))
+                                file.write(
+                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
+                                        target_function) + '\n')
+                                fileflag = 0
+                            else:
+                                target_function = -1
 
-                                if fileflag == 1:
-                                    x, y, s, a = ReadHelpOfFile(SizeK)
-                                    target_function = CalculationOfObjectiveFunction(x, 0)
-                                    file.write(
-                                        "Целевая функция последнего минимального переставления без штрафа= " + str(
-                                            target_function) + '\n')
-                                    target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a,
-                                                                                                        iteration))
-                                    file.write(
-                                        "Целевая функция последнего минимального переставления со штрафом= " + str(
-                                            target_function) + '\n')
-                                    fileflag = 0
-                                else:
-                                    target_function = -1
+                            minimum2 = min(target_function_start, target_function)
+                            if minimum2 == target_function and target_function != -1:
+                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
-                                minimum2 = min(target_function_start, target_function)
-                                if minimum2 == target_function and target_function != -1:
-                                    file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                    file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                SaveStartHelp(x, y, s, a, SizeK)
+                                target_function_start = target_function
+                                sizeK_start = SizeK
+                            else:
+                                file.write(
+                                    "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+                                howMuch = 'all'
+                                break
 
-                                    SaveStartHelp(x, y, s, a, SizeK)
-                                    target_function_start = target_function
-                                    sizeK_start = SizeK
-                                else:
-                                    file.write(
-                                        "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                    file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-                                    howMuch = 'all'
-                                    break
+                    if howMuch == 'all':
+                        file.write("\nПопробуем отдать несколько скважин\n")
 
-                        if howMuch == 'all':
-                            file.write("\nПопробуем отдать несколько скважин\n")
+                        file.write("Пересчитываем проебанные скважины\n")
+                        contWells = CountWellsWithFane(Sstart, Astart, client, k)
+                        file.write("Всего не укладывается " + str(contWells) + " скважин\n")
 
-                            file.write("Пересчитываем проебанные скважины\n")
-                            contWells = CountWellsWithFane(Sstart, Astart, client, k)
-                            file.write("Всего не укладывается " + str(contWells) + " скважин\n")
+                        for proebSkv in range(2, contWells + 1):
+                            file.write("Отдаем " + str(proebSkv) + " скважин\n")
+                            X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
+                            TargetFunction = target_function_start
+                            SizeK = sizeK_start
 
-                            for proebSkv in range(2, contWells + 1):
-                                file.write("Отдаем " + str(proebSkv) + " скважин\n")
-                                X, Y, Sresh, A = ReadStartHelpOfFile(sizeK_start)
-                                TargetFunction = target_function_start
-                                SizeK = sizeK_start
+                            flag = 0
+                            if proebSkv < int(Sresh[client][k] / factory.timeWork):
+                                flag = 'not the last'
+                            elif proebSkv == int(Sresh[client][k] / factory.timeWork):
+                                flag = 'last'
+                            else:
+                                flag = 'end'
 
-                                flag = 0
-                                if proebSkv < int(Sresh[client][k] / factory.timeWork):
-                                    flag = 'not the last'
-                                elif proebSkv == int(Sresh[client][k] / factory.timeWork):
-                                    flag = 'last'
-                                else:
-                                    flag = 'end'
+                            if flag != 'end':
+                                file.write("Сейчас " + flag + " скважина\n")
+                                file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
+                                for sosedK in range(sizeK_start):
+                                    if sosedK != k:
+                                        file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
+                                        file.write("Она не похожа на ту из которой взяли скважину\n")
 
-                                if flag != 'end':
-                                    file.write("Сейчас " + flag + " скважина\n")
-                                    file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
-                                    for sosedK in range(sizeK_start):
-                                        if sosedK != k:
-                                            file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
-                                            file.write("Она не похожа на ту из которой взяли скважину\n")
-
-                                            file.write("Начинаем цикл по объектам в этой машине\n")
-                                            for sosed in range(1, factory.N):
+                                        file.write("Начинаем цикл по объектам в этой машине\n")
+                                        for sosed in range(1, factory.N):
+                                            if (time.time() - start) < factory.timeAlgHelp:
                                                 if (Y[sosed][sosedK] == 1 and sosed != 0) or (
-                                                        sosed == 0 and not CarIsWork(Y, sosedK)) and ResultCoins():
+                                                        sosed == 0 and not CarIsWork(Y, sosedK)):
                                                     file.write("Рассматриваемый объект " + str(sosed) + "\n")
                                                     file.write(
                                                         "Попробую одну скважину с объекта " + str(
@@ -652,47 +674,47 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                                                 TargetFunction) + '\n')
                                                     file.write('\n')
 
+                                            else:
+                                                file.write("По максимуму постарались поделиться скважинами" + '\n')
+                                                Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
+
+                                                Time = time.time() - start
+                                                timeLocal[0] += Time
+                                                file.write("Время работы Help = " + str(Time) + 'seconds\n')
+
+                                                file.write("<-Help stop" + '\n')
+                                                file.close()
+
+                                                return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
+
+                        file.write(
+                            "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+
+                        if fileflag == 1:
+                            x, y, s, a = ReadHelpOfFile(SizeK)
+                            target_function = CalculationOfObjectiveFunction(x, 0)
                             file.write(
-                                "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
+                                "Целевая функция последнего минимального переставления без штрафа = " + str(
+                                    target_function) + '\n')
+                            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+                            file.write(
+                                "Целевая функция последнего минимального переставления со штрафом = " + str(
+                                    target_function) + '\n')
+                            fileflag = 0
+                        else:
+                            target_function = -1
 
-                            if fileflag == 1:
-                                x, y, s, a = ReadHelpOfFile(SizeK)
-                                target_function = CalculationOfObjectiveFunction(x, 0)
-                                file.write(
-                                    "Целевая функция последнего минимального переставления без штрафа = " + str(
-                                        target_function) + '\n')
-                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-                                file.write(
-                                    "Целевая функция последнего минимального переставления со штрафом = " + str(
-                                        target_function) + '\n')
-                                fileflag = 0
-                            else:
-                                target_function = -1
+                        minimum2 = min(target_function_start, target_function)
+                        if minimum2 == target_function and target_function != -1:
+                            file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                            file.write("Новая целевая функция равна " + str(target_function) + '\n')
 
-                            minimum2 = min(target_function_start, target_function)
-                            if minimum2 == target_function and target_function != -1:
-                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
-
-                                SaveStartHelp(x, y, s, a, SizeK)
-                                target_function_start = target_function
-                                sizeK_start = SizeK
-                            else:
-                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
-
-                    else:
-                        file.write("По максимуму постарались поделиться скважинами" + '\n')
-                        Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
-
-                        Time = time.time() - start
-                        timeLocal[0] += Time
-                        file.write("Время работы Help = " + str(Time) + 'seconds\n')
-
-                        file.write("<-Help stop" + '\n')
-                        file.close()
-
-                        return Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, timeLocal
+                            SaveStartHelp(x, y, s, a, SizeK)
+                            target_function_start = target_function
+                            sizeK_start = SizeK
+                        else:
+                            file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                            file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
 
     file.write("По максимуму постарались поделиться скважинами" + '\n')
     Xstart, Ystart, Sstart, Astart = ReadStartHelpOfFile(sizeK_start)
@@ -757,109 +779,107 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                         sosedCar = random.choice(car2)
                         car2.remove(sosedCar)
 
-                        if (time.time() - start) < factory.timeAlg:
+                        for sosed in range(1, factory.N):
+                            if Y[sosed][sosedCar] == 1:
 
-                            for sosed in range(1, factory.N):
-                                if Y[sosed][sosedCar] == 1:
+                                subseq1 = []
+                                subseq2 = []
 
-                                    subseq1 = []
-                                    subseq2 = []
+                                indexCl = sequenceX2[clientCar].index(client)
+                                indexSos = sequenceX2[sosedCar].index(sosed)
 
-                                    indexCl = sequenceX2[clientCar].index(client)
-                                    indexSos = sequenceX2[sosedCar].index(sosed)
+                                for i in range(indexCl, len(sequenceX2[clientCar])):
+                                    if i <= indexCl + factory.param_len_subseq and sequenceX2[clientCar][i] != 0:
+                                        subseq1.append(sequenceX2[clientCar][i])
+                                    else:
+                                        break
+                                for i in range(indexSos, len(sequenceX2[sosedCar])):
+                                    if i <= indexSos + factory.param_len_subseq and sequenceX2[sosedCar][i] != 0:
+                                        subseq2.append(sequenceX2[sosedCar][i])
+                                    else:
+                                        break
 
-                                    for i in range(indexCl, len(sequenceX2[clientCar])):
-                                        if i <= indexCl + factory.param_len_subseq and sequenceX2[clientCar][i] != 0:
-                                            subseq1.append(sequenceX2[clientCar][i])
-                                        else:
-                                            break
-                                    for i in range(indexSos, len(sequenceX2[sosedCar])):
-                                        if i <= indexSos + factory.param_len_subseq and sequenceX2[sosedCar][i] != 0:
-                                            subseq2.append(sequenceX2[sosedCar][i])
-                                        else:
-                                            break
+                                if subseq1 != [] and subseq2 != []:
+                                    file.write("Переставляем клиентa " + str(client) + '\n')
+                                    file.write("С машины " + str(clientCar) + '\n')
 
-                                    if subseq1 != [] and subseq2 != []:
-                                        file.write("Переставляем клиентa " + str(client) + '\n')
-                                        file.write("С машины " + str(clientCar) + '\n')
+                                    file.write("К соседу " + str(sosed) + '\n')
+                                    file.write("На машине " + str(sosedCar) + '\n')
 
-                                        file.write("К соседу " + str(sosed) + '\n')
-                                        file.write("На машине " + str(sosedCar) + '\n')
+                                    file.write("Собираем подпоследовательности\n")
+                                    file.write("path1 = " + str(sequenceX2[clientCar]) + '\n')
+                                    file.write("path2 = " + str(sequenceX2[sosedCar]) + '\n')
 
-                                        file.write("Собираем подпоследовательности\n")
-                                        file.write("path1 = " + str(sequenceX2[clientCar]) + '\n')
-                                        file.write("path2 = " + str(sequenceX2[sosedCar]) + '\n')
+                                    file.write("subseq1 = " + str(subseq1) + '\n')
+                                    file.write("subseq2 = " + str(subseq2) + '\n')
 
-                                        file.write("subseq1 = " + str(subseq1) + '\n')
-                                        file.write("subseq2 = " + str(subseq2) + '\n')
+                                    buf1 = []
+                                    for i in range(len(subseq1)):
+                                        if subseq1[-1] != 0:
+                                            buf1.append(subseq1[i])
+                                            buf2 = []
+                                            for j in range(len(subseq2)):
+                                                if subseq2[-1] != 0:
+                                                    buf2.append(subseq2[j])
 
-                                        buf1 = []
-                                        for i in range(len(subseq1)):
-                                            if subseq1[-1] != 0:
-                                                buf1.append(subseq1[i])
-                                                buf2 = []
-                                                for j in range(len(subseq2)):
-                                                    if subseq2[-1] != 0:
-                                                        buf2.append(subseq2[j])
+                                                seq1Start = sequenceX2[clientCar].index(buf1[0])
+                                                seq1End = sequenceX2[clientCar].index(buf1[-1])
+                                                seq2Start = sequenceX2[sosedCar].index(buf2[0])
+                                                seq2End = sequenceX2[sosedCar].index(buf2[-1])
 
-                                                    seq1Start = sequenceX2[clientCar].index(buf1[0])
-                                                    seq1End = sequenceX2[clientCar].index(buf1[-1])
-                                                    seq2Start = sequenceX2[sosedCar].index(buf2[0])
-                                                    seq2End = sequenceX2[sosedCar].index(buf2[-1])
+                                                if seq1Start == 1 or sequenceX2[clientCar][seq1End] == 0:
+                                                    sequence1Left = 0
+                                                else:
+                                                    sequence1Left = sequenceX2[clientCar][seq1Start - 2]
 
-                                                    if seq1Start == 1 or sequenceX2[clientCar][seq1End] == 0:
-                                                        sequence1Left = 0
-                                                    else:
-                                                        sequence1Left = sequenceX2[clientCar][seq1Start - 2]
+                                                if sequenceX2[clientCar][seq1End + 1] == 0 or sequenceX2[clientCar][
+                                                    seq1End] == 0:
+                                                    sequence1Right = 0
+                                                else:
+                                                    sequence1Right = sequenceX2[clientCar][seq1End + 2]
 
-                                                    if sequenceX2[clientCar][seq1End + 1] == 0 or sequenceX2[clientCar][
-                                                        seq1End] == 0:
-                                                        sequence1Right = 0
-                                                    else:
-                                                        sequence1Right = sequenceX2[clientCar][seq1End + 2]
+                                                if seq2Start == 1 or sequenceX2[sosedCar][seq2End] == 0:
+                                                    sequence2Left = 0
+                                                else:
+                                                    sequence2Left = sequenceX2[sosedCar][seq2Start - 2]
 
-                                                    if seq2Start == 1 or sequenceX2[sosedCar][seq2End] == 0:
-                                                        sequence2Left = 0
-                                                    else:
-                                                        sequence2Left = sequenceX2[sosedCar][seq2Start - 2]
+                                                if sequenceX2[sosedCar][seq2End + 1] == 0 or sequenceX2[sosedCar][
+                                                    seq2End] == 0:
+                                                    sequence2Right = 0
+                                                else:
+                                                    sequence2Right = sequenceX2[sosedCar][seq2End + 2]
 
-                                                    if sequenceX2[sosedCar][seq2End + 1] == 0 or sequenceX2[sosedCar][
-                                                        seq2End] == 0:
-                                                        sequence2Right = 0
-                                                    else:
-                                                        sequence2Right = sequenceX2[sosedCar][seq2End + 2]
+                                                file.write("buf1 = " + str(buf1) + '\n')
+                                                file.write("buf2 = " + str(buf2) + '\n')
 
-                                                    file.write("buf1 = " + str(buf1) + '\n')
-                                                    file.write("buf2 = " + str(buf2) + '\n')
-
-                                                    # TODO не отбрасываюся решения в которых левые и правые соседи равны элементам другой последовательности кроме первого и последнего
-                                                    if (not IsContainTailInStart(sequenceX2[sosedCar], buf1,
-                                                                                 sequence2Left,
-                                                                                 file)
-                                                        and not IsContainTailInEnd(sequenceX2[sosedCar], buf1,
-                                                                                   sequence2Right, file)
-                                                        and not IsContainTailInStart(sequenceX2[clientCar], buf2,
-                                                                                     sequence1Left, file)
-                                                        and not IsContainTailInEnd(sequenceX2[clientCar], buf2,
-                                                                                   sequence1Right,
-                                                                                   file) and clientCar != sosedCar) \
-                                                            or (
-                                                            clientCar == sosedCar and not IsContainTailInTail(buf1,
-                                                                                                              buf2,
-                                                                                                              file)):
-                                                        file.write("Пред Слева от последовательности клиента " + str(
-                                                            sequence1Left) + "\n")
-                                                        file.write(
-                                                            "После Справа от последовательности клиента " + str(
-                                                                sequence1Right) + "\n")
-                                                        file.write("Перд Слева от последовательности соседа " + str(
-                                                            sequence2Left) + "\n")
-                                                        file.write(
-                                                            "После Справа от последовательности соседа " + str(
-                                                                sequence2Right) + "\n")
-                                                        file.write("Элементы подпоследовательностей "
-                                                                   "не содержатся в другом маршруте\n")
-
+                                                # TODO не отбрасываюся решения в которых левые и правые соседи равны элементам другой последовательности кроме первого и последнего
+                                                if (not IsContainTailInStart(sequenceX2[sosedCar], buf1,
+                                                                             sequence2Left,
+                                                                             file)
+                                                    and not IsContainTailInEnd(sequenceX2[sosedCar], buf1,
+                                                                               sequence2Right, file)
+                                                    and not IsContainTailInStart(sequenceX2[clientCar], buf2,
+                                                                                 sequence1Left, file)
+                                                    and not IsContainTailInEnd(sequenceX2[clientCar], buf2,
+                                                                               sequence1Right,
+                                                                               file) and clientCar != sosedCar) \
+                                                        or (
+                                                        clientCar == sosedCar and not IsContainTailInTail(buf1,
+                                                                                                          buf2,
+                                                                                                          file)):
+                                                    file.write("Пред Слева от последовательности клиента " + str(
+                                                        sequence1Left) + "\n")
+                                                    file.write(
+                                                        "После Справа от последовательности клиента " + str(
+                                                            sequence1Right) + "\n")
+                                                    file.write("Перд Слева от последовательности соседа " + str(
+                                                        sequence2Left) + "\n")
+                                                    file.write(
+                                                        "После Справа от последовательности соседа " + str(
+                                                            sequence2Right) + "\n")
+                                                    file.write("Элементы подпоследовательностей "
+                                                               "не содержатся в другом маршруте\n")
+                                                    if (time.time() - start) < factory.timeAlg:
                                                         if ResultCoins():
                                                             file.write("Монетка сказала, берем\n")
                                                             file.write("buf1 = " + str(buf1) + '\n')
@@ -906,47 +926,57 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
                                                             file.write("buf2 = " + str(buf2) + '\n\n')
 
                                                     else:
-                                                        file.write("Отбросили мусорные решения\n")
+                                                        if fileflag == 1:
+                                                            x, y, s, a = ReadLocalSearchOfFile(SizeK)
+                                                            target_function = CalculationOfObjectiveFunction(x, 0)
+                                                            file.write(
+                                                                "Целевая функция последнего минимального переставления без штрафа= " + str(
+                                                                    target_function) + '\n')
+                                                            target_function = CalculationOfObjectiveFunction(x,
+                                                                                                             PenaltyFunction(
+                                                                                                                 y, s,
+                                                                                                                 a,
+                                                                                                                 iteration))
+                                                            file.write(
+                                                                "Целевая функция последнего минимального переставления со штрафом= " + str(
+                                                                    target_function) + '\n')
+                                                            fileflag = 0
+                                                        else:
+                                                            target_function = -1
+                                                        # TODO сравнивать по вероятностb
+                                                        minimum2 = min(target_function_start, target_function)
+                                                        if (minimum2 == target_function and target_function != -1) or (
+                                                                fileflag == 1 and it == 0):
+                                                            file.write(
+                                                                "Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
+                                                            file.write("Новая целевая функция равна " + str(
+                                                                target_function) + '\n')
 
-                        else:
-                            if fileflag == 1:
-                                x, y, s, a = ReadLocalSearchOfFile(SizeK)
-                                target_function = CalculationOfObjectiveFunction(x, 0)
-                                file.write(
-                                    "Целевая функция последнего минимального переставления без штрафа= " + str(
-                                        target_function) + '\n')
-                                target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-                                file.write(
-                                    "Целевая функция последнего минимального переставления со штрафом= " + str(
-                                        target_function) + '\n')
-                                fileflag = 0
-                            else:
-                                target_function = -1
-                            # TODO сравнивать по вероятностb
-                            minimum2 = min(target_function_start, target_function)
-                            if (minimum2 == target_function and target_function != -1) or (fileflag == 1 and it == 0):
-                                file.write("Новое перемещение, лучше чем стартовое, сохраняем это решение" + '\n')
-                                file.write("Новая целевая функция равна " + str(target_function) + '\n')
+                                                            SaveStartLocalSearch(x, y, s, a, SizeK)
+                                                            target_function_start = target_function
+                                                            TargetFunction = target_function
+                                                            sizeK_start = SizeK
+                                                        else:
+                                                            file.write(
+                                                                "Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
+                                                            file.write("Старая целевая функция равна " + str(
+                                                                target_function_start) + '\n')
 
-                                SaveStartLocalSearch(x, y, s, a, SizeK)
-                                target_function_start = target_function
-                                TargetFunction = target_function
-                                sizeK_start = SizeK
-                            else:
-                                file.write("Новое перемещение, хуже чем последние добавленое стартовое решение" + '\n')
-                                file.write("Старая целевая функция равна " + str(target_function_start) + '\n')
+                                                        file.write("While stop\n")
+                                                        x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(
+                                                            sizeK_start)
 
-                            file.write("While stop\n")
-                            x_start, y_start, s_start, a_start = ReadStartLocalSearchOfFile(sizeK_start)
+                                                        Time = time.time() - start
+                                                        timeLocal[0] += Time
+                                                        file.write("Время работы Exchange = " + str(Time) + 'seconds\n')
 
-                            Time = time.time() - start
-                            timeLocal[0] += Time
-                            file.write("Время работы Exchange = " + str(Time) + 'seconds\n')
+                                                        file.write("<-Exchange stop" + '\n')
+                                                        file.close()
 
-                            file.write("<-Exchange stop" + '\n')
-                            file.close()
+                                                        return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
 
-                            return x_start, y_start, s_start, a_start, target_function_start, sizeK_start, timeLocal
+                                                else:
+                                                    file.write("Отбросили мусорные решения\n")
 
         file.write(
             "Целевая функция последнего стартового решения = " + str(target_function_start) + '\n')
