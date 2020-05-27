@@ -32,26 +32,39 @@ def Relocate(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
         sequenceX2 = GettingTheSequence(X)
 
         car1 = []
-        for i in range(SizeK):
-            car1.append(i)
+        for k1 in range(SizeK):
+            car1.append(k1)
 
         # Bыбираем клиента
-        for i in range(SizeK):
+        for k1 in range(SizeK):
             clientCar = random.choice(car1)
             car1.remove(clientCar)
 
-            for client in range(1, factory.N):
+            obj1 = []
+            for i1 in range(1, factory.N):
+                obj1.append(i1)
+
+            for i1 in range(1, factory.N):
+                client = random.choice(obj1)
+                obj1.remove(client)
+
                 if Y[client][clientCar] == 1:
 
                     car2 = []
-                    for j in range(SizeK):
-                        car2.append(i)
+                    for k2 in range(SizeK):
+                        car2.append(k2)
 
-                    for j in range(SizeK):
+                    for k2 in range(SizeK):
                         sosedK = random.choice(car2)
                         car2.remove(sosedK)
 
-                        for sosed in range(factory.N):
+                        obj2 = []
+                        for i2 in range(1, factory.N):
+                            obj2.append(i2)
+
+                        for i2 in range(1, factory.N):
+                            sosed = random.choice(obj2)
+                            obj2.remove(sosed)
 
                             sosedLeft = SearchSosedLeftOrRight(X, Y, sosed, "left", sosedK)  # левый сосед соседа
                             sosedRight = SearchSosedLeftOrRight(X, Y, sosed, "right", sosedK)  # правый сосед соседа
@@ -250,28 +263,42 @@ def Two_Opt(x_start, y_start, s_start, a_start, target_function_start, sizeK_sta
         X, Y, Sresh, A = ReadStartLocalSearchOfFile(SizeK)
 
         car1 = []
-        for i in range(SizeK):
-            car1.append(i)
+        for k1 in range(SizeK):
+            car1.append(k1)
 
         # Bыбираем клиента
-        for i in range(SizeK):
+        for k1 in range(SizeK):
             client1Car = random.choice(car1)
             car1.remove(client1Car)
 
-            for client1 in range(1, factory.N):
+            obj1 = []
+            for i1 in range(1, factory.N):
+                obj1.append(i1)
+
+            for i1 in range(1, factory.N):
+                client1 = random.choice(obj1)
+                obj1.remove(client1)
+
                 if Y[client1][client1Car] == 1:
 
                     tail1, sequenceX2 = SearchTail(X, client1, client1Car, file)
 
                     car2 = []
-                    for j in range(SizeK):
-                        car2.append(i)
+                    for k2 in range(SizeK):
+                        car2.append(k2)
 
-                    for j in range(SizeK):
+                    for k2 in range(SizeK):
                         client2Car = random.choice(car2)
                         car2.remove(client2Car)
 
-                        for client2 in range(factory.N):
+                        obj2 = []
+                        for i2 in range(1, factory.N):
+                            obj2.append(i2)
+
+                        for i2 in range(1, factory.N):
+                            client2 = random.choice(obj2)
+                            obj2.remove(client2)
+
                             if (Y[client2][client2Car] == 1 and client2 != 0) or (
                                     client2 == 0 and not CarIsWork(Y, client2Car)):
                                 file.write("\nsequenceX2[client1Car] = " + str(sequenceX2[client1Car]) + '\n')
@@ -441,13 +468,24 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
 
     file.write("Начинаем поиск объектов, которые в маршруте не успевают закончить работу\n")
     fileflag = 0
+
     car1 = []
-    for i in range(sizeK_start):
-        car1.append(i)
-    for i in range(sizeK_start):
+    for k1 in range(sizeK_start):
+        car1.append(k1)
+
+    # Bыбираем клиента
+    for k1 in range(sizeK_start):
         k = random.choice(car1)
         car1.remove(k)
-        for client in range(1, factory.N):
+
+        obj1 = []
+        for i1 in range(1, factory.N):
+            obj1.append(i1)
+
+        for i1 in range(1, factory.N):
+            client = random.choice(obj1)
+            obj1.remove(client)
+
             if Ystart[client][k] == 1:
                 if Astart[client][k] + Sstart[client][k] > factory.l[client]:
                     file.write(
@@ -477,10 +515,10 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                             file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
 
                             car2 = []
-                            for j in range(sizeK_start):
-                                car2.append(i)
+                            for k2 in range(SizeK):
+                                car2.append(k2)
 
-                            for j in range(sizeK_start):
+                            for k2 in range(SizeK):
                                 sosedK = random.choice(car2)
                                 car2.remove(sosedK)
 
@@ -489,7 +527,14 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                                     file.write("Она не похожа на ту из которой взяли скважину\n")
 
                                     file.write("Начинаем цикл по объектам в этой машине\n")
-                                    for sosed in range(factory.N):
+                                    obj2 = []
+                                    for i2 in range(1, factory.N):
+                                        obj2.append(i2)
+
+                                    for i2 in range(1, factory.N):
+                                        sosed = random.choice(obj2)
+                                        obj2.remove(sosed)
+
                                         if (time.time() - start) < factory.timeAlgHelp:
                                             if (Y[sosed][sosedK] == 1 and sosed != 0) or (
                                                     sosed == 0 and not CarIsWork(Y, sosedK)):
@@ -611,13 +656,29 @@ def Help(Xstart, Ystart, Sstart, Astart, target_function_start, sizeK_start, ite
                             if flag != 'end':
                                 file.write("Сейчас " + flag + " скважина\n")
                                 file.write("Начинаем цикл по присовыванию везде (по машинам)\n")
-                                for sosedK in range(sizeK_start):
+
+                                car2 = []
+                                for k2 in range(SizeK):
+                                    car2.append(k2)
+
+                                for k2 in range(SizeK):
+                                    sosedK = random.choice(car2)
+                                    car2.remove(sosedK)
+
                                     if sosedK != k:
                                         file.write("Сейчас рассматриваем " + str(sosedK) + " машину\n")
                                         file.write("Она не похожа на ту из которой взяли скважину\n")
 
                                         file.write("Начинаем цикл по объектам в этой машине\n")
-                                        for sosed in range(1, factory.N):
+
+                                        obj2 = []
+                                        for i2 in range(1, factory.N):
+                                            obj2.append(i2)
+
+                                        for i2 in range(1, factory.N):
+                                            sosed = random.choice(obj2)
+                                            obj2.remove(sosed)
+
                                             if (time.time() - start) < factory.timeAlgHelp:
                                                 if (Y[sosed][sosedK] == 1 and sosed != 0) or (
                                                         sosed == 0 and not CarIsWork(Y, sosedK)):
@@ -760,26 +821,40 @@ def Exchange(x_start, y_start, s_start, a_start, target_function_start, sizeK_st
         sequenceX2 = GettingTheSequence(X)
 
         car1 = []
-        for i in range(SizeK):
-            car1.append(i)
+        for k1 in range(SizeK):
+            car1.append(k1)
 
         # Bыбираем клиента
-        for i in range(SizeK):
+        for k1 in range(SizeK):
             clientCar = random.choice(car1)
             car1.remove(clientCar)
 
-            for client in range(1, factory.N):
+            obj1 = []
+            for i1 in range(1, factory.N):
+                obj1.append(i1)
+
+            for i1 in range(1, factory.N):
+                client = random.choice(obj1)
+                obj1.remove(client)
+
                 if Y[client][clientCar] == 1:
 
                     car2 = []
-                    for j in range(SizeK):
-                        car2.append(i)
+                    for k2 in range(SizeK):
+                        car2.append(k2)
 
-                    for j in range(SizeK):
+                    for k2 in range(SizeK):
                         sosedCar = random.choice(car2)
                         car2.remove(sosedCar)
 
-                        for sosed in range(1, factory.N):
+                        obj2 = []
+                        for i2 in range(1, factory.N):
+                            obj2.append(i2)
+
+                        for i2 in range(1, factory.N):
+                            sosed = random.choice(obj2)
+                            obj2.remove(sosed)
+
                             if Y[sosed][sosedCar] == 1:
 
                                 subseq1 = []

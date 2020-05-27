@@ -4,6 +4,7 @@ import csv
 v = 100  # скорость ТС
 car_cost = 10000  # цена за арнеду машины
 penalty = 0.5  # штраф за превышения временного срока
+L = 10.1 # константа для формулы
 
 # N = 10  # число объектов
 # K = 5  # набор всех ТС
@@ -38,7 +39,7 @@ penalty = 0.5  # штраф за превышения временного ср�
 
 
 # Создаем пустые списки для входных данных
-path = "input/50/"
+path = "input/25/"
 OX = []
 OY = []
 S = []
@@ -111,8 +112,8 @@ l.reverse()
 d = [[0 for j in range(N)] for i in range(N)]  # расстояния между городами
 for i in range(N):
     for j in range(N):
-        # d[i][j] = 111.1 * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
-        d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
+        d[i][j] = L * acos(sin(OX[i]) * sin(OX[j]) + cos(OX[i]) * cos(OX[j]) * cos(OY[j] - OY[i]))
+        # d[i][j] = sqrt(pow((OX[i] - OX[j]), 2) + pow((OY[i] - OY[j]), 2))
 
 t = [[0 for j in range(N)] for i in range(N)]  # время перемещения между городами
 for i in range(N):
@@ -132,9 +133,9 @@ param_len_subseq = 2  # максимальная длина подпоследо
 param_hgrex_uncertainty = int(N/3)  # число для задания кол-ва случайных ребер
 
 if path == "input/25/":
-    timeAlgStart = 3.0
+    timeAlgStart = 2.0
     timeAlg = 0.5
-    timeAlgHelp = 3.0
+    timeAlgHelp = 1.0
 elif path == "input/50/":
     timeAlgStart = 5.0
     timeAlg = 1.0

@@ -94,91 +94,92 @@ def GeneticAlgorithm(Sequence, X, Y, Sresh, A, Target_Function, SizeK, iteration
         # sequence = RightOrder(x)
         # x, y, s, a, sizek = SequenceDisplayInTheXYSA(sequence)
 
-        assert VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1
-        # Считаем целевую функцию
-        target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
-        file.write(
-            "Целевая функция нового решения после оператора скрещивания и мутации равна " + str(target_function) + '\n')
-        minimumCros = min(minimumCros, target_function)
-        maximumCros = max(maximumCros, target_function)
-        SaveDateFromGraph(target_function, "Crossover")
+        if VerificationOfBoundaryConditions(x, y, s, a, 'true') == 1:
+            # Считаем целевую функцию
+            target_function = CalculationOfObjectiveFunction(x, PenaltyFunction(y, s, a, iteration))
+            file.write(
+                "Целевая функция нового решения после оператора скрещивания и мутации равна " + str(
+                    target_function) + '\n')
+            minimumCros = min(minimumCros, target_function)
+            maximumCros = max(maximumCros, target_function)
+            SaveDateFromGraph(target_function, "Crossover")
 
-        # file.write("Help start" + '\n')
-        # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
-        # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        # minimumHelp = min(minimumHelp, target_function)
-        # maximumHelp = max(maximumHelp, target_function)
+            # file.write("Help start" + '\n')
+            # x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration, timeLocal[2])
+            # file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+            # minimumHelp = min(minimumHelp, target_function)
+            # maximumHelp = max(maximumHelp, target_function)
 
-        # Применяем локальный поиск
-        file.write("LocalSearch start\n")
-        x, y, s, a, target_function, sizek, iteration, timeLocal = LocalSearch(x, y, s, a, target_function, sizek,
-                                                                               iteration, timeLocal)
-        print("Вышли из локального поиска")
-        file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
-        minimumLocal = min(minimumLocal, target_function)
-        maximumLocal = max(maximumLocal, target_function)
+            # Применяем локальный поиск
+            file.write("LocalSearch start\n")
+            x, y, s, a, target_function, sizek, iteration, timeLocal = LocalSearch(x, y, s, a, target_function, sizek,
+                                                                                   iteration, timeLocal)
+            print("Вышли из локального поиска")
+            file.write("Целевая функция нового решения после локального поиска равна " + str(target_function) + '\n')
+            minimumLocal = min(minimumLocal, target_function)
+            maximumLocal = max(maximumLocal, target_function)
 
-        file.write("Help start" + '\n')
-        x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration - 1,
-                                                                timeLocal[2])
-        print("Вышли из Help" + '\n')
-        file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
-        minimumHelp = min(minimumHelp, target_function)
-        maximumHelp = max(maximumHelp, target_function)
+            file.write("Help start" + '\n')
+            x, y, s, a, target_function, sizek, timeLocal[2] = Help(x, y, s, a, target_function, sizek, iteration - 1,
+                                                                    timeLocal[2])
+            print("Вышли из Help" + '\n')
+            file.write("Целевая функция нового решения после оператора хелп " + str(target_function) + '\n')
+            minimumHelp = min(minimumHelp, target_function)
+            maximumHelp = max(maximumHelp, target_function)
 
-        # Проверяем что новое решение не хуже самого плохого
-        # Ищем самое большое решение по целевой функции
-        maximum = max(Target_Function)
-        i_max = Target_Function.index(maximum)
-        file.write("Самое плохое решение в популяции " + str(maximum) + '\n')
+            # Проверяем что новое решение не хуже самого плохого
+            # Ищем самое большое решение по целевой функции
+            maximum = max(Target_Function)
+            i_max = Target_Function.index(maximum)
+            file.write("Самое плохое решение в популяции " + str(maximum) + '\n')
 
-        # Удаляем какое-нибудь решение
-        if maximum >= target_function:
-            SaveDateFromGraph(target_function, "AfterCrosSearsh")
-            if scenario_add == 'deleteTheBad':
-                file.write("Удаляем самое плохое решение в популяции" + '\n')
-                print("Удаляем самое плохое решение в популяции" + '\n')
-                X.pop(i_max)
-                Y.pop(i_max)
-                Sresh.pop(i_max)
-                A.pop(i_max)
-                Target_Function.pop(i_max)
-                Sequence.pop(i_max)
-                SizeK.pop(i_max)
+            # Удаляем какое-нибудь решение
+            if maximum >= target_function:
+                SaveDateFromGraph(target_function, "AfterCrosSearsh")
+                if scenario_add == 'deleteTheBad':
+                    file.write("Удаляем самое плохое решение в популяции" + '\n')
+                    print("Удаляем самое плохое решение в популяции" + '\n')
+                    X.pop(i_max)
+                    Y.pop(i_max)
+                    Sresh.pop(i_max)
+                    A.pop(i_max)
+                    Target_Function.pop(i_max)
+                    Sequence.pop(i_max)
+                    SizeK.pop(i_max)
 
-            elif scenario_add == 'deleteTheBadParents':
-                file.write("Удаляем самого плохого родителя" + '\n')
-                print("Удаляем самого плохого родителя" + '\n')
-                if Target_Function[index] <= Target_Function[jndex]:
-                    file.write("с целевой функцией " + str(Target_Function[jndex]) + '\n')
-                    X.pop(jndex)
-                    Y.pop(jndex)
-                    Sresh.pop(jndex)
-                    A.pop(jndex)
-                    Target_Function.pop(jndex)
-                    Sequence.pop(jndex)
-                    SizeK.pop(jndex)
+                elif scenario_add == 'deleteTheBadParents':
+                    file.write("Удаляем самого плохого родителя" + '\n')
+                    print("Удаляем самого плохого родителя" + '\n')
+                    if Target_Function[index] <= Target_Function[jndex]:
+                        file.write("с целевой функцией " + str(Target_Function[jndex]) + '\n')
+                        X.pop(jndex)
+                        Y.pop(jndex)
+                        Sresh.pop(jndex)
+                        A.pop(jndex)
+                        Target_Function.pop(jndex)
+                        Sequence.pop(jndex)
+                        SizeK.pop(jndex)
 
-                elif Target_Function[index] > Target_Function[jndex]:
-                    file.write("с целевой функцией " + str(Target_Function[index]) + '\n')
-                    X.pop(index)
-                    Y.pop(index)
-                    Sresh.pop(index)
-                    A.pop(index)
-                    Target_Function.pop(index)
-                    Sequence.pop(index)
-                    SizeK.pop(index)
+                    elif Target_Function[index] > Target_Function[jndex]:
+                        file.write("с целевой функцией " + str(Target_Function[index]) + '\n')
+                        X.pop(index)
+                        Y.pop(index)
+                        Sresh.pop(index)
+                        A.pop(index)
+                        Target_Function.pop(index)
+                        Sequence.pop(index)
+                        SizeK.pop(index)
 
-            file.write("Добавляем новое решение в конец" + '\n')
-            X.append(x)
-            Y.append(y)
-            Sresh.append(s)
-            A.append(a)
-            Target_Function.append(target_function)
-            Sequence.append(children)
-            SizeK.append(sizek)
+                file.write("Добавляем новое решение в конец" + '\n')
+                X.append(x)
+                Y.append(y)
+                Sresh.append(s)
+                A.append(a)
+                Target_Function.append(target_function)
+                Sequence.append(children)
+                SizeK.append(sizek)
 
-        file.write("Число итераций = " + str(iteration) + '\n')
+            file.write("Число итераций = " + str(iteration) + '\n')
     SaveDateResult("Минимальное значение целевой в поппуляции после кроссовера = " + str(minimumCros))
     SaveDateResult("Максимальное значение целевой в поппуляции после кроссовера = " + str(maximumCros))
     SaveDateResult("Минимальное значение целевой в поппуляции после локального поиска= " + str(minimumLocal))
